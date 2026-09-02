@@ -820,6 +820,48 @@ body {
     transform: scale(1.15);
 }
 
+.social-icon {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+    display: block;
+}
+
+.view-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+    user-select: none;
+}
+
+.view-counter:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(0, 206, 209, 0.2);
+}
+
+.view-icon {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+    display: block;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
 .vol-icon {
     width: 20px;
     height: 20px;

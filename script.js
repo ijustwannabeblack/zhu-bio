@@ -94,24 +94,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startText) startText.textContent = startTextContent + (startCursorVisible ? '|' : ' ');
   }, 500);
 
-  // Visitor Counter
-  function initializeVisitorCounter() {
-    let totalVisitors = localStorage.getItem('totalVisitorCount');
-    if (!totalVisitors) {
-      totalVisitors = 924180;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-    } else {
-      totalVisitors = parseInt(totalVisitors);
-    }
+  // Guns.lol Real-Time View Counter (Deduplicated by Device & Session)
+  async function initializeVisitorCounter() {
+    const VIEW_STORAGE_KEY = 'larpifyy_asia_profile_viewed';
+    const hasViewed = localStorage.getItem(VIEW_STORAGE_KEY) || sessionStorage.getItem(VIEW_STORAGE_KEY);
+    const countEl = document.getElementById('visitor-count');
 
-    const hasVisited = sessionStorage.getItem('hasVisitedSession');
-    if (!hasVisited) {
-      totalVisitors++;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-      sessionStorage.setItem('hasVisitedSession', 'true');
-    }
+    try {
+      // If already visited from this device/browser, only GET the count without incrementing
+      const endpoint = hasViewed
+        ? 'https://abacus.jasoncameron.dev/get/larpifyy_asia/views'
+        : 'https://abacus.jasoncameron.dev/hit/larpifyy_asia/views';
 
-    if (visitorCount) visitorCount.textContent = totalVisitors.toLocaleString();
+      const res = await fetch(endpoint);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.value === 'number') {
+          if (!hasViewed) {
+            localStorage.setItem(VIEW_STORAGE_KEY, Date.now().toString());
+            sessionStorage.setItem(VIEW_STORAGE_KEY, 'true');
+          }
+          if (countEl) {
+            countEl.textContent = data.value.toLocaleString();
+          }
+          return;
+        }
+      }
+    } catch (e) {}
+
+    // Fallback if offline
+    let localCount = parseInt(localStorage.getItem('cached_view_count') || '1');
+    if (!hasViewed) {
+      localCount++;
+      localStorage.setItem('cached_view_count', localCount.toString());
+      localStorage.setItem(VIEW_STORAGE_KEY, Date.now().toString());
+    }
+    if (countEl) countEl.textContent = localCount.toLocaleString();
   }
   initializeVisitorCounter();
 
