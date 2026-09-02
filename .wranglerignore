@@ -1,0 +1,9 @@
+node_modules/
+.wrangler/
+.git/
+package.json
+package-lock.json
+bun.lockb
+server.js
+README.MD
+LICENSE
