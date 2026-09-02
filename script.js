@@ -14,6 +14,7 @@ let userBadges = [
 ];
 let songPlaylist = [
   "Addison Rae - Fame is a Gun (Official Video).mp3",
+  "Drake - Janice STFU.mp3",
   "Julia Wolf - In My Room Official Lyric Video.mp3",
   "Kelly Clarkson - Since U Been Gone (VIDEO).mp3",
   "Legendary Lovers.mp3"
@@ -359,10 +360,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Username (Static, no typing animation)
   let userNameStr = "zhu";
 
-  // Typewriter Bio (Loops between anja my world and owner of /larpifyy)
+  // Typewriter Bio (Loops between anja my world, owner of /larpifyy, and i trade on axiom.trade btw)
   const bioMessages = [
     "anja my world",
-    "owner of /larpifyy"
+    "owner of /larpifyy",
+    "i trade on axiom.trade btw"
   ];
   let bioText = '';
   let bioIndex = 0;
@@ -643,17 +645,18 @@ document.addEventListener('DOMContentLoaded', () => {
       mouse.y = null;
     });
 
-    const particleCount = Math.min(Math.max(Math.floor((w * h) / 14000), 45), 90);
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 26 : Math.min(Math.max(Math.floor((w * h) / 16000), 35), 65);
     const particles = [];
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * w,
         y: Math.random() * h,
-        r: Math.random() * 2 + 1,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: (Math.random() - 0.5) * 0.6,
-        alpha: Math.random() * 0.5 + 0.3
+        r: Math.random() * 1.5 + 1,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        alpha: Math.random() * 0.4 + 0.3
       });
     }
 
@@ -678,8 +681,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = themeColor;
         ctx.globalAlpha = p.alpha;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = themeColor;
+        if (!isMobile) {
+          ctx.shadowBlur = 4;
+          ctx.shadowColor = themeColor;
+        }
         ctx.fill();
 
         // Connect particle to mouse
