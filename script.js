@@ -28,7 +28,7 @@ function initMedia() {
   const backgroundMusic = document.getElementById('background-music');
   const backgroundVideo = document.getElementById('background');
   if (!backgroundMusic || !backgroundVideo) return;
-  backgroundMusic.volume = 0.3;
+  backgroundMusic.volume = 1.0;
   backgroundVideo.muted = true;
   backgroundVideo.play().catch(() => {});
 }
@@ -258,11 +258,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (backgroundMusic) {
-    backgroundMusic.volume = 0.5;
+    backgroundMusic.volume = 1.0;
     backgroundMusic.addEventListener('ended', () => {
       // Pick another random song when track ends
       selectRandomSong();
-      backgroundMusic.play().catch(() => {});
+      if (backgroundMusic) {
+        backgroundMusic.volume = savedVolume;
+        backgroundMusic.play().catch(() => {});
+      }
     });
   }
 
@@ -272,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const volumeSliderBar = document.getElementById('volume-slider-bar');
   const volumeIconHigh = document.getElementById('volume-icon-high');
   const volumeIconMute = document.getElementById('volume-icon-mute');
-  let savedVolume = 0.5;
+  let savedVolume = 1.0;
 
   function setVolume(val, updateInput = true) {
     const clamped = Math.max(0, Math.min(1, val));
@@ -317,9 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       if (!backgroundMusic) return;
       if (backgroundMusic.muted || backgroundMusic.volume === 0) {
-        setVolume(savedVolume || 0.5, true);
+        setVolume(savedVolume || 1.0, true);
       } else {
-        savedVolume = backgroundMusic.volume || 0.5;
+        savedVolume = backgroundMusic.volume || 1.0;
         backgroundMusic.muted = true;
         if (volumeSliderBar) volumeSliderBar.value = 0;
         updateVolumeUI(0, true);
