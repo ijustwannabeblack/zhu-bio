@@ -120,42 +120,90 @@ document.addEventListener('DOMContentLoaded', () => {
   updateBerlinTime();
   setInterval(updateBerlinTime, 1000);
 
-  // Guns.lol Anti-Bot & Anti-Incognito View Counter (Starts at 0)
+  // Guns.lol Strict HWID & Anti-Incognito View Counter (Starts at 0)
   const COUNTER_NAMESPACE = 'larpifyy_asia';
-  const COUNTER_KEY = 'views_v0';
+  const COUNTER_KEY = 'views_hwid_v1';
   let hasRecordedViewThisSession = false;
 
-  async function getDeviceFingerprint() {
+  function getGPUHWID() {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) return 'no_gl';
+      const dbgRenderInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      if (!dbgRenderInfo) return 'no_dbg';
+      const vendor = gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL) || '';
+      const renderer = gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL) || '';
+      return `${vendor}__${renderer}`;
+    } catch (e) {
+      return 'gl_err';
+    }
+  }
+
+  async function isIncognitoMode() {
+    try {
+      // 1. Chrome / Chromium / Edge storage estimate check
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        const { quota } = await navigator.storage.estimate();
+        if (quota && quota < 130 * 1024 * 1024) {
+          return true;
+        }
+      }
+      // 2. WebKit FileSystem check
+      if ('webkitRequestFileSystem' in window) {
+        const isIncog = await new Promise(resolve => {
+          window.webkitRequestFileSystem(
+            window.TEMPORARY,
+            100,
+            () => resolve(false),
+            () => resolve(true)
+          );
+        });
+        if (isIncog) return true;
+      }
+      // 3. Safari Private Browsing
+      if (window.safari && !window.safari.pushNotification) {
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  async function getDeviceHWID() {
     try {
       const parts = [
+        getGPUHWID(),
         screen.width,
         screen.height,
         screen.colorDepth,
+        window.devicePixelRatio || 1,
         navigator.hardwareConcurrency || 2,
-        navigator.language,
+        navigator.maxTouchPoints || 0,
         Intl.DateTimeFormat().resolvedOptions().timeZone,
-        navigator.userAgent
+        navigator.platform || '',
+        navigator.language
       ];
-      // Canvas rendering fingerprint
+      // Canvas HWID fingerprint
       const canvas = document.createElement('canvas');
+      canvas.width = 200;
+      canvas.height = 50;
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.textBaseline = 'top';
         ctx.font = "14px 'Arial'";
-        ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = '#f60';
-        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillRect(10, 10, 80, 20);
         ctx.fillStyle = '#069';
-        ctx.fillText('larpifyy,asia', 2, 15);
+        ctx.fillText('hwid_larpifyy', 15, 15);
         parts.push(canvas.toDataURL());
       }
       const raw = parts.join('###');
       const msgUint8 = new TextEncoder().encode(raw);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
     } catch (e) {
-      return 'fp_' + screen.width + 'x' + screen.height;
+      return 'hwid_' + screen.width + 'x' + screen.height;
     }
   }
 
@@ -182,17 +230,25 @@ document.addEventListener('DOMContentLoaded', () => {
     hasRecordedViewThisSession = true;
 
     const countEl = document.getElementById('visitor-count');
-    const fp = await getDeviceFingerprint();
-    const storageKey = `viewed_${COUNTER_KEY}_${fp}`;
 
-    // Check if device has already viewed
+    // Block Incognito / Private browsing from incrementing views
+    const incognito = await isIncognitoMode();
+    if (incognito) {
+      fetchLiveViewCount();
+      return;
+    }
+
+    const hwid = await getDeviceHWID();
+    const storageKey = `hwid_viewed_${COUNTER_KEY}_${hwid}`;
+
+    // Check if this physical device/HWID has already viewed
     if (localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey)) {
       fetchLiveViewCount();
       return;
     }
 
     try {
-      // Optional IP verification to block incognito replay on same network
+      // IP verification to block multiple tabs / reloads on same IP
       let ip = '';
       try {
         const ipRes = await fetch('https://api64.ipify.org?format=json', { signal: AbortSignal.timeout(2000) });
@@ -208,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // First genuine human view: increment counter!
+      // First genuine human non-incognito view: increment counter!
       const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`);
       if (res.ok) {
         const data = await res.json();
