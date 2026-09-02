@@ -94,6 +94,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startText) startText.textContent = startTextContent + (startCursorVisible ? '|' : ' ');
   }, 500);
 
+  // Live Germany (Berlin) Time Clock
+  function updateBerlinTime() {
+    const timeEl = document.getElementById('berlin-time');
+    if (!timeEl) return;
+    try {
+      const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Berlin',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      timeEl.textContent = formatter.format(new Date());
+    } catch (e) {
+      const now = new Date();
+      timeEl.textContent = now.toLocaleTimeString();
+    }
+  }
+  updateBerlinTime();
+  setInterval(updateBerlinTime, 1000);
+
   // Guns.lol Anti-Bot & Anti-Incognito View Counter (Starts at 0)
   const COUNTER_NAMESPACE = 'larpifyy_asia';
   const COUNTER_KEY = 'views_v0';
