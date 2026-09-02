@@ -94,44 +94,113 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startText) startText.textContent = startTextContent + (startCursorVisible ? '|' : ' ');
   }, 500);
 
-  // Guns.lol Real-Time View Counter (Deduplicated by Device & Session)
-  async function initializeVisitorCounter() {
-    const VIEW_STORAGE_KEY = 'larpifyy_asia_profile_viewed';
-    const hasViewed = localStorage.getItem(VIEW_STORAGE_KEY) || sessionStorage.getItem(VIEW_STORAGE_KEY);
-    const countEl = document.getElementById('visitor-count');
+  // Guns.lol Anti-Bot & Anti-Incognito View Counter (Starts at 0)
+  const COUNTER_NAMESPACE = 'larpifyy_asia';
+  const COUNTER_KEY = 'views_v0';
+  let hasRecordedViewThisSession = false;
 
+  async function getDeviceFingerprint() {
     try {
-      // If already visited from this device/browser, only GET the count without incrementing
-      const endpoint = hasViewed
-        ? 'https://abacus.jasoncameron.dev/get/larpifyy_asia/views'
-        : 'https://abacus.jasoncameron.dev/hit/larpifyy_asia/views';
+      const parts = [
+        screen.width,
+        screen.height,
+        screen.colorDepth,
+        navigator.hardwareConcurrency || 2,
+        navigator.language,
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        navigator.userAgent
+      ];
+      // Canvas rendering fingerprint
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.textBaseline = 'top';
+        ctx.font = "14px 'Arial'";
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('larpifyy,asia', 2, 15);
+        parts.push(canvas.toDataURL());
+      }
+      const raw = parts.join('###');
+      const msgUint8 = new TextEncoder().encode(raw);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+    } catch (e) {
+      return 'fp_' + screen.width + 'x' + screen.height;
+    }
+  }
 
-      const res = await fetch(endpoint);
+  async function fetchLiveViewCount() {
+    const countEl = document.getElementById('visitor-count');
+    try {
+      const res = await fetch(`https://abacus.jasoncameron.dev/get/${COUNTER_NAMESPACE}/${COUNTER_KEY}`);
       if (res.ok) {
         const data = await res.json();
         if (data && typeof data.value === 'number') {
-          if (!hasViewed) {
-            localStorage.setItem(VIEW_STORAGE_KEY, Date.now().toString());
-            sessionStorage.setItem(VIEW_STORAGE_KEY, 'true');
-          }
-          if (countEl) {
-            countEl.textContent = data.value.toLocaleString();
-          }
+          if (countEl) countEl.textContent = data.value.toLocaleString();
+          return data.value;
+        }
+      }
+    } catch (e) {}
+    if (countEl && (!countEl.textContent || countEl.textContent === '')) {
+      countEl.textContent = '0';
+    }
+    return 0;
+  }
+
+  async function recordHumanView() {
+    if (hasRecordedViewThisSession) return;
+    hasRecordedViewThisSession = true;
+
+    const countEl = document.getElementById('visitor-count');
+    const fp = await getDeviceFingerprint();
+    const storageKey = `viewed_${COUNTER_KEY}_${fp}`;
+
+    // Check if device has already viewed
+    if (localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey)) {
+      fetchLiveViewCount();
+      return;
+    }
+
+    try {
+      // Optional IP verification to block incognito replay on same network
+      let ip = '';
+      try {
+        const ipRes = await fetch('https://api64.ipify.org?format=json', { signal: AbortSignal.timeout(2000) });
+        if (ipRes.ok) {
+          const ipData = await ipRes.json();
+          ip = ipData.ip || '';
+        }
+      } catch (e) {}
+
+      const ipKey = ip ? `viewed_ip_${ip.replace(/[^a-zA-Z0-9]/g, '_')}` : '';
+      if (ipKey && localStorage.getItem(ipKey)) {
+        fetchLiveViewCount();
+        return;
+      }
+
+      // First genuine human view: increment counter!
+      const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.value === 'number') {
+          localStorage.setItem(storageKey, Date.now().toString());
+          sessionStorage.setItem(storageKey, 'true');
+          if (ipKey) localStorage.setItem(ipKey, Date.now().toString());
+          if (countEl) countEl.textContent = data.value.toLocaleString();
           return;
         }
       }
     } catch (e) {}
 
-    // Fallback if offline
-    let localCount = parseInt(localStorage.getItem('cached_view_count') || '1');
-    if (!hasViewed) {
-      localCount++;
-      localStorage.setItem('cached_view_count', localCount.toString());
-      localStorage.setItem(VIEW_STORAGE_KEY, Date.now().toString());
-    }
-    if (countEl) countEl.textContent = localCount.toLocaleString();
+    fetchLiveViewCount();
   }
-  initializeVisitorCounter();
+
+  // Fetch initial live count on load (without incrementing)
+  fetchLiveViewCount();
 
   // Dynamic Random Song Selector from songs/ folder
   let currentSong = null;
@@ -255,6 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (profileName) profileName.textContent = userNameStr;
     typeWriterBio();
+    recordHumanView();
   }
 
   if (startScreen) {
@@ -268,9 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Username (Static, no typing animation)
   let userNameStr = "zhu";
 
-  // Typewriter Bio
+  // Typewriter Bio (Loops between anja my world and owner of /larpifyy)
   const bioMessages = [
-    "anja my world"
+    "anja my world",
+    "owner of /larpifyy"
   ];
   let bioText = '';
   let bioIndex = 0;
