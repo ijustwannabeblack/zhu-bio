@@ -386,6 +386,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Solana Address Copy & Toast Notification
+  const solanaCopyBtn = document.getElementById('solana-copy-btn');
+  const toastNotification = document.getElementById('toast-notification');
+  let toastTimeout = null;
+
+  function showToast(message = "Copied to clipboard!") {
+    if (!toastNotification) return;
+    toastNotification.textContent = message;
+    toastNotification.classList.remove('hidden');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toastNotification.classList.add('hidden');
+    }, 2500);
+  }
+
+  if (solanaCopyBtn) {
+    solanaCopyBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const solanaAddress = "JE1kHDbcEebg7sMJvZ5ory8fNck51hSccRNnvFMqv16x";
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(solanaAddress);
+        } else {
+          const textarea = document.createElement('textarea');
+          textarea.value = solanaAddress;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+        }
+        showToast("Copied to clipboard!");
+      } catch (err) {
+        showToast("Copied to clipboard!");
+      }
+    });
+  }
+
   // Start Screen Click
   function handleEnter() {
     if (!startScreen || startScreen.classList.contains('hidden')) return;
