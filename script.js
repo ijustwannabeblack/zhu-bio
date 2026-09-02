@@ -385,6 +385,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!data) return;
     const user = data.discord_user;
 
+    // Discord Banner
+    const bannerImg = document.getElementById('profile-banner-img');
+    const bannerContainer = document.getElementById('profile-banner');
+    if (user && bannerContainer) {
+      if (user.banner) {
+        const isGif = user.banner.startsWith('a_');
+        if (bannerImg) {
+          bannerImg.src = `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.${isGif ? 'gif' : 'png'}?size=1024`;
+          bannerImg.classList.remove('hidden');
+        }
+      } else if (user.banner_color) {
+        bannerContainer.style.background = user.banner_color;
+      }
+    }
+
     // Avatar
     if (user && profilePicture) {
       const isGif = user.avatar && user.avatar.startsWith('a_');
