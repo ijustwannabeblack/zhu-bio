@@ -15,9 +15,13 @@ let userBadges = [
 let songPlaylist = [
   "Addison Rae - Fame is a Gun (Official Video).mp3",
   "Drake - Janice STFU.mp3",
+  "Jay-Z Kanye West - Ni as In Paris (Explicit).mp3",
   "Julia Wolf - In My Room Official Lyric Video.mp3",
+  "Kanye West - All Falls Down ft. Syleena Johnson.mp3",
+  "Kanye West - All Of The Lights.mp3",
   "Kelly Clarkson - Since U Been Gone (VIDEO).mp3",
-  "Legendary Lovers.mp3"
+  "Legendary Lovers.mp3",
+  "Trippie Redd, Travis Scott - Dark Knight Dummo ft. Travis Scott.mp3"
 ];
 
 function initMedia() {
