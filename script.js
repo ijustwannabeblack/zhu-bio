@@ -5,7 +5,19 @@ const LANYARD_REST_URL = `https://api.lanyard.rest/v1/users/${LANYARD_USER_ID}`;
 let lanyardSocket = null;
 let heartbeatTimer = null;
 let spotifyInterval = null;
-let userBadges = ["Booster.png", "Gifted.png", "Nitro Gold.png"];
+let userBadges = [
+  "verified.png",
+  "Nitro Gold.png",
+  "Developer.png",
+  "Booster.png",
+  "Gifted.png"
+];
+let songPlaylist = [
+  "Addison Rae - Fame is a Gun (Official Video).mp3",
+  "Julia Wolf - In My Room Official Lyric Video.mp3",
+  "Kelly Clarkson - Since U Been Gone (VIDEO).mp3",
+  "Legendary Lovers.mp3"
+];
 
 function initMedia() {
   const backgroundMusic = document.getElementById('background-music');
@@ -104,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeVisitorCounter();
 
   // Dynamic Random Song Selector from songs/ folder
-  let songPlaylist = [];
   let currentSong = null;
 
   async function initSongs() {
