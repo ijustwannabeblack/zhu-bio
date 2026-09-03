@@ -6,7 +6,6 @@ let lanyardSocket = null;
 let heartbeatTimer = null;
 let spotifyInterval = null;
 let userBadges = [
-  "verified.png",
   "Nitro Gold.png",
   "Developer.png",
   "Booster.png",
@@ -25,12 +24,11 @@ let songPlaylist = [
 ];
 
 function initMedia() {
-  const backgroundMusic = document.getElementById('background-music');
   const backgroundVideo = document.getElementById('background');
-  if (!backgroundMusic || !backgroundVideo) return;
-  backgroundMusic.volume = 1.0;
-  backgroundVideo.muted = true;
-  backgroundVideo.play().catch(() => {});
+  if (backgroundVideo) {
+    backgroundVideo.muted = true;
+    backgroundVideo.play().catch(() => {});
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -71,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const badgeGroup = document.getElementById('badge-group');
   const spotifyPlayer = document.getElementById('spotify-player');
   const spotifyArt = document.getElementById('spotify-art');
+  const spotifyArtLink = document.getElementById('spotify-art-link');
   const spotifySong = document.getElementById('spotify-song');
   const spotifyArtist = document.getElementById('spotify-artist');
   const spotifyBarFill = document.getElementById('spotify-bar-fill');
@@ -313,6 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
     backgroundMusic.load();
   }
 
+  // Pre-select song immediately so audio source is loaded before interaction
+  selectRandomSong();
+
   if (backgroundMusic) {
     backgroundMusic.volume = 1.0;
     backgroundMusic.addEventListener('ended', () => {
@@ -425,14 +427,56 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Start Screen Click
-  function handleEnter() {
-    if (!startScreen || startScreen.classList.contains('hidden')) return;
-    startScreen.classList.add('hidden');
-    if (backgroundMusic) {
+  // Mobile & Desktop Reliable Audio Starter
+  let audioStarted = false;
+  function startBackgroundAudio() {
+    if (!backgroundMusic) return;
+    try {
       backgroundMusic.muted = false;
-      backgroundMusic.play().catch(() => {});
+      backgroundMusic.volume = savedVolume || 1.0;
+    } catch (e) {}
+
+    // Unlock Web Audio API context for iOS Safari & Android Chrome
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        if (!window._appAudioCtx) window._appAudioCtx = new AudioCtx();
+        if (window._appAudioCtx.state === 'suspended') {
+          window._appAudioCtx.resume();
+        }
+      }
+    } catch (e) {}
+
+    const playPromise = backgroundMusic.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        audioStarted = true;
+      }).catch((err) => {
+        console.warn("Mobile autoplay policy deferred audio:", err);
+        // Fallback: unlock and play on next user tap anywhere
+        const fallbackUnlock = () => {
+          if (!backgroundMusic) return;
+          backgroundMusic.muted = false;
+          backgroundMusic.play().then(() => {
+            audioStarted = true;
+          }).catch(() => {});
+          document.removeEventListener('touchend', fallbackUnlock);
+          document.removeEventListener('click', fallbackUnlock);
+        };
+        document.addEventListener('touchend', fallbackUnlock, { once: true, passive: true });
+        document.addEventListener('click', fallbackUnlock, { once: true, passive: true });
+      });
     }
+  }
+
+  // Start Screen Click / Touch
+  let enterHandled = false;
+  function handleEnter() {
+    if (enterHandled || !startScreen || startScreen.classList.contains('hidden')) return;
+    enterHandled = true;
+    startScreen.classList.add('hidden');
+    startBackgroundAudio();
+
     if (profileBlock) {
       profileBlock.classList.remove('hidden');
       if (window.gsap) {
@@ -453,10 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (startScreen) {
     startScreen.addEventListener('click', handleEnter);
-    startScreen.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      handleEnter();
-    });
+    startScreen.addEventListener('touchend', handleEnter, { passive: true });
   }
 
   // Username (Static, no typing animation)
@@ -531,16 +572,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!badgeGroup) return;
     badgeGroup.innerHTML = '';
 
-    // Sort order: Verified (1) -> Nitro (2) -> Developer (3) -> Booster (4) -> Gifted (5) -> Others
-    const sortedBadges = userBadges.slice().sort((a, b) => {
+    // Filter out verified badge completely
+    const validBadges = userBadges.filter(f => !f.toLowerCase().includes('verified'));
+
+    // Sort order: Nitro (1) -> Developer (2) -> Booster (3) -> Gifted (4) -> Others
+    const sortedBadges = validBadges.slice().sort((a, b) => {
       const getPriority = (filename) => {
         const lower = filename.toLowerCase();
-        if (lower.includes('verified')) return 1;
-        if (lower.includes('nitro')) return 2;
-        if (lower.includes('developer')) return 3;
-        if (lower.includes('booster')) return 4;
-        if (lower.includes('gifted')) return 5;
-        return 6;
+        if (lower.includes('nitro')) return 1;
+        if (lower.includes('developer')) return 2;
+        if (lower.includes('booster')) return 3;
+        if (lower.includes('gifted')) return 4;
+        return 5;
       };
       const pA = getPriority(a);
       const pB = getPriority(b);
@@ -678,13 +721,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Spotify
     if (data.listening_to_spotify && data.spotify && spotifyPlayer) {
       spotifyPlayer.classList.remove('hidden');
+      const trackUrl = data.spotify.track_id ? `https://open.spotify.com/track/${data.spotify.track_id}` : '#';
       if (spotifyArt) spotifyArt.src = data.spotify.album_art_url || '';
+      if (spotifyArtLink) spotifyArtLink.href = trackUrl;
       if (spotifySong) {
         spotifySong.textContent = data.spotify.song || 'Unknown Track';
-        spotifySong.href = data.spotify.track_id ? `https://open.spotify.com/track/${data.spotify.track_id}` : '#';
+        spotifySong.title = data.spotify.song || 'Unknown Track';
+        spotifySong.href = trackUrl;
       }
       if (spotifyArtist) {
-        spotifyArtist.textContent = `${data.spotify.artist || ''} • ${data.spotify.album || ''}`;
+        const artistAlbum = `${data.spotify.artist || ''} • ${data.spotify.album || ''}`;
+        spotifyArtist.textContent = artistAlbum;
+        spotifyArtist.title = artistAlbum;
       }
 
       // Progress bar & Time counters
