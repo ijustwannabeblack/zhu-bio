@@ -427,6 +427,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Top Projects Button (Nothing happens first as requested)
+  const projectsBtn = document.getElementById('projects-btn');
+  const projectsWidget = document.getElementById('projects-widget');
+  const handleProjectsClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  if (projectsBtn) projectsBtn.addEventListener('click', handleProjectsClick);
+  if (projectsWidget) projectsWidget.addEventListener('click', handleProjectsClick);
+
   // Mobile & Desktop Reliable Audio Starter
   let audioStarted = false;
   function startBackgroundAudio() {
