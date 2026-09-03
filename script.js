@@ -427,15 +427,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Top Projects Button (Nothing happens first as requested)
+  // Projects & Archive Window Modal
   const projectsBtn = document.getElementById('projects-btn');
   const projectsWidget = document.getElementById('projects-widget');
-  const handleProjectsClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  if (projectsBtn) projectsBtn.addEventListener('click', handleProjectsClick);
-  if (projectsWidget) projectsWidget.addEventListener('click', handleProjectsClick);
+  const projectsModal = document.getElementById('projects-modal');
+  const projectsCloseBtn = document.getElementById('projects-close-btn');
+  const projectsCloseDot = document.getElementById('projects-close-dot');
+  const projectsWindow = document.querySelector('.projects-window');
+
+  function openProjectsModal(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (projectsModal) {
+      projectsModal.classList.remove('hidden');
+    }
+  }
+
+  function closeProjectsModal(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (projectsModal) {
+      projectsModal.classList.add('hidden');
+    }
+  }
+
+  if (projectsBtn) projectsBtn.addEventListener('click', openProjectsModal);
+  if (projectsWidget) projectsWidget.addEventListener('click', openProjectsModal);
+  if (projectsCloseBtn) projectsCloseBtn.addEventListener('click', closeProjectsModal);
+  if (projectsCloseDot) projectsCloseDot.addEventListener('click', closeProjectsModal);
+
+  if (projectsModal) {
+    projectsModal.addEventListener('click', (e) => {
+      if (e.target === projectsModal) {
+        closeProjectsModal(e);
+      }
+    });
+  }
+
+  if (projectsWindow) {
+    projectsWindow.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && projectsModal && !projectsModal.classList.contains('hidden')) {
+      closeProjectsModal();
+    }
+  });
 
   // Mobile & Desktop Reliable Audio Starter
   let audioStarted = false;

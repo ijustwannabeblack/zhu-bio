@@ -54,6 +54,133 @@
     <!-- Toast Notification -->
     <div id="toast-notification" class="toast-notification hidden">Copied to clipboard!</div>
 
+    <!-- In-Site Projects & Archive Window Modal -->
+    <div id="projects-modal" class="projects-modal-backdrop hidden">
+        <div class="projects-window">
+            <!-- Window Header / Titlebar -->
+            <div class="projects-window-titlebar">
+                <div class="projects-window-controls">
+                    <button id="projects-close-dot" class="dot-btn close-dot" title="Close window" aria-label="Close"></button>
+                    <span class="dot-btn min-dot"></span>
+                    <span class="dot-btn max-dot"></span>
+                </div>
+                <div class="projects-window-title">
+                    <svg class="window-title-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                    </svg>
+                    <span>zhu ~ /archives/projects</span>
+                </div>
+                <button id="projects-close-btn" class="projects-close-btn" title="Close" aria-label="Close window">✕</button>
+            </div>
+
+            <!-- Window Body -->
+            <div class="projects-window-body">
+                <div class="projects-archive-header">
+                    <div class="archive-header-badge">ARCHIVE DIRECTORY</div>
+                    <h2 class="archive-header-title">Projects & Archives</h2>
+                    <p class="archive-header-desc">Download project archives, releases, and media files below.</p>
+                </div>
+
+                <!-- Archive List -->
+                <div class="projects-archive-list">
+                    <!-- Project 1 -->
+                    <div class="archive-card">
+                        <div class="archive-card-left">
+                            <div class="archive-file-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="10" y1="12" x2="10" y2="18"></line>
+                                    <line x1="8" y1="15" x2="12" y2="15"></line>
+                                </svg>
+                                <span class="zip-tag">ZIP</span>
+                            </div>
+                            <div class="archive-card-details">
+                                <div class="archive-card-name">zhu-bio-source.zip</div>
+                                <div class="archive-card-sub">Complete bio site source code, widgets & custom styles</div>
+                                <div class="archive-card-tags">
+                                    <span class="arch-tag">v2.0</span>
+                                    <span class="arch-tag">Source</span>
+                                    <span class="arch-tag-muted">21 KB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="archives/zhu-bio-source.zip" download="zhu-bio-source.zip" class="archive-download-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Download</span>
+                        </a>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="archive-card">
+                        <div class="archive-card-left">
+                            <div class="archive-file-icon icon-cyan">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <circle cx="12" cy="14" r="3"></circle>
+                                </svg>
+                                <span class="zip-tag">ZIP</span>
+                            </div>
+                            <div class="archive-card-details">
+                                <div class="archive-card-name">assets-pack.zip</div>
+                                <div class="archive-card-sub">Discord badges, cat banners, custom cursor & audio assets</div>
+                                <div class="archive-card-tags">
+                                    <span class="arch-tag">Assets</span>
+                                    <span class="arch-tag">Media</span>
+                                    <span class="arch-tag-muted">2.0 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="archives/assets-pack.zip" download="assets-pack.zip" class="archive-download-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Download</span>
+                        </a>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="archive-card">
+                        <div class="archive-card-left">
+                            <div class="archive-file-icon icon-purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <polygon points="12 11 15 17 9 17"></polygon>
+                                </svg>
+                                <span class="zip-tag">ZIP</span>
+                            </div>
+                            <div class="archive-card-details">
+                                <div class="archive-card-name">configs-and-scripts.zip</div>
+                                <div class="archive-card-sub">Server handlers, Cloudflare Wrangler & deployment setups</div>
+                                <div class="archive-card-tags">
+                                    <span class="arch-tag">Configs</span>
+                                    <span class="arch-tag">Tools</span>
+                                    <span class="arch-tag-muted">1.8 KB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="archives/configs-and-scripts.zip" download="configs-and-scripts.zip" class="archive-download-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            <span>Download</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         
         <!-- Background Video & Canvas -->

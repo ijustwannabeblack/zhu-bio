@@ -15,7 +15,8 @@ const MIME_TYPES = {
   '.mp4': 'video/mp4',
   '.mp3': 'audio/mpeg',
   '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf'
+  '.ttf': 'font/ttf',
+  '.zip': 'application/zip'
 };
 
 const server = http.createServer((req, res) => {
