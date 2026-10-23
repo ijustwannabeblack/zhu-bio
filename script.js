@@ -544,7 +544,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     if (profileName) profileName.textContent = userNameStr;
-    typeWriterBio();
     recordHumanView();
   }
 
@@ -556,45 +555,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Username (Static, no typing animation)
   let userNameStr = "zhu";
 
-  // Typewriter Bio (Loops between owner of /larpifyy and i trade on axiom.trade btw)
-  const bioMessages = [
-    "owner of /larpifyy",
-    "i trade on axiom.trade btw"
-  ];
-  let bioText = '';
-  let bioIndex = 0;
-  let bioMessageIndex = 0;
-  let isBioDeleting = false;
-  let bioCursorVisible = true;
-
-  function typeWriterBio() {
-    if (!profileBio) return;
-    if (!isBioDeleting && bioIndex < bioMessages[bioMessageIndex].length) {
-      bioText = bioMessages[bioMessageIndex].slice(0, bioIndex + 1);
-      bioIndex++;
-    } else if (isBioDeleting && bioIndex > 0) {
-      bioText = bioMessages[bioMessageIndex].slice(0, bioIndex - 1);
-      bioIndex--;
-    } else if (bioIndex === bioMessages[bioMessageIndex].length) {
-      isBioDeleting = true;
-      setTimeout(typeWriterBio, 2500);
-      return;
-    } else if (bioIndex === 0 && isBioDeleting) {
-      isBioDeleting = false;
-      bioMessageIndex = (bioMessageIndex + 1) % bioMessages.length;
-    }
-    profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
-    if (Math.random() < 0.1) {
-      profileBio.classList.add('glitch');
-      setTimeout(() => profileBio.classList.remove('glitch'), 200);
-    }
-    setTimeout(typeWriterBio, isBioDeleting ? 60 : 120);
-  }
-
-  setInterval(() => {
-    bioCursorVisible = !bioCursorVisible;
-    if (profileBio) profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
-  }, 500);
+  // Bio kept empty/hidden
+  if (profileBio) profileBio.style.display = "none";
 
   // (Tilt and controls removed)
 
