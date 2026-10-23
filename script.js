@@ -787,14 +787,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const particleCount = isMobile ? 26 : Math.min(Math.max(Math.floor((w * h) / 16000), 35), 65);
     const particles = [];
 
+    const emberColors = ['#ff6a00', '#ff9900', '#a855f7', '#ff3300', '#d946ef'];
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * w,
         y: Math.random() * h,
-        r: Math.random() * 1.5 + 1,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        alpha: Math.random() * 0.4 + 0.3
+        r: Math.random() * 2 + 1,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -Math.random() * 0.9 - 0.2, // float gently upwards like glowing embers
+        color: emberColors[Math.floor(Math.random() * emberColors.length)],
+        alpha: Math.random() * 0.5 + 0.3,
+        pulse: Math.random() * Math.PI
       });
     }
 
@@ -814,14 +817,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (p.y < 0) p.y = h;
         if (p.y > h) p.y = 0;
 
-        // Draw particle dot
+        // Draw Halloween ember / floating spark
+        p.pulse += 0.03;
+        const curAlpha = Math.max(0.1, p.alpha + Math.sin(p.pulse) * 0.25);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = themeColor;
-        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color || themeColor;
+        ctx.globalAlpha = curAlpha;
         if (!isMobile) {
-          ctx.shadowBlur = 4;
-          ctx.shadowColor = themeColor;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = p.color || themeColor;
         }
         ctx.fill();
 
