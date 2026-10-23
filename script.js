@@ -6,10 +6,7 @@ let lanyardSocket = null;
 let heartbeatTimer = null;
 let spotifyInterval = null;
 let userBadges = [
-  "Nitro Gold.png",
-  "Developer.png",
-  "Booster.png",
-  "Gifted.png"
+  "Nitro Gold.png"
 ];
 let songPlaylist = [
   "Playboi Carti - Beno! (Official Audio) - (320 Kbps).mp3",
