@@ -547,6 +547,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // Username (Static, no typing animation)
   let userNameStr = "zhu";
 
+// Typewriter animation for browser tab title
+  const titleText = "discord.gg/udvengers";
+  let titleCharIndex = 0;
+  let titleIsDeleting = false;
+
+  function typeWriterTitle() {
+    if (!titleIsDeleting && titleCharIndex < titleText.length) {
+      titleCharIndex++;
+      document.title = titleText.slice(0, titleCharIndex);
+      setTimeout(typeWriterTitle, 200);
+    } else if (!titleIsDeleting && titleCharIndex === titleText.length) {
+      titleIsDeleting = true;
+      setTimeout(typeWriterTitle, 2500); // pause at full title
+    } else if (titleIsDeleting && titleCharIndex > 0) {
+      titleCharIndex--;
+      document.title = titleText.slice(0, titleCharIndex) || " ";
+      setTimeout(typeWriterTitle, 100);
+    } else if (titleIsDeleting && titleCharIndex === 0) {
+      titleIsDeleting = false;
+      setTimeout(typeWriterTitle, 800); // pause before typing again
+    }
+  }
+
+  typeWriterTitle();
+
   // Bio Description
   if (profileBio) {
     profileBio.textContent = "CEO @ UDvengers";
