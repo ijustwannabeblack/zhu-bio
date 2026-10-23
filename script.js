@@ -556,9 +556,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Username (Static, no typing animation)
   let userNameStr = "zhu";
 
-  // Typewriter Bio (Loops between anja my world, owner of /larpifyy, and i trade on axiom.trade btw)
+  // Typewriter Bio (Loops between owner of /larpifyy and i trade on axiom.trade btw)
   const bioMessages = [
-    "anja my world",
     "owner of /larpifyy",
     "i trade on axiom.trade btw"
   ];
