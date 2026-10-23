@@ -12,15 +12,10 @@ let userBadges = [
   "Gifted.png"
 ];
 let songPlaylist = [
-  "Addison Rae - Fame is a Gun (Official Video).mp3",
-  "Drake - Janice STFU.mp3",
-  "Jay-Z Kanye West - Ni as In Paris (Explicit).mp3",
-  "Julia Wolf - In My Room Official Lyric Video.mp3",
-  "Kanye West - All Falls Down ft. Syleena Johnson.mp3",
-  "Kanye West - All Of The Lights.mp3",
-  "Kelly Clarkson - Since U Been Gone (VIDEO).mp3",
-  "Legendary Lovers.mp3",
-  "Trippie Redd, Travis Scott - Dark Knight Dummo ft. Travis Scott.mp3"
+  "Playboi Carti - Beno! (Official Audio) - (320 Kbps).mp3",
+  "Playboi Carti - WAKE UP F1LTHY [with Travis Scott] (Official Audio) - (320 Kbps).mp3",
+  "Purpose General - (320 Kbps).mp3",
+  "YEAT - _Tonka 2_ OFFICIAL VERSION - (320 Kbps).mp3"
 ];
 
 function initMedia() {
@@ -307,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
       currentSong = randomSong;
       backgroundMusic.src = `songs/${encodeURIComponent(randomSong)}`;
     } else {
-      backgroundMusic.src = `songs/Legendary%20Lovers.mp3`;
+      backgroundMusic.src = `songs/Playboi%20Carti%20-%20Beno!%20(Official%20Audio)%20-%20(320%20Kbps).mp3`;
     }
     backgroundMusic.load();
   }
