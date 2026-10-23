@@ -547,8 +547,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Username (Static, no typing animation)
   let userNameStr = "zhu";
 
-  // Bio kept empty/hidden
-  if (profileBio) profileBio.style.display = "none";
+  // Bio Description
+  if (profileBio) {
+    profileBio.textContent = "CEO @ UDvengers";
+    profileBio.style.display = "block";
+  }
 
   // (Tilt and controls removed)
 
