@@ -662,28 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!data) return;
     const user = data.discord_user;
 
-    // Discord Banner
-    const bannerImg = document.getElementById('profile-banner-img');
-    const bannerContainer = document.getElementById('profile-banner');
-    if (user && bannerContainer) {
-      if (user.banner) {
-        const isGif = user.banner.startsWith('a_');
-        if (bannerImg) {
-          bannerImg.src = `https://cdn.discordapp.com/banners/${user.id}/${user.banner}.${isGif ? 'gif' : 'png'}?size=1024`;
-          bannerImg.classList.remove('hidden');
-        }
-      } else if (user.banner_color) {
-        bannerContainer.style.background = user.banner_color;
-      }
-    }
-
-    // Avatar
-    if (user && profilePicture) {
-      const isGif = user.avatar && user.avatar.startsWith('a_');
-      profilePicture.src = user.avatar
-        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${isGif ? 'gif' : 'png'}?size=512`
-        : `https://cdn.discordapp.com/embed/avatars/0.png`;
-    }
+    // Custom banner & pfp are preserved (not overwritten by Discord)
 
     // Avatar Decoration
     if (user && user.avatar_decoration_data && avatarDecoration) {
