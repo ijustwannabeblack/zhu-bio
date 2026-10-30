@@ -1,1 +1,368 @@
-export const ADMIN_HTML = "<!DOCTYPE html>\n<html lang=\"en\" class=\"dark\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>AuthShield - Owner Admin Dashboard</title>\n    <script src=\"https://cdn.tailwindcss.com\"></script>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">\n    <script>\n        tailwind.config = {\n            darkMode: 'class',\n            theme: {\n                extend: {\n                    colors: {\n                        dark: {\n                            900: '#0b0f19',\n                            800: '#111827',\n                            700: '#1f2937',\n                            600: '#374151'\n                        },\n                        brand: {\n                            500: '#6366f1',\n                            600: '#4f46e5',\n                            700: '#4338ca'\n                        }\n                    }\n                }\n            }\n        }\n    </script>\n    <style>\n        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');\n        body { font-family: 'Plus Jakarta Sans', sans-serif; }\n        .font-mono { font-family: 'JetBrains Mono', monospace; }\n        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }\n    </style>\n</head>\n<body class=\"bg-dark-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white\">\n\n    <!-- MAIN APP -->\n    <div id=\"mainApp\" class=\"flex-1 flex flex-col\">\n        <!-- HEADER -->\n        <header class=\"glass sticky top-0 z-40 border-b border-slate-800/80 px-6 py-4\">\n            <div class=\"max-w-7xl mx-auto flex items-center justify-between\">\n                <div class=\"flex items-center space-x-3\">\n                    <div class=\"w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20\">\n                        <i class=\"fa-solid fa-shield-halved text-base\"></i>\n                    </div>\n                    <div>\n                        <span class=\"text-lg font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent\">AuthShield</span>\n                        <span class=\"ml-2 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full\">Discord Protected</span>\n                    </div>\n                </div>\n\n                <div class=\"flex items-center space-x-3\">\n                    <div id=\"discordUserTag\" class=\"flex items-center space-x-2 px-3 py-1.5 glass rounded-xl text-xs font-semibold\">\n                        <img id=\"adminAvatar\" src=\"https://cdn.discordapp.com/embed/avatars/0.png\" class=\"w-6 h-6 rounded-full border border-brand-500/50\">\n                        <span id=\"adminUsername\" class=\"text-slate-200\">Owner</span>\n                        <span class=\"px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]\">Verified ID</span>\n                    </div>\n                    <button onclick=\"openModal('generateModal')\" class=\"flex items-center space-x-2 px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition shadow-md shadow-brand-600/20\">\n                        <i class=\"fa-solid fa-plus text-xs\"></i>\n                        <span>Create Keys</span>\n                    </button>\n                    <a href=\"/api/admin/logout\" class=\"p-2 text-slate-400 hover:text-rose-400 glass rounded-xl transition\" title=\"Logout\">\n                        <i class=\"fa-solid fa-right-from-bracket\"></i>\n                    </a>\n                </div>\n            </div>\n        </header>\n\n        <!-- CONTENT -->\n        <main class=\"max-w-7xl mx-auto w-full px-6 py-8 flex-1 space-y-8\">\n            <!-- STATS ROW -->\n            <div class=\"grid grid-cols-1 md:grid-cols-4 gap-4\">\n                <div class=\"glass p-5 rounded-2xl\">\n                    <div class=\"flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2\">\n                        <span>Total Licenses</span>\n                        <i class=\"fa-solid fa-key text-brand-500\"></i>\n                    </div>\n                    <div id=\"statTotal\" class=\"text-2xl font-bold font-mono\">0</div>\n                </div>\n                <div class=\"glass p-5 rounded-2xl\">\n                    <div class=\"flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2\">\n                        <span>Active Subscriptions</span>\n                        <i class=\"fa-solid fa-circle-check text-emerald-400\"></i>\n                    </div>\n                    <div id=\"statActive\" class=\"text-2xl font-bold font-mono text-emerald-400\">0</div>\n                </div>\n                <div class=\"glass p-5 rounded-2xl\">\n                    <div class=\"flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2\">\n                        <span>Banned Users</span>\n                        <i class=\"fa-solid fa-ban text-rose-400\"></i>\n                    </div>\n                    <div id=\"statBanned\" class=\"text-2xl font-bold font-mono text-rose-400\">0</div>\n                </div>\n                <div class=\"glass p-5 rounded-2xl\">\n                    <div class=\"flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2\">\n                        <span>Payload Status</span>\n                        <i class=\"fa-solid fa-shield text-indigo-400\"></i>\n                    </div>\n                    <div id=\"statPayload\" class=\"text-sm font-semibold text-emerald-400 flex items-center space-x-1.5 mt-1.5\">\n                        <span class=\"w-2 h-2 rounded-full bg-emerald-400 animate-pulse\"></span>\n                        <span id=\"payloadText\">Cloudflare Edge Ready</span>\n                    </div>\n                </div>\n            </div>\n\n            <!-- TABS & SEARCH -->\n            <div class=\"flex flex-col md:flex-row md:items-center justify-between gap-4\">\n                <div class=\"flex items-center space-x-2\">\n                    <button onclick=\"switchTab('keys')\" id=\"tabBtnKeys\" class=\"px-4 py-2 rounded-xl text-sm font-semibold bg-brand-600 text-white transition\">\n                        <i class=\"fa-solid fa-key mr-1.5\"></i> Licenses\n                    </button>\n                    <button onclick=\"switchTab('logs')\" id=\"tabBtnLogs\" class=\"px-4 py-2 rounded-xl text-sm font-semibold glass text-slate-400 hover:text-white transition\">\n                        <i class=\"fa-solid fa-clock-rotate-left mr-1.5\"></i> Security Logs\n                    </button>\n                </div>\n                <div class=\"relative w-full md:w-72\">\n                    <i class=\"fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs\"></i>\n                    <input type=\"text\" id=\"searchInput\" oninput=\"filterLicenses()\" placeholder=\"Search key, HWID, note...\"\n                        class=\"w-full pl-9 pr-4 py-2 bg-dark-800/80 border border-slate-700/80 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition\">\n                </div>\n            </div>\n\n            <!-- TAB 1: LICENSES TABLE -->\n            <div id=\"tabKeys\" class=\"glass rounded-2xl overflow-hidden shadow-xl border border-slate-800\">\n                <div class=\"overflow-x-auto\">\n                    <table class=\"w-full text-left text-sm text-slate-300\">\n                        <thead class=\"bg-dark-800/80 text-xs uppercase font-semibold text-slate-400 tracking-wider border-b border-slate-700/80\">\n                            <tr>\n                                <th class=\"py-3.5 px-4\">License Key</th>\n                                <th class=\"py-3.5 px-4\">Duration</th>\n                                <th class=\"py-3.5 px-4\">HWID Status</th>\n                                <th class=\"py-3.5 px-4\">Expires</th>\n                                <th class=\"py-3.5 px-4\">Status</th>\n                                <th class=\"py-3.5 px-4\">Note</th>\n                                <th class=\"py-3.5 px-4 text-right\">Actions</th>\n                            </tr>\n                        </thead>\n                        <tbody id=\"licenseTableBody\" class=\"divide-y divide-slate-800/60 font-mono text-xs\">\n                            <!-- Injected dynamically -->\n                        </tbody>\n                    </table>\n                </div>\n            </div>\n\n            <!-- TAB 2: AUDIT LOGS -->\n            <div id=\"tabLogs\" class=\"hidden glass rounded-2xl overflow-hidden shadow-xl border border-slate-800\">\n                <div class=\"overflow-x-auto\">\n                    <table class=\"w-full text-left text-sm text-slate-300\">\n                        <thead class=\"bg-dark-800/80 text-xs uppercase font-semibold text-slate-400 tracking-wider border-b border-slate-700/80\">\n                            <tr>\n                                <th class=\"py-3.5 px-4\">Timestamp</th>\n                                <th class=\"py-3.5 px-4\">Event</th>\n                                <th class=\"py-3.5 px-4\">IP Address</th>\n                                <th class=\"py-3.5 px-4\">Key</th>\n                                <th class=\"py-3.5 px-4\">Details</th>\n                            </tr>\n                        </thead>\n                        <tbody id=\"logsTableBody\" class=\"divide-y divide-slate-800/60 font-mono text-xs\">\n                            <!-- Injected dynamically -->\n                        </tbody>\n                    </table>\n                </div>\n            </div>\n        </main>\n    </div>\n\n    <!-- MODAL: GENERATE KEYS -->\n    <div id=\"generateModal\" class=\"hidden fixed inset-0 z-50 flex items-center justify-center bg-dark-900/80 backdrop-blur-sm p-4\">\n        <div class=\"glass w-full max-w-lg p-6 rounded-2xl shadow-2xl border border-slate-700 space-y-4\">\n            <div class=\"flex items-center justify-between pb-2 border-b border-slate-800\">\n                <h3 class=\"text-lg font-bold\">Generate New License Keys</h3>\n                <button onclick=\"closeModal('generateModal')\" class=\"text-slate-400 hover:text-white\"><i class=\"fa-solid fa-xmark\"></i></button>\n            </div>\n            <form id=\"genForm\" class=\"space-y-4\">\n                <div class=\"grid grid-cols-2 gap-4\">\n                    <div>\n                        <label class=\"block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5\">Duration</label>\n                        <select id=\"genDuration\" class=\"w-full px-3 py-2.5 bg-dark-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-brand-500\">\n                            <option value=\"1\">1 Day</option>\n                            <option value=\"3\">3 Days</option>\n                            <option value=\"7\" selected>7 Days (1 Week)</option>\n                            <option value=\"30\">30 Days (1 Month)</option>\n                            <option value=\"90\">90 Days (3 Months)</option>\n                            <option value=\"0\">Lifetime (Permanent)</option>\n                        </select>\n                    </div>\n                    <div>\n                        <label class=\"block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5\">Prefix</label>\n                        <input type=\"text\" id=\"genPrefix\" value=\"VIP\" placeholder=\"VIP\" maxlength=\"6\"\n                            class=\"w-full px-3 py-2.5 bg-dark-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-brand-500 font-mono uppercase\">\n                    </div>\n                </div>\n                <div class=\"grid grid-cols-2 gap-4\">\n                    <div>\n                        <label class=\"block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5\">Quantity</label>\n                        <input type=\"number\" id=\"genCount\" value=\"1\" min=\"1\" max=\"50\"\n                            class=\"w-full px-3 py-2.5 bg-dark-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-brand-500\">\n                    </div>\n                    <div>\n                        <label class=\"block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5\">Note / Customer</label>\n                        <input type=\"text\" id=\"genNote\" placeholder=\"e.g. Discord username\"\n                            class=\"w-full px-3 py-2.5 bg-dark-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-brand-500\">\n                    </div>\n                </div>\n                <button type=\"submit\" class=\"w-full py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl transition\">\n                    Generate Keys\n                </button>\n            </form>\n        </div>\n    </div>\n\n    <!-- MODAL: RESULT KEYS -->\n    <div id=\"resultModal\" class=\"hidden fixed inset-0 z-50 flex items-center justify-center bg-dark-900/80 backdrop-blur-sm p-4\">\n        <div class=\"glass w-full max-w-lg p-6 rounded-2xl shadow-2xl border border-slate-700 space-y-4\">\n            <div class=\"flex items-center justify-between pb-2 border-b border-slate-800\">\n                <h3 class=\"text-lg font-bold text-emerald-400\"><i class=\"fa-solid fa-circle-check mr-2\"></i>Keys Generated</h3>\n                <button onclick=\"closeModal('resultModal')\" class=\"text-slate-400 hover:text-white\"><i class=\"fa-solid fa-xmark\"></i></button>\n            </div>\n            <textarea id=\"resultKeys\" readonly rows=\"6\" class=\"w-full p-3 bg-dark-800 border border-slate-700 rounded-xl font-mono text-xs text-slate-200 focus:outline-none\"></textarea>\n            <div class=\"flex justify-end space-x-3\">\n                <button onclick=\"copyGeneratedKeys()\" class=\"px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition\">\n                    <i class=\"fa-regular fa-copy mr-1.5\"></i> Copy All\n                </button>\n                <button onclick=\"closeModal('resultModal')\" class=\"px-4 py-2 glass rounded-xl text-sm text-slate-300\">Done</button>\n            </div>\n        </div>\n    </div>\n\n    <script>\n        let allLicenses = [];\n\n        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }\n        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }\n\n        async function api(path, opts = {}) {\n            opts.headers = opts.headers || {};\n            opts.headers['Content-Type'] = 'application/json';\n            const res = await fetch(path, opts);\n            if (res.status === 401) {\n                // Not authorized -> redirect back to larpifyy.asia\n                window.location.href = 'https://larpifyy.asia/';\n                return { success: false };\n            }\n            return res.json();\n        }\n\n        async function loadDashboard() {\n            const data = await api('/api/admin/overview');\n            if (!data || !data.success) return;\n\n            if (data.user) {\n                document.getElementById('adminUsername').textContent = data.user.username;\n                if (data.user.avatar) {\n                    document.getElementById('adminAvatar').src = data.user.avatar;\n                }\n            }\n\n            allLicenses = data.licenses || [];\n            renderLicenses(allLicenses);\n            renderLogs(data.logs || []);\n\n            document.getElementById('statTotal').textContent = data.stats.total;\n            document.getElementById('statActive').textContent = data.stats.active;\n            document.getElementById('statBanned').textContent = data.stats.banned;\n        }\n\n        function renderLicenses(licenses) {\n            const tbody = document.getElementById('licenseTableBody');\n            tbody.innerHTML = '';\n            licenses.forEach(lic => {\n                const tr = document.createElement('tr');\n                tr.className = 'hover:bg-dark-800/40 transition';\n\n                const isLocked = lic.hwid ? true : false;\n                const hwidBadge = isLocked \n                    ? `<span class=\"px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20\" title=\"${lic.hwid}\">LOCKED (${lic.hwid.substring(0, 10)}...)</span>`\n                    : `<span class=\"px-2 py-0.5 rounded bg-slate-700/50 text-slate-400\">UNBOUND</span>`;\n\n                let statusBadge = '';\n                if (lic.status === 'banned') statusBadge = '<span class=\"px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold\">BANNED</span>';\n                else if (lic.expires_at && lic.expires_at < Date.now()) statusBadge = '<span class=\"px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20\">EXPIRED</span>';\n                else statusBadge = '<span class=\"px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20\">ACTIVE</span>';\n\n                let expiresStr = 'Not Activated';\n                if (lic.duration_days === 0) expiresStr = 'Lifetime';\n                else if (lic.expires_at) expiresStr = new Date(lic.expires_at).toLocaleDateString();\n\n                tr.innerHTML = `\n                    <td class=\"py-3 px-4 font-bold text-slate-200 select-all\">${lic.key}</td>\n                    <td class=\"py-3 px-4 text-slate-400 font-sans\">${lic.duration_days === 0 ? 'Lifetime' : lic.duration_days + ' Days'}</td>\n                    <td class=\"py-3 px-4\">${hwidBadge}</td>\n                    <td class=\"py-3 px-4 text-slate-400 font-sans\">${expiresStr}</td>\n                    <td class=\"py-3 px-4 font-sans\">${statusBadge}</td>\n                    <td class=\"py-3 px-4 text-slate-400 font-sans\">${lic.note || '-'}</td>\n                    <td class=\"py-3 px-4 text-right space-x-1.5 font-sans\">\n                        ${isLocked ? `<button onclick=\"resetHwid('${lic.key}')\" class=\"px-2 py-1 glass hover:bg-slate-700 text-xs rounded-lg text-indigo-400\" title=\"Reset HWID\"><i class=\"fa-solid fa-arrows-rotate\"></i></button>` : ''}\n                        <button onclick=\"toggleBan('${lic.key}', '${lic.status}')\" class=\"px-2 py-1 glass hover:bg-slate-700 text-xs rounded-lg ${lic.status === 'banned' ? 'text-emerald-400' : 'text-amber-400'}\" title=\"${lic.status === 'banned' ? 'Unban' : 'Ban'}\">\n                            <i class=\"fa-solid ${lic.status === 'banned' ? 'fa-unlock' : 'fa-ban'}\"></i>\n                        </button>\n                        <button onclick=\"deleteKey('${lic.key}')\" class=\"px-2 py-1 glass hover:bg-rose-950/40 text-xs rounded-lg text-rose-400\" title=\"Delete\"><i class=\"fa-solid fa-trash\"></i></button>\n                    </td>\n                `;\n                tbody.appendChild(tr);\n            });\n        }\n\n        function renderLogs(logs) {\n            const tbody = document.getElementById('logsTableBody');\n            tbody.innerHTML = '';\n            logs.forEach(l => {\n                const tr = document.createElement('tr');\n                const isFail = l.event.includes('FAIL') || l.event.includes('MISMATCH') || l.event.includes('BAN') || l.event.includes('BLOCKED');\n                tr.innerHTML = `\n                    <td class=\"py-2.5 px-4 text-slate-400 font-sans\">${new Date(l.timestamp).toLocaleString()}</td>\n                    <td class=\"py-2.5 px-4\"><span class=\"${isFail ? 'text-rose-400' : 'text-emerald-400'} font-bold\">${l.event}</span></td>\n                    <td class=\"py-2.5 px-4 text-slate-400\">${l.ip || '-'}</td>\n                    <td class=\"py-2.5 px-4 text-slate-300\">${l.key || '-'}</td>\n                    <td class=\"py-2.5 px-4 text-slate-400 font-sans\">${l.details || ''}</td>\n                `;\n                tbody.appendChild(tr);\n            });\n        }\n\n        function filterLicenses() {\n            const q = document.getElementById('searchInput').value.toLowerCase();\n            const filtered = allLicenses.filter(l => \n                l.key.toLowerCase().includes(q) || \n                (l.hwid && l.hwid.toLowerCase().includes(q)) || \n                (l.note && l.note.toLowerCase().includes(q))\n            );\n            renderLicenses(filtered);\n        }\n\n        function switchTab(t) {\n            if (t === 'keys') {\n                document.getElementById('tabKeys').classList.remove('hidden');\n                document.getElementById('tabLogs').classList.add('hidden');\n                document.getElementById('tabBtnKeys').className = 'px-4 py-2 rounded-xl text-sm font-semibold bg-brand-600 text-white transition';\n                document.getElementById('tabBtnLogs').className = 'px-4 py-2 rounded-xl text-sm font-semibold glass text-slate-400 hover:text-white transition';\n            } else {\n                document.getElementById('tabKeys').classList.add('hidden');\n                document.getElementById('tabLogs').classList.remove('hidden');\n                document.getElementById('tabBtnLogs').className = 'px-4 py-2 rounded-xl text-sm font-semibold bg-brand-600 text-white transition';\n                document.getElementById('tabBtnKeys').className = 'px-4 py-2 rounded-xl text-sm font-semibold glass text-slate-400 hover:text-white transition';\n            }\n        }\n\n        // Actions\n        async function resetHwid(key) {\n            if (!confirm(`Reset HWID for key ${key}? User can link a new PC.`)) return;\n            await api('/api/admin/reset-hwid', { method: 'POST', body: JSON.stringify({ key }) });\n            loadDashboard();\n        }\n\n        async function toggleBan(key, currentStatus) {\n            const newStatus = currentStatus === 'banned' ? 'active' : 'banned';\n            await api('/api/admin/set-status', { method: 'POST', body: JSON.stringify({ key, status: newStatus }) });\n            loadDashboard();\n        }\n\n        async function deleteKey(key) {\n            if (!confirm(`Permanently delete key ${key}?`)) return;\n            await api('/api/admin/delete-key', { method: 'POST', body: JSON.stringify({ key }) });\n            loadDashboard();\n        }\n\n        document.getElementById('genForm').onsubmit = async (e) => {\n            e.preventDefault();\n            const duration = parseInt(document.getElementById('genDuration').value);\n            const prefix = document.getElementById('genPrefix').value;\n            const count = parseInt(document.getElementById('genCount').value);\n            const note = document.getElementById('genNote').value;\n\n            const res = await api('/api/admin/generate-keys', {\n                method: 'POST',\n                body: JSON.stringify({ duration_days: duration, prefix, count, note })\n            });\n\n            if (res && res.success) {\n                closeModal('generateModal');\n                document.getElementById('resultKeys').value = res.keys.join('\\n');\n                openModal('resultModal');\n                loadDashboard();\n            }\n        };\n\n        function copyGeneratedKeys() {\n            const ta = document.getElementById('resultKeys');\n            ta.select();\n            navigator.clipboard.writeText(ta.value);\n            alert('Copied keys to clipboard!');\n        }\n\n        // Load dashboard on startup\n        window.addEventListener('DOMContentLoaded', loadDashboard);\n    </script>\n</body>\n</html>\n";
+export const ADMIN_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background-color: #09090b; color: #f4f4f5; }
+        .font-mono { font-family: 'Geist Mono', monospace; }
+        .border-subtle { border-color: #27272a; }
+        .bg-card { background-color: #0c0c0e; }
+        .bg-hover:hover { background-color: #141417; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-neutral-800 selection:text-white">
+
+    <!-- TOP HEADER -->
+    <header class="border-b border-subtle bg-[#09090b] sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="font-semibold tracking-tight text-sm text-neutral-100">Authentication</span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 pl-2 pr-3 py-1 bg-neutral-900 border border-subtle rounded-full text-xs text-neutral-400">
+                    <img id="adminAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-4 h-4 rounded-full">
+                    <span id="adminUsername" class="text-neutral-200 font-medium">Owner</span>
+                </div>
+
+                <button onclick="openModal('generateModal')" class="h-8 px-3.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    <span>Create Key</span>
+                </button>
+
+                <a href="/api/admin/logout" class="h-8 w-8 flex items-center justify-center text-neutral-400 hover:text-neutral-100 hover:bg-neutral-900 border border-transparent hover:border-subtle rounded-lg transition" title="Log out">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-6xl mx-auto w-full px-6 py-8 flex-1 space-y-6">
+
+        <!-- METRICS ROW (3 Cards: Total, Active, Banned) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="bg-card border border-subtle rounded-xl p-4">
+                <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Total Licenses</div>
+                <div id="statTotal" class="text-2xl font-bold font-mono tracking-tight text-neutral-100">0</div>
+            </div>
+            <div class="bg-card border border-subtle rounded-xl p-4">
+                <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Active Subscriptions</div>
+                <div id="statActive" class="text-2xl font-bold font-mono tracking-tight text-emerald-400">0</div>
+            </div>
+            <div class="bg-card border border-subtle rounded-xl p-4">
+                <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Banned Users</div>
+                <div id="statBanned" class="text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
+            </div>
+        </div>
+
+        <!-- CONTROLS & FILTER BAR -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <!-- TABS -->
+            <div class="inline-flex p-1 bg-neutral-900 border border-subtle rounded-lg self-start">
+                <button onclick="switchTab('keys')" id="tabBtnKeys" class="px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition">
+                    Licenses
+                </button>
+                <button onclick="switchTab('logs')" id="tabBtnLogs" class="px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition">
+                    Audit Logs
+                </button>
+            </div>
+
+            <!-- SEARCH -->
+            <div class="relative w-full sm:w-64">
+                <svg class="w-3.5 h-3.5 absolute left-3 top-2.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="searchInput" oninput="filterLicenses()" placeholder="Search key, HWID, note..."
+                    class="w-full h-8 pl-8 pr-3 bg-neutral-900 border border-subtle rounded-lg text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition">
+            </div>
+        </div>
+
+        <!-- TAB 1: LICENSES TABLE -->
+        <div id="tabKeys" class="bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            <th class="py-3 px-4">License Key</th>
+                            <th class="py-3 px-4">Duration</th>
+                            <th class="py-3 px-4">HWID</th>
+                            <th class="py-3 px-4">Expires</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Note</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="licenseTableBody" class="divide-y divide-neutral-900 font-mono">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: AUDIT LOGS -->
+        <div id="tabLogs" class="hidden bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            <th class="py-3 px-4">Timestamp</th>
+                            <th class="py-3 px-4">Event</th>
+                            <th class="py-3 px-4">IP</th>
+                            <th class="py-3 px-4">Key</th>
+                            <th class="py-3 px-4">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody" class="divide-y divide-neutral-900 font-mono">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: GENERATE KEYS -->
+    <div id="generateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-card w-full max-w-md p-5 rounded-xl border border-subtle shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-subtle">
+                <h3 class="text-sm font-semibold text-neutral-100">Create Licenses</h3>
+                <button onclick="closeModal('generateModal')" class="text-neutral-500 hover:text-neutral-300">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="genForm" class="space-y-3.5">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">Duration</label>
+                        <select id="genDuration" class="w-full h-9 px-3 bg-neutral-900 border border-subtle rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-neutral-500">
+                            <option value="1">1 Day</option>
+                            <option value="3">3 Days</option>
+                            <option value="7" selected>7 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="90">90 Days</option>
+                            <option value="0">Lifetime</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">Prefix</label>
+                        <input type="text" id="genPrefix" value="VIP" maxlength="6"
+                            class="w-full h-9 px-3 bg-neutral-900 border border-subtle rounded-lg text-xs font-mono uppercase text-neutral-200 focus:outline-none focus:border-neutral-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">Quantity</label>
+                        <input type="number" id="genCount" value="1" min="1" max="50"
+                            class="w-full h-9 px-3 bg-neutral-900 border border-subtle rounded-lg text-xs font-mono text-neutral-200 focus:outline-none focus:border-neutral-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">Note (Optional)</label>
+                        <input type="text" id="genNote" placeholder="e.g. buyer tag"
+                            class="w-full h-9 px-3 bg-neutral-900 border border-subtle rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-neutral-500">
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full h-9 bg-white hover:bg-neutral-200 text-black font-semibold rounded-lg text-xs transition duration-150 shadow-sm">
+                        Generate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: RESULT KEYS -->
+    <div id="resultModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-card w-full max-w-md p-5 rounded-xl border border-subtle shadow-2xl space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-subtle">
+                <h3 class="text-xs font-semibold text-emerald-400 flex items-center space-x-1.5">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span>Keys Created</span>
+                </h3>
+                <button onclick="closeModal('resultModal')" class="text-neutral-500 hover:text-neutral-300">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <textarea id="resultKeys" readonly rows="5" class="w-full p-2.5 bg-neutral-900 border border-subtle rounded-lg font-mono text-xs text-neutral-200 focus:outline-none select-all"></textarea>
+            <div class="flex justify-end space-x-2 pt-1">
+                <button onclick="copyGeneratedKeys()" class="h-8 px-3 bg-neutral-100 hover:bg-white text-black font-semibold rounded-lg text-xs transition">
+                    Copy All
+                </button>
+                <button onclick="closeModal('resultModal')" class="h-8 px-3 border border-subtle hover:bg-neutral-900 text-neutral-300 rounded-lg text-xs transition">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allLicenses = [];
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        async function api(path, opts = {}) {
+            opts.headers = opts.headers || {};
+            opts.headers['Content-Type'] = 'application/json';
+            const res = await fetch(path, opts);
+            if (res.status === 401) {
+                window.location.href = 'https://larpifyy.asia/';
+                return { success: false };
+            }
+            return res.json();
+        }
+
+        async function loadDashboard() {
+            const data = await api('/api/admin/overview');
+            if (!data || !data.success) return;
+
+            if (data.user) {
+                document.getElementById('adminUsername').textContent = data.user.username;
+                if (data.user.avatar) {
+                    document.getElementById('adminAvatar').src = data.user.avatar;
+                }
+            }
+
+            allLicenses = data.licenses || [];
+            renderLicenses(allLicenses);
+            renderLogs(data.logs || []);
+
+            document.getElementById('statTotal').textContent = data.stats.total;
+            document.getElementById('statActive').textContent = data.stats.active;
+            document.getElementById('statBanned').textContent = data.stats.banned;
+        }
+
+        function renderLicenses(licenses) {
+            const tbody = document.getElementById('licenseTableBody');
+            tbody.innerHTML = '';
+            licenses.forEach(lic => {
+                const tr = document.createElement('tr');
+                tr.className = 'bg-hover transition duration-100';
+
+                const isLocked = !!lic.hwid;
+                const hwidCell = isLocked 
+                    ? \`<span class="text-neutral-400 select-all" title="\${lic.hwid}">\${lic.hwid.substring(0, 8)}...</span>\`
+                    : \`<span class="text-neutral-600">Unbound</span>\`;
+
+                let statusBadge = '';
+                if (lic.status === 'banned') statusBadge = '<span class="inline-flex items-center text-rose-400 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span>Banned</span>';
+                else if (lic.expires_at && lic.expires_at < Date.now()) statusBadge = '<span class="inline-flex items-center text-amber-400 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>Expired</span>';
+                else statusBadge = '<span class="inline-flex items-center text-emerald-400 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Active</span>';
+
+                let expiresStr = 'Not Activated';
+                if (lic.duration_days === 0) expiresStr = 'Lifetime';
+                else if (lic.expires_at) expiresStr = new Date(lic.expires_at).toLocaleDateString();
+
+                tr.innerHTML = \`
+                    <td class="py-2.5 px-4 font-semibold text-neutral-200 select-all tracking-tight">\${lic.key}</td>
+                    <td class="py-2.5 px-4 text-neutral-400 font-sans">\${lic.duration_days === 0 ? 'Lifetime' : lic.duration_days + 'd'}</td>
+                    <td class="py-2.5 px-4">\${hwidCell}</td>
+                    <td class="py-2.5 px-4 text-neutral-400 font-sans">\${expiresStr}</td>
+                    <td class="py-2.5 px-4">\${statusBadge}</td>
+                    <td class="py-2.5 px-4 text-neutral-500 font-sans">\${lic.note || '-'}</td>
+                    <td class="py-2.5 px-4 text-right space-x-1 font-sans">
+                        \${isLocked ? \`<button onclick="resetHwid('\${lic.key}')" class="px-2 py-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-neutral-200 transition" title="Reset HWID"><svg class="w-3.5 h-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 21v-5h5"/></svg></button>\` : ''}
+                        <button onclick="toggleBan('\${lic.key}', '\${lic.status}')" class="px-2 py-1 hover:bg-neutral-800 rounded \${lic.status === 'banned' ? 'text-emerald-400' : 'text-neutral-400 hover:text-amber-400'} transition" title="\${lic.status === 'banned' ? 'Unban' : 'Ban'}">
+                            <svg class="w-3.5 h-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+                        </button>
+                        <button onclick="deleteKey('\${lic.key}')" class="px-2 py-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-rose-400 transition" title="Delete">
+                            <svg class="w-3.5 h-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </td>
+                \`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById('logsTableBody');
+            tbody.innerHTML = '';
+            logs.forEach(l => {
+                const tr = document.createElement('tr');
+                tr.className = 'bg-hover transition duration-100';
+                const isFail = l.event.includes('FAIL') || l.event.includes('MISMATCH') || l.event.includes('BAN') || l.event.includes('BLOCKED');
+                tr.innerHTML = \`
+                    <td class="py-2.5 px-4 text-neutral-500 font-sans">\${new Date(l.timestamp).toLocaleTimeString()}</td>
+                    <td class="py-2.5 px-4 font-medium \${isFail ? 'text-rose-400' : 'text-emerald-400'}">\${l.event}</td>
+                    <td class="py-2.5 px-4 text-neutral-500">\${l.ip || '-'}</td>
+                    <td class="py-2.5 px-4 text-neutral-300">\${l.key || '-'}</td>
+                    <td class="py-2.5 px-4 text-neutral-500 font-sans">\${l.details || ''}</td>
+                \`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterLicenses() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allLicenses.filter(l => 
+                l.key.toLowerCase().includes(q) || 
+                (l.hwid && l.hwid.toLowerCase().includes(q)) || 
+                (l.note && l.note.toLowerCase().includes(q))
+            );
+            renderLicenses(filtered);
+        }
+
+        function switchTab(t) {
+            if (t === 'keys') {
+                document.getElementById('tabKeys').classList.remove('hidden');
+                document.getElementById('tabLogs').classList.add('hidden');
+                document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition';
+                document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
+            } else {
+                document.getElementById('tabKeys').classList.add('hidden');
+                document.getElementById('tabLogs').classList.remove('hidden');
+                document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition';
+                document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
+            }
+        }
+
+        async function resetHwid(key) {
+            if (!confirm(\`Reset HWID for key \${key}?\`)) return;
+            await api('/api/admin/reset-hwid', { method: 'POST', body: JSON.stringify({ key }) });
+            loadDashboard();
+        }
+
+        async function toggleBan(key, currentStatus) {
+            const newStatus = currentStatus === 'banned' ? 'active' : 'banned';
+            await api('/api/admin/set-status', { method: 'POST', body: JSON.stringify({ key, status: newStatus }) });
+            loadDashboard();
+        }
+
+        async function deleteKey(key) {
+            if (!confirm(\`Delete key \${key}?\`)) return;
+            await api('/api/admin/delete-key', { method: 'POST', body: JSON.stringify({ key }) });
+            loadDashboard();
+        }
+
+        document.getElementById('genForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const duration = parseInt(document.getElementById('genDuration').value);
+            const prefix = document.getElementById('genPrefix').value;
+            const count = parseInt(document.getElementById('genCount').value);
+            const note = document.getElementById('genNote').value;
+
+            const res = await api('/api/admin/generate-keys', {
+                method: 'POST',
+                body: JSON.stringify({ duration_days: duration, prefix, count, note })
+            });
+
+            if (res && res.success) {
+                closeModal('generateModal');
+                document.getElementById('resultKeys').value = res.keys.join('\\n');
+                openModal('resultModal');
+                loadDashboard();
+            }
+        };
+
+        function copyGeneratedKeys() {
+            const ta = document.getElementById('resultKeys');
+            ta.select();
+            navigator.clipboard.writeText(ta.value);
+        }
+
+        window.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>
+`;
