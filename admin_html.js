@@ -12,35 +12,61 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         .border-subtle { border-color: #27272a; }
         .bg-card { background-color: #0c0c0e; }
         .bg-hover:hover { background-color: #141417; }
+        
+        /* Smooth Mobile & Desktop Scrollbars */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0c0c0e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 9999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-neutral-800 selection:text-white">
 
     <!-- TOP HEADER -->
-    <header class="border-b border-subtle bg-[#09090b] sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="font-semibold tracking-tight text-sm text-neutral-100">Authentication</span>
+    <header class="border-b border-subtle bg-[#09090b]/95 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2 shrink-0">
+                <span class="font-bold tracking-tight text-sm text-neutral-100">Authentication</span>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <div class="flex items-center space-x-2 pl-2 pr-3 py-1 bg-neutral-900 border border-subtle rounded-full text-xs text-neutral-400">
+            <div class="flex items-center space-x-1.5 sm:space-x-2.5">
+                <!-- USER BADGE -->
+                <div class="hidden xs:flex sm:flex items-center space-x-1.5 pl-1.5 pr-2.5 py-1 bg-neutral-900 border border-subtle rounded-full text-xs text-neutral-400">
                     <img id="adminAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" class="w-4 h-4 rounded-full">
-                    <span id="adminUsername" class="text-neutral-200 font-medium">Owner</span>
+                    <span id="adminUsername" class="text-neutral-200 font-medium text-[11px] max-w-[65px] sm:max-w-none truncate">Owner</span>
                 </div>
 
                 <!-- LOADER KILL SWITCH BUTTON -->
-                <button id="loaderToggleBtn" onclick="toggleLoaderState()" class="h-8 px-3.5 bg-neutral-900 text-neutral-300 border border-subtle text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm">
-                    <span id="loaderDot" class="w-2 h-2 rounded-full bg-neutral-500"></span>
+                <button id="loaderToggleBtn" onclick="toggleLoaderState()" class="h-8 px-2.5 sm:px-3.5 bg-neutral-900 text-neutral-300 border border-subtle text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm whitespace-nowrap">
+                    <span id="loaderDot" class="w-2 h-2 rounded-full bg-neutral-500 shrink-0"></span>
                     <span id="loaderBtnText">...</span>
                 </button>
 
-                <button onclick="openModal('generateModal')" class="h-8 px-3.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm">
+                <!-- CREATE KEY BUTTON -->
+                <button onclick="openModal('generateModal')" class="h-8 px-2.5 sm:px-3.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1 sm:space-x-1.5 shadow-sm whitespace-nowrap shrink-0">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-                    <span>Create Key</span>
+                    <span>Create<span class="hidden sm:inline"> Key</span></span>
                 </button>
 
-                <a href="/api/admin/logout" class="h-8 w-8 flex items-center justify-center text-neutral-400 hover:text-neutral-100 hover:bg-neutral-900 border border-transparent hover:border-subtle rounded-lg transition" title="Log out">
+                <!-- LOGOUT -->
+                <a href="/api/admin/logout" class="h-8 w-8 shrink-0 flex items-center justify-center text-neutral-400 hover:text-neutral-100 hover:bg-neutral-900 border border-transparent hover:border-subtle rounded-lg transition" title="Log out">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 </a>
             </div>
@@ -48,54 +74,54 @@ export const ADMIN_HTML = `<!DOCTYPE html>
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="max-w-6xl mx-auto w-full px-6 py-8 flex-1 space-y-6">
+    <main class="max-w-6xl mx-auto w-full px-3.5 sm:px-6 py-4 sm:py-8 flex-1 space-y-4 sm:space-y-6">
 
         <!-- DISABLED BANNER -->
-        <div id="disabledBanner" class="hidden p-3.5 bg-rose-950/50 border border-rose-900/70 rounded-xl text-xs text-rose-300 flex items-center justify-between shadow-lg">
-            <div class="flex items-center space-x-2.5 flex-wrap gap-y-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
-                <span><strong class="font-semibold text-rose-200 uppercase tracking-wider text-[11px]">Loaders Globally Disabled:</strong> <span id="currentDisableReasonText" class="text-rose-100 font-mono"></span></span>
-                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-semibold uppercase tracking-wider">Time Paused: Keys Won't Lose Time ⏸</span>
+        <div id="disabledBanner" class="hidden p-3 sm:p-3.5 bg-rose-950/50 border border-rose-900/70 rounded-xl text-xs text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-lg">
+            <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0 shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
+                <span><strong class="font-semibold text-rose-200 uppercase tracking-wider text-[11px]">Loaders Globally Disabled:</strong> <span id="currentDisableReasonText" class="text-rose-100 font-mono text-[11px]"></span></span>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap">Time Paused ⏸</span>
             </div>
-            <button onclick="toggleLoaderState()" class="px-2.5 py-1 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/80 rounded text-[11px] font-semibold transition whitespace-nowrap">
+            <button onclick="toggleLoaderState()" class="w-full sm:w-auto px-3 py-1.5 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/80 rounded-lg text-xs font-semibold transition text-center whitespace-nowrap">
                 Re-Enable Now
             </button>
         </div>
 
-        <!-- METRICS ROW (4 Cards: Total, Active, Banned, Cracking Attempts) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="bg-card border border-subtle rounded-xl p-4">
-                <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Total Licenses</div>
-                <div id="statTotal" class="text-2xl font-bold font-mono tracking-tight text-neutral-100">0</div>
+        <!-- METRICS ROW (Mobile: 2x2 Clean Grid, Desktop: 4 Cards) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            <div class="bg-card border border-subtle rounded-xl p-3 sm:p-4 flex flex-col justify-between">
+                <div class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-0.5 sm:mb-1 truncate">Total Licenses</div>
+                <div id="statTotal" class="text-xl sm:text-2xl font-bold font-mono tracking-tight text-neutral-100">0</div>
             </div>
-            <div class="bg-card border border-subtle rounded-xl p-4">
-                <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Active Subscriptions</div>
-                <div id="statActive" class="text-2xl font-bold font-mono tracking-tight text-emerald-400">0</div>
+            <div class="bg-card border border-subtle rounded-xl p-3 sm:p-4 flex flex-col justify-between">
+                <div class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-0.5 sm:mb-1 truncate">Active Subs</div>
+                <div id="statActive" class="text-xl sm:text-2xl font-bold font-mono tracking-tight text-emerald-400">0</div>
             </div>
-            <div class="bg-card border border-subtle rounded-xl p-4">
-                <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Banned Users</div>
-                <div id="statBanned" class="text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
+            <div class="bg-card border border-subtle rounded-xl p-3 sm:p-4 flex flex-col justify-between">
+                <div class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-0.5 sm:mb-1 truncate">Banned Users</div>
+                <div id="statBanned" class="text-xl sm:text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
             </div>
-            <div class="bg-card border border-subtle rounded-xl p-4">
-                <div class="text-[11px] font-medium uppercase tracking-wider text-rose-400 mb-1 flex items-center justify-between">
-                    <span>Cracking Attempts</span>
-                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            <div class="bg-card border border-subtle rounded-xl p-3 sm:p-4 flex flex-col justify-between">
+                <div class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-rose-400 mb-0.5 sm:mb-1 flex items-center justify-between">
+                    <span class="truncate">Cracking Logs</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
                 </div>
-                <div id="statCracks" class="text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
+                <div id="statCracks" class="text-xl sm:text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
             </div>
         </div>
 
         <!-- CONTROLS & FILTER BAR -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <!-- TABS -->
-            <div class="inline-flex p-1 bg-neutral-900 border border-subtle rounded-lg self-start">
-                <button onclick="switchTab('keys')" id="tabBtnKeys" class="px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition">
+            <div class="flex items-center space-x-1 p-1 bg-neutral-900 border border-subtle rounded-lg overflow-x-auto w-full sm:w-auto scrollbar-none">
+                <button onclick="switchTab('keys')" id="tabBtnKeys" class="px-3 py-1.5 rounded-md text-xs font-medium bg-neutral-800 text-white transition whitespace-nowrap flex-1 sm:flex-none text-center">
                     Licenses
                 </button>
-                <button onclick="switchTab('logs')" id="tabBtnLogs" class="px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition">
+                <button onclick="switchTab('logs')" id="tabBtnLogs" class="px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition whitespace-nowrap flex-1 sm:flex-none text-center">
                     Audit Logs
                 </button>
-                <button onclick="switchTab('threats')" id="tabBtnThreats" class="px-3 py-1 rounded-md text-xs font-medium text-rose-400/80 hover:text-rose-300 transition flex items-center space-x-1.5">
+                <button onclick="switchTab('threats')" id="tabBtnThreats" class="px-3 py-1.5 rounded-md text-xs font-medium text-rose-400/80 hover:text-rose-300 transition whitespace-nowrap flex items-center justify-center space-x-1.5 flex-1 sm:flex-none text-center">
                     <span>Cracking Attempts</span>
                     <span id="threatCountBadge" class="hidden px-1.5 py-0.2 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded-full text-[10px] font-bold">0</span>
                 </button>
@@ -111,17 +137,17 @@ export const ADMIN_HTML = `<!DOCTYPE html>
 
         <!-- TAB 1: LICENSES TABLE -->
         <div id="tabKeys" class="bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs min-w-[620px]">
                     <thead>
-                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
-                            <th class="py-3 px-4">License Key</th>
-                            <th class="py-3 px-4">Duration</th>
-                            <th class="py-3 px-4">HWID</th>
-                            <th class="py-3 px-4">Expires</th>
-                            <th class="py-3 px-4">Status</th>
-                            <th class="py-3 px-4">Note</th>
-                            <th class="py-3 px-4 text-right">Actions</th>
+                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500 whitespace-nowrap">
+                            <th class="py-3 px-3.5 sm:px-4">License Key</th>
+                            <th class="py-3 px-3 sm:px-4">Duration</th>
+                            <th class="py-3 px-3 sm:px-4">HWID</th>
+                            <th class="py-3 px-3 sm:px-4">Expires</th>
+                            <th class="py-3 px-3 sm:px-4">Status</th>
+                            <th class="py-3 px-3 sm:px-4">Note</th>
+                            <th class="py-3 px-3.5 sm:px-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="licenseTableBody" class="divide-y divide-neutral-900 font-mono">
@@ -133,15 +159,15 @@ export const ADMIN_HTML = `<!DOCTYPE html>
 
         <!-- TAB 2: AUDIT LOGS -->
         <div id="tabLogs" class="hidden bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs min-w-[580px]">
                     <thead>
-                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
-                            <th class="py-3 px-4">Timestamp</th>
-                            <th class="py-3 px-4">Event</th>
-                            <th class="py-3 px-4">IP</th>
-                            <th class="py-3 px-4">Key</th>
-                            <th class="py-3 px-4">Details</th>
+                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500 whitespace-nowrap">
+                            <th class="py-3 px-3.5 sm:px-4">Timestamp</th>
+                            <th class="py-3 px-3 sm:px-4">Event</th>
+                            <th class="py-3 px-3 sm:px-4">IP</th>
+                            <th class="py-3 px-3 sm:px-4">Key</th>
+                            <th class="py-3 px-3.5 sm:px-4">Details</th>
                         </tr>
                     </thead>
                     <tbody id="logsTableBody" class="divide-y divide-neutral-900 font-mono">
@@ -153,7 +179,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
 
         <!-- TAB 3: CRACKING ATTEMPTS -->
         <div id="tabThreats" class="hidden bg-card border border-rose-950/40 rounded-xl overflow-hidden shadow-sm">
-            <div class="px-4 py-3 bg-rose-950/20 border-b border-rose-900/30 flex items-center justify-between">
+            <div class="px-3.5 sm:px-4 py-3 bg-rose-950/20 border-b border-rose-900/30 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <span class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse"></span>
                     <span class="text-xs font-semibold text-rose-300 uppercase tracking-wider">Live Security & Integrity Incidents</span>
@@ -162,17 +188,17 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     Clear Log Feed
                 </button>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs min-w-[680px]">
                     <thead>
-                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
-                            <th class="py-3 px-4">Time</th>
-                            <th class="py-3 px-4">Threat / Violation</th>
-                            <th class="py-3 px-4">Offender IP</th>
-                            <th class="py-3 px-4">Offending Tool / App</th>
-                            <th class="py-3 px-4">Associated Key</th>
-                            <th class="py-3 px-4">Target Details</th>
-                            <th class="py-3 px-4 text-right">Actions</th>
+                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500 whitespace-nowrap">
+                            <th class="py-3 px-3.5 sm:px-4">Time</th>
+                            <th class="py-3 px-3 sm:px-4">Threat / Violation</th>
+                            <th class="py-3 px-3 sm:px-4">Offender IP</th>
+                            <th class="py-3 px-3 sm:px-4">Offending Tool / App</th>
+                            <th class="py-3 px-3 sm:px-4">Associated Key</th>
+                            <th class="py-3 px-3 sm:px-4">Target Details</th>
+                            <th class="py-3 px-3.5 sm:px-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="threatsTableBody" class="divide-y divide-neutral-900 font-mono">
@@ -301,13 +327,13 @@ export const ADMIN_HTML = `<!DOCTYPE html>
             if (!btn || !dot || !text) return;
 
             if (gLoaderEnabled) {
-                btn.className = 'h-8 px-3.5 bg-neutral-900 hover:bg-rose-950/40 text-neutral-200 hover:text-rose-300 border border-subtle hover:border-rose-900/60 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm';
-                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]';
-                text.textContent = 'Disable Loader';
+                btn.className = 'h-8 px-2.5 sm:px-3.5 bg-neutral-900 hover:bg-rose-950/40 text-neutral-200 hover:text-rose-300 border border-subtle hover:border-rose-900/60 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm whitespace-nowrap';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)] shrink-0';
+                text.innerHTML = 'Disable<span class="hidden sm:inline"> Loader</span>';
             } else {
-                btn.className = 'h-8 px-3.5 bg-rose-950/60 hover:bg-emerald-950/50 text-rose-300 hover:text-emerald-300 border border-rose-800/80 hover:border-emerald-800/80 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm';
-                dot.className = 'w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] animate-pulse';
-                text.textContent = 'Enable Loader';
+                btn.className = 'h-8 px-2.5 sm:px-3.5 bg-rose-950/60 hover:bg-emerald-950/50 text-rose-300 hover:text-emerald-300 border border-rose-800/80 hover:border-emerald-800/80 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm whitespace-nowrap';
+                dot.className = 'w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] animate-pulse shrink-0';
+                text.innerHTML = 'Enable<span class="hidden sm:inline"> Loader</span>';
             }
         }
 
@@ -409,6 +435,23 @@ export const ADMIN_HTML = `<!DOCTYPE html>
             }
         }
 
+        function showToast(msg) {
+            let t = document.getElementById('toastNotice');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'toastNotice';
+                t.className = 'fixed bottom-4 right-4 z-50 px-3.5 py-2 bg-neutral-900 border border-neutral-700 text-neutral-100 text-xs rounded-lg shadow-2xl transition-opacity duration-200 pointer-events-none opacity-0 flex items-center space-x-2';
+                document.body.appendChild(t);
+            }
+            t.innerHTML = \`<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>\${msg}</span>\`;
+            t.classList.remove('opacity-0');
+            setTimeout(() => t.classList.add('opacity-0'), 2000);
+        }
+
+        function copyKey(key) {
+            navigator.clipboard.writeText(key).then(() => showToast('Key copied to clipboard!'));
+        }
+
         function renderLicenses(licenses) {
             const tbody = document.getElementById('licenseTableBody');
             tbody.innerHTML = '';
@@ -439,13 +482,20 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 }
 
                 tr.innerHTML = \`
-                    <td class="py-2.5 px-4 font-semibold text-neutral-200 select-all tracking-tight">\${lic.key}</td>
-                    <td class="py-2.5 px-4 text-neutral-400 font-sans">\${lic.duration_days === 0 ? 'Lifetime' : lic.duration_days + 'd'}</td>
-                    <td class="py-2.5 px-4">\${hwidCell}</td>
-                    <td class="py-2.5 px-4 text-neutral-400 font-sans">\${expiresStr}</td>
-                    <td class="py-2.5 px-4">\${statusBadge}</td>
-                    <td class="py-2.5 px-4 text-neutral-500 font-sans">\${lic.note || '-'}</td>
-                    <td class="py-2.5 px-4 text-right space-x-1 font-sans">
+                    <td class="py-2.5 px-3.5 sm:px-4 font-semibold text-neutral-200 select-all tracking-tight whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span>\${lic.key}</span>
+                            <button onclick="copyKey('\${lic.key}')" class="text-neutral-500 hover:text-neutral-200 transition p-0.5 rounded" title="Copy key">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            </button>
+                        </span>
+                    </td>
+                    <td class="py-2.5 px-3 sm:px-4 text-neutral-400 font-sans whitespace-nowrap">\${lic.duration_days === 0 ? 'Lifetime' : lic.duration_days + 'd'}</td>
+                    <td class="py-2.5 px-3 sm:px-4 whitespace-nowrap">\${hwidCell}</td>
+                    <td class="py-2.5 px-3 sm:px-4 text-neutral-400 font-sans whitespace-nowrap">\${expiresStr}</td>
+                    <td class="py-2.5 px-3 sm:px-4 whitespace-nowrap">\${statusBadge}</td>
+                    <td class="py-2.5 px-3 sm:px-4 text-neutral-500 font-sans whitespace-nowrap">\${lic.note || '-'}</td>
+                    <td class="py-2.5 px-3.5 sm:px-4 text-right space-x-1 font-sans whitespace-nowrap">
                         \${isLocked ? \`<button onclick="resetHwid('\${lic.key}')" class="px-2 py-1 hover:bg-neutral-800 rounded text-neutral-400 hover:text-neutral-200 transition" title="Reset HWID"><svg class="w-3.5 h-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 21v-5h5"/></svg></button>\` : ''}
                         <button onclick="toggleBan('\${lic.key}', '\${lic.status}')" class="px-2 py-1 hover:bg-neutral-800 rounded \${lic.status === 'banned' ? 'text-emerald-400' : 'text-neutral-400 hover:text-amber-400'} transition" title="\${lic.status === 'banned' ? 'Unban' : 'Ban'}">
                             <svg class="w-3.5 h-3.5 inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
@@ -523,19 +573,19 @@ export const ADMIN_HTML = `<!DOCTYPE html>
             document.getElementById('tabLogs').classList.add('hidden');
             document.getElementById('tabThreats').classList.add('hidden');
 
-            document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
-            document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
-            document.getElementById('tabBtnThreats').className = 'px-3 py-1 rounded-md text-xs font-medium text-rose-400/80 hover:text-rose-300 transition flex items-center space-x-1.5';
+            document.getElementById('tabBtnKeys').className = 'px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition whitespace-nowrap flex-1 sm:flex-none text-center';
+            document.getElementById('tabBtnLogs').className = 'px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition whitespace-nowrap flex-1 sm:flex-none text-center';
+            document.getElementById('tabBtnThreats').className = 'px-3 py-1.5 rounded-md text-xs font-medium text-rose-400/80 hover:text-rose-300 transition whitespace-nowrap flex items-center justify-center space-x-1.5 flex-1 sm:flex-none text-center';
 
             if (t === 'keys') {
                 document.getElementById('tabKeys').classList.remove('hidden');
-                document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition';
+                document.getElementById('tabBtnKeys').className = 'px-3 py-1.5 rounded-md text-xs font-medium bg-neutral-800 text-white transition whitespace-nowrap flex-1 sm:flex-none text-center';
             } else if (t === 'logs') {
                 document.getElementById('tabLogs').classList.remove('hidden');
-                document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition';
+                document.getElementById('tabBtnLogs').className = 'px-3 py-1.5 rounded-md text-xs font-medium bg-neutral-800 text-white transition whitespace-nowrap flex-1 sm:flex-none text-center';
             } else if (t === 'threats') {
                 document.getElementById('tabThreats').classList.remove('hidden');
-                document.getElementById('tabBtnThreats').className = 'px-3 py-1 rounded-md text-xs font-medium bg-rose-950/60 text-rose-200 border border-rose-800/60 transition flex items-center space-x-1.5';
+                document.getElementById('tabBtnThreats').className = 'px-3 py-1.5 rounded-md text-xs font-medium bg-rose-950/60 text-rose-200 border border-rose-800/60 transition whitespace-nowrap flex items-center justify-center space-x-1.5 flex-1 sm:flex-none text-center';
             }
         }
 
@@ -583,7 +633,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         function copyGeneratedKeys() {
             const ta = document.getElementById('resultKeys');
             ta.select();
-            navigator.clipboard.writeText(ta.value);
+            navigator.clipboard.writeText(ta.value).then(() => showToast('All keys copied!'));
         }
 
         window.addEventListener('DOMContentLoaded', loadDashboard);
