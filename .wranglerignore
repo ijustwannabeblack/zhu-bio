@@ -1,9 +1,13 @@
-node_modules/
-.wrangler/
-.git/
+.git
+.git/**
+.wrangler
+.wrangler/**
+node_modules
+node_modules/**
 package.json
 package-lock.json
 bun.lockb
 server.js
 README.MD
 LICENSE
+deploy.bat

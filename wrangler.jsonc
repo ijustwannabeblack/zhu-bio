@@ -7,10 +7,16 @@
   "assets": {
     "directory": "."
   },
+  "routes": [
+    {
+      "pattern": "larpifyy.asia",
+      "custom_domain": true
+    }
+  ],
   "kv_namespaces": [
     {
       "binding": "AUTH_KV",
-      "id": "AUTH_KV_ID"
+      "id": "438655b8873a42bdbc6cabed0fafe934"
     }
   ]
 }
