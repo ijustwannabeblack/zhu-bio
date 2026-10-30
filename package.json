@@ -1,17 +1,21 @@
 {
   "name": "gunslol-bio-profile",
   "version": "1.0.0",
-  "description": "Clean, authentic Guns.lol style personal bio profile page with Discord and Spotify presence integration",
-  "main": "server.js",
+  "description": "Clean, authentic Guns.lol style personal bio profile page with Discord and Spotify presence integration + AuthShield Private Licensing System",
+  "type": "module",
+  "main": "worker.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "keywords": [
     "gunslol",
     "bio-link",
     "discord-lanyard",
     "portfolio",
-    "profile"
+    "profile",
+    "authshield"
   ],
   "author": "zhu",
   "license": "MIT"

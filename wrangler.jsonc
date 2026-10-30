@@ -1,7 +1,16 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zhu-bio",
+  "main": "worker.js",
   "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "."
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "AUTH_KV",
+      "id": "AUTH_KV_ID"
+    }
+  ]
 }
