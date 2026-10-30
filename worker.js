@@ -106,7 +106,12 @@ async function getKv(env) {
 async function getLicense(env, key) {
     const kv = await getKv(env);
     if (kv) {
-        return (await kv.get('lic:' + key, 'json')) || null;
+        try {
+            return (await kv.get('lic:' + key, 'json')) || null;
+        } catch (e) {
+            console.error('Error parsing license for key:', key, e);
+            return null;
+        }
     }
     return memoryStore.licenses.get(key) || null;
 }
@@ -115,7 +120,12 @@ async function saveLicense(env, lic) {
     const kv = await getKv(env);
     if (kv) {
         await kv.put('lic:' + lic.key, JSON.stringify(lic));
-        let allKeys = (await kv.get('index:keys', 'json')) || [];
+        let allKeys = [];
+        try {
+            allKeys = (await kv.get('index:keys', 'json')) || [];
+        } catch (e) {
+            allKeys = [];
+        }
         if (!allKeys.includes(lic.key)) {
             allKeys.push(lic.key);
             await kv.put('index:keys', JSON.stringify(allKeys));
@@ -129,7 +139,12 @@ async function deleteLicense(env, key) {
     const kv = await getKv(env);
     if (kv) {
         await kv.delete('lic:' + key);
-        let allKeys = (await kv.get('index:keys', 'json')) || [];
+        let allKeys = [];
+        try {
+            allKeys = (await kv.get('index:keys', 'json')) || [];
+        } catch (e) {
+            allKeys = [];
+        }
         allKeys = allKeys.filter(k => k !== key);
         await kv.put('index:keys', JSON.stringify(allKeys));
         return;
@@ -140,11 +155,22 @@ async function deleteLicense(env, key) {
 async function getAllLicenses(env) {
     const kv = await getKv(env);
     if (kv) {
-        const allKeys = (await kv.get('index:keys', 'json')) || [];
+        let allKeys = [];
+        try {
+            allKeys = (await kv.get('index:keys', 'json')) || [];
+        } catch (e) {
+            allKeys = [];
+        }
         const results = [];
         for (const k of allKeys) {
-            const lic = await kv.get('lic:' + k, 'json');
-            if (lic) results.push(lic);
+            try {
+                const lic = await kv.get('lic:' + k, 'json');
+                if (lic && typeof lic === 'object' && lic.key) {
+                    results.push(lic);
+                }
+            } catch (e) {
+                console.warn('Skipping invalid license JSON for key:', k, e.message);
+            }
         }
         return results.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
     }
@@ -219,9 +245,135 @@ async function addAuditLog(env, event, ip, key, details) {
 async function getAuditLogs(env) {
     const kv = await getKv(env);
     if (kv) {
-        return (await kv.get('audit:logs', 'json')) || [];
+        try {
+            return (await kv.get('audit:logs', 'json')) || [];
+        } catch (e) {
+            console.error('Error parsing audit logs from KV:', e);
+            return [];
+        }
     }
     return memoryStore.logs;
+}
+
+async function isLoaderEnabled(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        try {
+            const val = await kv.get('config:loader_enabled');
+            if (val === null) return true;
+            return val === 'true';
+        } catch (e) {
+            return true;
+        }
+    }
+    return memoryStore.loaderEnabled !== false;
+}
+
+async function setLoaderEnabled(env, enabled) {
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put('config:loader_enabled', enabled ? 'true' : 'false');
+        return;
+    }
+    memoryStore.loaderEnabled = enabled;
+}
+
+async function getLoaderDisableReason(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        try {
+            return (await kv.get('config:loader_disable_reason')) || 'Updating for new game patch';
+        } catch (e) {
+            return 'Updating for new game patch';
+        }
+    }
+    return memoryStore.loaderDisableReason || 'Updating for new game patch';
+}
+
+async function setLoaderDisableReason(env, reason) {
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put('config:loader_disable_reason', reason || '');
+        return;
+    }
+    memoryStore.loaderDisableReason = reason || '';
+}
+
+async function getLoaderDisabledAt(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        try {
+            const val = await kv.get('config:loader_disabled_at');
+            return val ? parseInt(val) : 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+    return memoryStore.loaderDisabledAt || 0;
+}
+
+async function setLoaderDisabledAt(env, timestamp) {
+    const kv = await getKv(env);
+    if (kv) {
+        if (timestamp) {
+            await kv.put('config:loader_disabled_at', timestamp.toString());
+        } else {
+            await kv.delete('config:loader_disabled_at');
+        }
+        return;
+    }
+    memoryStore.loaderDisabledAt = timestamp || 0;
+}
+
+async function addCrackingAttempt(env, data) {
+    const logItem = {
+        id: getRandomHex(8),
+        timestamp: Date.now(),
+        threat_type: data.threat_type || 'Security Violation',
+        offending_app: data.offending_app || 'Unknown Tool',
+        ip: data.ip || '127.0.0.1',
+        key: data.key || null,
+        hwid: data.hwid || null,
+        details: data.details || ''
+    };
+    const kv = await getKv(env);
+    if (kv) {
+        let list = [];
+        try {
+            list = (await kv.get('cracking:attempts', 'json')) || [];
+        } catch (e) {
+            list = [];
+        }
+        list.unshift(logItem);
+        if (list.length > 200) list = list.slice(0, 200);
+        await kv.put('cracking:attempts', JSON.stringify(list));
+        return logItem;
+    }
+    if (!memoryStore.crackingAttempts) memoryStore.crackingAttempts = [];
+    memoryStore.crackingAttempts.unshift(logItem);
+    if (memoryStore.crackingAttempts.length > 200) memoryStore.crackingAttempts = memoryStore.crackingAttempts.slice(0, 200);
+    return logItem;
+}
+
+async function getCrackingAttempts(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        try {
+            return (await kv.get('cracking:attempts', 'json')) || [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return memoryStore.crackingAttempts || [];
+}
+
+async function clearCrackingAttempts(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put('cracking:attempts', JSON.stringify([]));
+        return;
+    }
+    memoryStore.crackingAttempts = [];
 }
 
 // -------------------------------------------------------------
@@ -377,10 +529,39 @@ export default {
         // -------------------------------------------------------------
         // 4. CLIENT API ENDPOINTS (Zero-Knowledge, Encrypted Payload)
         // -------------------------------------------------------------
+        if (path === '/api/v1/report-threat' && method === 'POST') {
+            try {
+                const body = await request.json();
+                await addCrackingAttempt(env, {
+                    threat_type: body.threat_type || body.reason || 'Client Security Violation',
+                    offending_app: body.offending_app || body.app || 'Unknown Tool',
+                    ip,
+                    key: body.key || null,
+                    hwid: body.hwid || null,
+                    details: body.details || ''
+                });
+                await addAuditLog(env, 'CRACKING_ATTEMPT', ip, body.key || '', `${body.threat_type || body.reason || 'Security Alert'} (Tool: ${body.offending_app || 'N/A'})`);
+                return jsonResponse({ success: true });
+            } catch (err) {
+                return jsonResponse({ success: false, message: err.message }, 500);
+            }
+        }
+
         if (path === '/api/v1/init' && method === 'POST') {
+            const enabled = await isLoaderEnabled(env);
+            if (!enabled) {
+                const reason = await getLoaderDisableReason(env);
+                return jsonResponse({
+                    success: false,
+                    loader_enabled: false,
+                    reason: reason,
+                    message: `Loader has been disabled\n\nReason: ${reason}`
+                });
+            }
             const nonce = getRandomHex(16);
             return jsonResponse({
                 success: true,
+                loader_enabled: true,
                 version: '2.0.0-cloudflare',
                 timestamp: Date.now(),
                 nonce
@@ -389,6 +570,17 @@ export default {
 
         if (path === '/api/v1/login' && method === 'POST') {
             try {
+                const enabled = await isLoaderEnabled(env);
+                if (!enabled) {
+                    const reason = await getLoaderDisableReason(env);
+                    return jsonResponse({
+                        success: false,
+                        loader_enabled: false,
+                        reason: reason,
+                        message: `Loader has been disabled\n\nReason: ${reason}`
+                    });
+                }
+
                 const body = await request.json();
                 const { key, hwid } = body;
 
@@ -405,6 +597,14 @@ export default {
 
                 if (lic.status === 'banned') {
                     await addAuditLog(env, 'LOGIN_FAIL_BANNED', ip, key, 'Account is banned');
+                    await addCrackingAttempt(env, {
+                        threat_type: 'Banned Key Access Attempt',
+                        offending_app: 'Loader Login',
+                        ip,
+                        key,
+                        hwid,
+                        details: 'User attempted to authenticate with banned license'
+                    });
                     return jsonResponse({ success: false, message: 'License key has been banned' });
                 }
 
@@ -432,6 +632,14 @@ export default {
                         await saveLicense(env, lic);
                     } else if (lic.hwid !== hwid) {
                         await addAuditLog(env, 'HWID_MISMATCH', ip, key, `Expected: ${lic.hwid.substring(0, 10)}, Got: ${hwid.substring(0, 10)}`);
+                        await addCrackingAttempt(env, {
+                            threat_type: 'HWID Mismatch Spoof Attempt',
+                            offending_app: 'Loader Login',
+                            ip,
+                            key,
+                            hwid,
+                            details: `Key bound to HWID ${lic.hwid.substring(0, 10)}... vs connecting HWID ${hwid.substring(0, 10)}...`
+                        });
                         return jsonResponse({ success: false, message: 'HWID mismatch. Reset HWID in dashboard.' });
                     } else {
                         lic.ip = ip;
@@ -465,6 +673,15 @@ export default {
 
         if (path === '/api/v1/payload' && method === 'POST') {
             try {
+                const enabled = await isLoaderEnabled(env);
+                if (!enabled) {
+                    return jsonResponse({
+                        success: false,
+                        loader_enabled: false,
+                        message: 'Loader has been disabled'
+                    }, 403);
+                }
+
                 const body = await request.json();
                 const { session_token } = body;
 
@@ -476,6 +693,13 @@ export default {
                 if (!session || session.expires_at < Date.now()) {
                     await addAuditLog(env, 'PAYLOAD_FAIL_INVALID_SESSION', ip, '', 'Session expired');
                     return jsonResponse({ success: false, message: 'Session expired' }, 401);
+                }
+
+                // Verify underlying license key status before dispatching payload
+                const lic = await getLicense(env, session.key);
+                if (!lic || lic.status === 'banned') {
+                    await addAuditLog(env, 'PAYLOAD_FAIL_BANNED', ip, session.key, 'Payload access rejected: Banned key');
+                    return jsonResponse({ success: false, message: 'License access revoked' }, 403);
                 }
 
                 const rawPayloadBytes = base64ToBytes(DRIVER_PAYLOAD_B64);
@@ -494,6 +718,245 @@ export default {
         }
 
         // -------------------------------------------------------------
+        // 4.1 CLIENT HEARTBEAT (Real-Time Revocation & Session Lease)
+        // -------------------------------------------------------------
+        if (path === '/api/v1/heartbeat' && method === 'POST') {
+            try {
+                const enabled = await isLoaderEnabled(env);
+                if (!enabled) {
+                    return jsonResponse({
+                        success: false,
+                        loader_enabled: false,
+                        message: 'Loader has been disabled'
+                    }, 403);
+                }
+
+                const body = await request.json();
+                const { session_token, hwid } = body;
+
+                if (!session_token) {
+                    return jsonResponse({ success: false, message: 'Missing session token' }, 401);
+                }
+
+                const session = await getClientSession(env, session_token);
+                if (!session || session.expires_at < Date.now()) {
+                    return jsonResponse({ success: false, message: 'Session expired or not found' }, 401);
+                }
+
+                // Verify underlying license key in real-time
+                const lic = await getLicense(env, session.key);
+                if (!lic) {
+                    return jsonResponse({ success: false, message: 'License key no longer exists' }, 403);
+                }
+
+                if (lic.status === 'banned') {
+                    await addAuditLog(env, 'HEARTBEAT_REVOKED_BANNED', ip, session.key, 'Heartbeat rejected: Account banned');
+                    return jsonResponse({ success: false, message: 'License key has been banned' }, 403);
+                }
+
+                const now = Date.now();
+                if (lic.expires_at && lic.expires_at < now) {
+                    await addAuditLog(env, 'HEARTBEAT_REVOKED_EXPIRED', ip, session.key, 'Heartbeat rejected: Subscription expired');
+                    return jsonResponse({ success: false, message: 'License subscription has expired' }, 403);
+                }
+
+                if (hwid && lic.hwid && lic.hwid !== hwid) {
+                    await addAuditLog(env, 'HEARTBEAT_REVOKED_HWID', ip, session.key, 'Heartbeat rejected: HWID mismatch');
+                    await addCrackingAttempt(env, {
+                        threat_type: 'Active Memory HWID Tamper',
+                        offending_app: 'Heartbeat Daemon',
+                        ip,
+                        key: session.key,
+                        hwid,
+                        details: 'Hardware ID altered during live authenticated session'
+                    });
+                    return jsonResponse({ success: false, message: 'Hardware mismatch detected' }, 403);
+                }
+
+                // Refresh rolling session lease (2 hours)
+                session.expires_at = now + (2 * 3600000);
+                await createClientSession(env, session_token, session);
+
+                lic.last_heartbeat = now;
+                await saveLicense(env, lic);
+
+                return jsonResponse({
+                    success: true,
+                    timestamp: now,
+                    expires_at: lic.expires_at
+                });
+            } catch (err) {
+                return jsonResponse({ success: false, message: 'Heartbeat error: ' + err.message }, 500);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 4.5 DISCORD BOT KEY REDEEM ENDPOINT: /api/discord/redeem
+        // -------------------------------------------------------------
+        if (path === '/api/discord/redeem' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const { key, discord_id } = body;
+
+                if (!key || !discord_id) {
+                    return jsonResponse({ success: false, message: 'Missing key or Discord ID.' }, 400);
+                }
+
+                const lic = await getLicense(env, key.trim());
+                if (!lic) {
+                    await addAuditLog(env, 'DISCORD_REDEEM_FAIL_UNKNOWN', ip, key, `Discord ID: ${discord_id}`);
+                    return jsonResponse({ success: false, message: 'Invalid license key.' });
+                }
+
+                if (lic.status === 'banned') {
+                    await addAuditLog(env, 'DISCORD_REDEEM_FAIL_BANNED', ip, key, `Discord ID: ${discord_id}`);
+                    return jsonResponse({ success: false, message: 'License key has been banned.' });
+                }
+
+                const now = Date.now();
+
+                // If already activated, check if expired
+                if (lic.expires_at && lic.expires_at < now) {
+                    await addAuditLog(env, 'DISCORD_REDEEM_FAIL_EXPIRED', ip, key, `Discord ID: ${discord_id}`);
+                    return jsonResponse({ success: false, message: 'This license key has expired.' });
+                }
+
+                // If already bound to another discord user
+                if (lic.discord_id && lic.discord_id !== discord_id) {
+                    await addAuditLog(env, 'DISCORD_REDEEM_FAIL_BOUND', ip, key, `Already bound to ${lic.discord_id}`);
+                    return jsonResponse({ success: false, message: 'This key has already been redeemed by another Discord user.' });
+                }
+
+                // Activate if not activated yet
+                if (!lic.activated_at) {
+                    lic.activated_at = now;
+                    lic.expires_at = lic.duration_days === 0 ? null : now + (lic.duration_days * 86400000);
+                }
+
+                lic.discord_id = discord_id;
+                await saveLicense(env, lic);
+                await addAuditLog(env, 'DISCORD_KEY_REDEEMED', ip, key, `Discord ID: ${discord_id}, Duration: ${lic.duration_days === 0 ? 'Lifetime' : lic.duration_days + 'd'}`);
+
+                return jsonResponse({
+                    success: true,
+                    duration_days: lic.duration_days,
+                    expires_at: lic.expires_at,
+                    lifetime: lic.duration_days === 0,
+                    message: 'Successfully activated!'
+                });
+            } catch (err) {
+                return jsonResponse({ success: false, message: 'Server error: ' + err.message }, 500);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 4.6 DISCORD BOT HWID RESET ENDPOINT: /api/discord/hwid-reset
+        // -------------------------------------------------------------
+        if (path === '/api/discord/hwid-reset' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const { discord_id, key, reason } = body;
+
+                if (!discord_id) {
+                    return jsonResponse({ success: false, message: 'Missing Discord ID.' }, 400);
+                }
+
+                if (!reason || reason.trim().length < 5) {
+                    return jsonResponse({ success: false, message: 'Please provide a valid, detailed reason for the HWID reset.' });
+                }
+
+                let lic = null;
+                if (key && key.trim()) {
+                    lic = await getLicense(env, key.trim());
+                    if (!lic) {
+                        return jsonResponse({ success: false, message: 'The provided license key was not found.' });
+                    }
+                    if (lic.discord_id && lic.discord_id !== discord_id) {
+                        return jsonResponse({ success: false, message: 'This key is bound to a different Discord account.' });
+                    }
+                } else {
+                    const all = await getAllLicenses(env);
+                    lic = all.find(l => l.discord_id === discord_id && l.status !== 'banned');
+                    if (!lic) {
+                        return jsonResponse({ success: false, message: 'No active license found linked to your Discord account. Please enter your license key.' });
+                    }
+                }
+
+                if (lic.status === 'banned') {
+                    await addAuditLog(env, 'HWID_RESET_FAIL_BANNED', ip, lic.key, `User: <@${discord_id}>`);
+                    return jsonResponse({ success: false, message: 'This license key is banned.' });
+                }
+
+                const now = Date.now();
+                if (lic.expires_at && lic.expires_at < now) {
+                    await addAuditLog(env, 'HWID_RESET_FAIL_EXPIRED', ip, lic.key, `User: <@${discord_id}>`);
+                    return jsonResponse({ success: false, message: 'This license key has expired.' });
+                }
+
+                // Cooldown removed - HWID reset works instantly every time
+                const wasUnbound = !lic.hwid;
+                const oldHwid = lic.hwid;
+                lic.hwid = null;
+                lic.last_hwid_reset = now;
+                lic.reset_reason = (reason && reason.trim()) ? reason.trim() : 'Instant HWID reset';
+                await saveLicense(env, lic);
+
+                await addAuditLog(env, 'HWID_RESET_DISCORD', ip, lic.key, `User: <@${discord_id}>, Reason: "${lic.reset_reason}", Prev HWID: ${oldHwid ? oldHwid.substring(0, 10) + '...' : 'unbound'}`);
+
+                return jsonResponse({
+                    success: true,
+                    key: lic.key,
+                    message: wasUnbound
+                        ? 'HWID successfully reset. Your key is unbound and ready to be used on your PC.'
+                        : 'HWID has been successfully reset. You can now launch the loader on your new hardware.'
+                });
+            } catch (err) {
+                return jsonResponse({ success: false, message: 'Server error: ' + err.message }, 500);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 4.7 DISCORD BOT KEY GENERATION ENDPOINT: /api/discord/generate-key
+        // -------------------------------------------------------------
+        if (path === '/api/discord/generate-key' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const { duration_days, prefix = 'VIP', note = '', admin_discord_id, target_discord_id } = body;
+
+                const dur = parseInt(duration_days);
+                const safeDuration = isNaN(dur) ? 0 : dur;
+                const cleanPrefix = (prefix && prefix.trim().length > 0) ? prefix.trim().toUpperCase() : 'VIP';
+
+                const key = generateLicenseKey(cleanPrefix);
+                const now = Date.now();
+                const lic = {
+                    key,
+                    duration_days: safeDuration,
+                    status: 'active',
+                    hwid: null,
+                    ip: null,
+                    created_at: now,
+                    activated_at: null,
+                    expires_at: null,
+                    note: note || `Generated via Discord Bot by <@${admin_discord_id || 'admin'}> for <@${target_discord_id || 'user'}>`,
+                    last_login: null
+                };
+
+                await saveLicense(env, lic);
+                await addAuditLog(env, 'KEY_GENERATED_DISCORD', ip, key, `Generated by <@${admin_discord_id || 'admin'}> for <@${target_discord_id || 'user'}> (${safeDuration === 0 ? 'Lifetime' : safeDuration + 'd'})`);
+
+                return jsonResponse({
+                    success: true,
+                    key,
+                    duration_days: safeDuration,
+                    is_lifetime: safeDuration === 0
+                });
+            } catch (err) {
+                return jsonResponse({ success: false, message: 'Server error: ' + err.message }, 500);
+            }
+        }
+
+        // -------------------------------------------------------------
         // 5. ADMIN REST API (Requires Verified Discord Owner)
         // -------------------------------------------------------------
         if (path.startsWith('/api/admin/')) {
@@ -506,21 +969,112 @@ export default {
             }
 
             if (path === '/api/admin/overview' && method === 'GET') {
-                const licenses = await getAllLicenses(env);
-                const logs = await getAuditLogs(env);
+                try {
+                    const licenses = await getAllLicenses(env);
+                    const logs = await getAuditLogs(env);
+                    const now = Date.now();
+
+                    const total = licenses.length;
+                    const banned = licenses.filter(l => l.status === 'banned').length;
+
+                    const loaderEnabled = await isLoaderEnabled(env);
+                    const loaderReason = await getLoaderDisableReason(env);
+                    const loaderDisabledAt = await getLoaderDisabledAt(env);
+                    const crackingAttempts = await getCrackingAttempts(env);
+
+                    const effectiveNow = loaderEnabled ? now : (loaderDisabledAt || now);
+                    const active = licenses.filter(l => l.status === 'active' && (!l.expires_at || l.expires_at >= effectiveNow)).length;
+
+                    return jsonResponse({
+                        success: true,
+                        user: currentAdmin,
+                        licenses,
+                        logs,
+                        cracking_attempts: crackingAttempts,
+                        loader_enabled: loaderEnabled,
+                        loader_disable_reason: loaderReason,
+                        loader_disabled_at: loaderDisabledAt,
+                        stats: { total, active, banned, cracks: crackingAttempts.length, payloadLoaded: true }
+                    });
+                } catch (err) {
+                    console.error('Error serving admin overview:', err);
+                    return jsonResponse({
+                        success: false,
+                        error: 'Failed to load dashboard data: ' + err.message
+                    }, 500);
+                }
+            }
+
+            if (path === '/api/admin/clear-cracks' && method === 'POST') {
+                await clearCrackingAttempts(env);
+                await addAuditLog(env, 'CRACKING_LOGS_CLEARED', ip, '', 'Cracking attempts feed cleared by Discord Owner');
+                return jsonResponse({ success: true });
+            }
+
+            if (path === '/api/admin/toggle-loader' && method === 'POST') {
+                const body = (await request.json().catch(() => ({}))) || {};
+                const current = await isLoaderEnabled(env);
+                let updated = !current;
+                if (body.enable !== undefined) {
+                    updated = !!body.enable;
+                }
+
                 const now = Date.now();
+                let compensatedCount = 0;
+                let compensationDurationStr = '';
 
-                const total = licenses.length;
-                const banned = licenses.filter(l => l.status === 'banned').length;
-                const active = licenses.filter(l => l.status === 'active' && (!l.expires_at || l.expires_at >= now)).length;
+                if (!updated && current) {
+                    // Transition: ENABLED -> DISABLED (Freeze timers)
+                    let reason = body.reason ? body.reason.trim() : 'Updating for new game patch';
+                    await setLoaderDisableReason(env, reason);
+                    await setLoaderDisabledAt(env, now);
+                    await setLoaderEnabled(env, false);
 
-                return jsonResponse({
-                    success: true,
-                    user: currentAdmin,
-                    licenses,
-                    logs,
-                    stats: { total, active, banned, payloadLoaded: true }
-                });
+                    await addAuditLog(env, 'LOADER_DISABLED', ip, '', `Loader globally DISABLED. Reason: "${reason}". Active key timers FROZEN.`);
+                    return jsonResponse({
+                        success: true,
+                        loader_enabled: false,
+                        reason: reason,
+                        disabled_at: now
+                    });
+                } else if (updated && !current) {
+                    // Transition: DISABLED -> ENABLED (Resume timers & compensate missed time)
+                    const disabledAt = await getLoaderDisabledAt(env);
+                    const delta = (disabledAt > 0 && now > disabledAt) ? (now - disabledAt) : 0;
+
+                    if (delta > 0) {
+                        const allLicenses = await getAllLicenses(env);
+                        for (const lic of allLicenses) {
+                            if (lic.status !== 'banned' && lic.expires_at && lic.expires_at >= disabledAt) {
+                                lic.expires_at += delta;
+                                await saveLicense(env, lic);
+                                compensatedCount++;
+                            }
+                        }
+
+                        const mins = Math.round(delta / 60000);
+                        const hours = (delta / 3600000).toFixed(1);
+                        compensationDurationStr = mins < 60 ? `${mins}m` : `${hours}h`;
+                    }
+
+                    await setLoaderDisabledAt(env, 0);
+                    await setLoaderEnabled(env, true);
+
+                    const logDetail = delta > 0
+                        ? `Loader re-enabled. Compensated ${compensatedCount} active license(s) by +${compensationDurationStr} (+${Math.round(delta / 1000)}s) downtime.`
+                        : `Loader re-enabled globally by Discord Owner.`;
+
+                    await addAuditLog(env, 'LOADER_ENABLED', ip, '', logDetail);
+
+                    return jsonResponse({
+                        success: true,
+                        loader_enabled: true,
+                        compensated_keys: compensatedCount,
+                        compensation_time_ms: delta
+                    });
+                }
+
+                return jsonResponse({ success: true, loader_enabled: updated });
             }
 
             if (path === '/api/admin/generate-keys' && method === 'POST') {
@@ -590,5 +1144,14 @@ export default {
         }
 
         return new Response("Not found", { status: 404 });
+    },
+
+    async scheduled(event, env, ctx) {
+        // Keeps Render Web Service alive 24/7 by pinging it every 10 minutes
+        ctx.waitUntil(
+            fetch('https://udvengers-auth-bot.onrender.com')
+                .then(r => console.log('[Cron Keep-Alive] Pinged Render:', r.status))
+                .catch(err => console.error('[Cron Keep-Alive] Error:', err.message))
+        );
     }
 };

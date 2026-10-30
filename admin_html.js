@@ -29,6 +29,12 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     <span id="adminUsername" class="text-neutral-200 font-medium">Owner</span>
                 </div>
 
+                <!-- LOADER KILL SWITCH BUTTON -->
+                <button id="loaderToggleBtn" onclick="toggleLoaderState()" class="h-8 px-3.5 bg-neutral-900 text-neutral-300 border border-subtle text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm">
+                    <span id="loaderDot" class="w-2 h-2 rounded-full bg-neutral-500"></span>
+                    <span id="loaderBtnText">...</span>
+                </button>
+
                 <button onclick="openModal('generateModal')" class="h-8 px-3.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                     <span>Create Key</span>
@@ -44,8 +50,20 @@ export const ADMIN_HTML = `<!DOCTYPE html>
     <!-- MAIN CONTENT -->
     <main class="max-w-6xl mx-auto w-full px-6 py-8 flex-1 space-y-6">
 
-        <!-- METRICS ROW (3 Cards: Total, Active, Banned) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <!-- DISABLED BANNER -->
+        <div id="disabledBanner" class="hidden p-3.5 bg-rose-950/50 border border-rose-900/70 rounded-xl text-xs text-rose-300 flex items-center justify-between shadow-lg">
+            <div class="flex items-center space-x-2.5 flex-wrap gap-y-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
+                <span><strong class="font-semibold text-rose-200 uppercase tracking-wider text-[11px]">Loaders Globally Disabled:</strong> <span id="currentDisableReasonText" class="text-rose-100 font-mono"></span></span>
+                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-semibold uppercase tracking-wider">Time Paused: Keys Won't Lose Time ⏸</span>
+            </div>
+            <button onclick="toggleLoaderState()" class="px-2.5 py-1 bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/80 rounded text-[11px] font-semibold transition whitespace-nowrap">
+                Re-Enable Now
+            </button>
+        </div>
+
+        <!-- METRICS ROW (4 Cards: Total, Active, Banned, Cracking Attempts) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="bg-card border border-subtle rounded-xl p-4">
                 <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Total Licenses</div>
                 <div id="statTotal" class="text-2xl font-bold font-mono tracking-tight text-neutral-100">0</div>
@@ -58,6 +76,13 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1">Banned Users</div>
                 <div id="statBanned" class="text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
             </div>
+            <div class="bg-card border border-subtle rounded-xl p-4">
+                <div class="text-[11px] font-medium uppercase tracking-wider text-rose-400 mb-1 flex items-center justify-between">
+                    <span>Cracking Attempts</span>
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                </div>
+                <div id="statCracks" class="text-2xl font-bold font-mono tracking-tight text-rose-400">0</div>
+            </div>
         </div>
 
         <!-- CONTROLS & FILTER BAR -->
@@ -69,6 +94,10 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </button>
                 <button onclick="switchTab('logs')" id="tabBtnLogs" class="px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition">
                     Audit Logs
+                </button>
+                <button onclick="switchTab('threats')" id="tabBtnThreats" class="px-3 py-1 rounded-md text-xs font-medium text-rose-400/80 hover:text-rose-300 transition flex items-center space-x-1.5">
+                    <span>Cracking Attempts</span>
+                    <span id="threatCountBadge" class="hidden px-1.5 py-0.2 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded-full text-[10px] font-bold">0</span>
                 </button>
             </div>
 
@@ -116,6 +145,37 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                         </tr>
                     </thead>
                     <tbody id="logsTableBody" class="divide-y divide-neutral-900 font-mono">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: CRACKING ATTEMPTS -->
+        <div id="tabThreats" class="hidden bg-card border border-rose-950/40 rounded-xl overflow-hidden shadow-sm">
+            <div class="px-4 py-3 bg-rose-950/20 border-b border-rose-900/30 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse"></span>
+                    <span class="text-xs font-semibold text-rose-300 uppercase tracking-wider">Live Security & Integrity Incidents</span>
+                </div>
+                <button onclick="clearCrackingAttempts()" class="px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-rose-400 border border-subtle rounded text-[11px] transition">
+                    Clear Log Feed
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-subtle bg-neutral-950/60 text-[11px] font-medium uppercase tracking-wider text-neutral-500">
+                            <th class="py-3 px-4">Time</th>
+                            <th class="py-3 px-4">Threat / Violation</th>
+                            <th class="py-3 px-4">Offender IP</th>
+                            <th class="py-3 px-4">Offending Tool / App</th>
+                            <th class="py-3 px-4">Associated Key</th>
+                            <th class="py-3 px-4">Target Details</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="threatsTableBody" class="divide-y divide-neutral-900 font-mono">
                         <!-- Dynamic Rows -->
                     </tbody>
                 </table>
@@ -196,8 +256,94 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         </div>
     </div>
 
+    <!-- MODAL: DISABLE LOADER WITH REASON -->
+    <div id="disableModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+        <div class="bg-card w-full max-w-md p-5 rounded-xl border border-rose-900/60 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-subtle">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    <h3 class="font-semibold text-sm text-neutral-100">Disable All Loaders</h3>
+                </div>
+                <button onclick="closeModal('disableModal')" class="text-neutral-500 hover:text-neutral-300">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p class="text-xs text-neutral-400">
+                All client loaders will immediately be blocked. Anyone launching the loader will see a popup window displaying the reason you provide below.
+            </p>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-medium text-neutral-400">Reason for Shutdown</label>
+                <input type="text" id="disableReasonInput" placeholder="e.g. Updating for new game patch / Maintenance" 
+                    value="Updating for new game patch"
+                    class="w-full h-9 px-3 bg-neutral-900 border border-subtle rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-rose-500">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('disableModal')" class="h-8 px-3 border border-subtle hover:bg-neutral-900 text-neutral-300 rounded-lg text-xs transition">
+                    Cancel
+                </button>
+                <button onclick="confirmDisableLoader()" class="h-8 px-4 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg text-xs transition shadow-sm">
+                    Disable Loaders
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let allLicenses = [];
+        let gLoaderEnabled = true;
+        let gLoaderDisabledAt = 0;
+
+        function updateLoaderButton(enabled) {
+            gLoaderEnabled = (enabled !== false);
+            const btn = document.getElementById('loaderToggleBtn');
+            const dot = document.getElementById('loaderDot');
+            const text = document.getElementById('loaderBtnText');
+            if (!btn || !dot || !text) return;
+
+            if (gLoaderEnabled) {
+                btn.className = 'h-8 px-3.5 bg-neutral-900 hover:bg-rose-950/40 text-neutral-200 hover:text-rose-300 border border-subtle hover:border-rose-900/60 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]';
+                text.textContent = 'Disable Loader';
+            } else {
+                btn.className = 'h-8 px-3.5 bg-rose-950/60 hover:bg-emerald-950/50 text-rose-300 hover:text-emerald-300 border border-rose-800/80 hover:border-emerald-800/80 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm';
+                dot.className = 'w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] animate-pulse';
+                text.textContent = 'Enable Loader';
+            }
+        }
+
+        async function toggleLoaderState() {
+            if (gLoaderEnabled) {
+                openModal('disableModal');
+                setTimeout(() => document.getElementById('disableReasonInput')?.focus(), 50);
+            } else {
+                const res = await api('/api/admin/toggle-loader', { 
+                    method: 'POST',
+                    body: JSON.stringify({ enable: true })
+                });
+                if (res && res.success) {
+                    updateLoaderButton(res.loader_enabled);
+                    loadDashboard();
+                } else {
+                    alert('Failed to update loader state: ' + (res?.message || 'Server error'));
+                }
+            }
+        }
+
+        async function confirmDisableLoader() {
+            const reasonInput = document.getElementById('disableReasonInput').value.trim();
+            const reason = reasonInput || 'Updating for new game patch';
+            const res = await api('/api/admin/toggle-loader', { 
+                method: 'POST',
+                body: JSON.stringify({ enable: false, reason })
+            });
+            if (res && res.success) {
+                closeModal('disableModal');
+                updateLoaderButton(res.loader_enabled);
+                loadDashboard();
+            } else {
+                alert('Failed to disable loaders: ' + (res?.message || 'Server error'));
+            }
+        }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -224,13 +370,43 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 }
             }
 
+            if (data.loader_enabled !== undefined) {
+                updateLoaderButton(data.loader_enabled);
+            }
+            gLoaderDisabledAt = data.loader_disabled_at || 0;
+
+            const banner = document.getElementById('disabledBanner');
+            const reasonText = document.getElementById('currentDisableReasonText');
+            if (banner && reasonText) {
+                if (data.loader_enabled === false) {
+                    banner.classList.remove('hidden');
+                    reasonText.textContent = data.loader_disable_reason || 'Maintenance';
+                } else {
+                    banner.classList.add('hidden');
+                }
+            }
+
             allLicenses = data.licenses || [];
             renderLicenses(allLicenses);
             renderLogs(data.logs || []);
+            renderThreats(data.cracking_attempts || []);
 
             document.getElementById('statTotal').textContent = data.stats.total;
             document.getElementById('statActive').textContent = data.stats.active;
             document.getElementById('statBanned').textContent = data.stats.banned;
+            
+            const crackCount = data.stats.cracks !== undefined ? data.stats.cracks : (data.cracking_attempts ? data.cracking_attempts.length : 0);
+            document.getElementById('statCracks').textContent = crackCount;
+
+            const badge = document.getElementById('threatCountBadge');
+            if (badge) {
+                if (crackCount > 0) {
+                    badge.textContent = crackCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
         }
 
         function renderLicenses(licenses) {
@@ -245,14 +421,22 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     ? \`<span class="text-neutral-400 select-all" title="\${lic.hwid}">\${lic.hwid.substring(0, 8)}...</span>\`
                     : \`<span class="text-neutral-600">Unbound</span>\`;
 
+                const isFrozen = !gLoaderEnabled && lic.expires_at && lic.expires_at >= (gLoaderDisabledAt || Date.now());
+
                 let statusBadge = '';
                 if (lic.status === 'banned') statusBadge = '<span class="inline-flex items-center text-rose-400 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-rose-400 mr-1.5"></span>Banned</span>';
+                else if (isFrozen) statusBadge = '<span class="inline-flex items-center text-amber-300 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5 animate-pulse"></span>Time Paused</span>';
                 else if (lic.expires_at && lic.expires_at < Date.now()) statusBadge = '<span class="inline-flex items-center text-amber-400 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1.5"></span>Expired</span>';
                 else statusBadge = '<span class="inline-flex items-center text-emerald-400 font-sans"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Active</span>';
 
                 let expiresStr = 'Not Activated';
                 if (lic.duration_days === 0) expiresStr = 'Lifetime';
-                else if (lic.expires_at) expiresStr = new Date(lic.expires_at).toLocaleDateString();
+                else if (lic.expires_at) {
+                    expiresStr = new Date(lic.expires_at).toLocaleDateString();
+                    if (isFrozen) {
+                        expiresStr += ' <span class="text-amber-400 font-medium text-[10px]" title="Key timer stopped while loader is disabled">(Paused ⏸)</span>';
+                    }
+                }
 
                 tr.innerHTML = \`
                     <td class="py-2.5 px-4 font-semibold text-neutral-200 select-all tracking-tight">\${lic.key}</td>
@@ -282,10 +466,11 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 const tr = document.createElement('tr');
                 tr.className = 'bg-hover transition duration-100';
                 const isFail = l.event.includes('FAIL') || l.event.includes('MISMATCH') || l.event.includes('BAN') || l.event.includes('BLOCKED');
+                const ipDisplay = l.ip ? \`<button type="button" onclick="const s=this.querySelector('span');const rev=this.dataset.rev==='1';this.dataset.rev=rev?'0':'1';s.textContent=rev?'••••••••••':'\${l.ip}';this.classList.toggle('text-neutral-200',!rev);this.classList.toggle('text-neutral-500',rev);" data-rev="0" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-neutral-900 border border-subtle text-neutral-500 hover:text-neutral-200 hover:border-neutral-700 transition cursor-pointer select-none text-[11px]" title="Click to show/hide IP"><span>••••••••••</span><svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>\` : '-';
                 tr.innerHTML = \`
                     <td class="py-2.5 px-4 text-neutral-500 font-sans">\${new Date(l.timestamp).toLocaleTimeString()}</td>
                     <td class="py-2.5 px-4 font-medium \${isFail ? 'text-rose-400' : 'text-emerald-400'}">\${l.event}</td>
-                    <td class="py-2.5 px-4 text-neutral-500">\${l.ip || '-'}</td>
+                    <td class="py-2.5 px-4">\${ipDisplay}</td>
                     <td class="py-2.5 px-4 text-neutral-300">\${l.key || '-'}</td>
                     <td class="py-2.5 px-4 text-neutral-500 font-sans">\${l.details || ''}</td>
                 \`;
@@ -303,22 +488,63 @@ export const ADMIN_HTML = `<!DOCTYPE html>
             renderLicenses(filtered);
         }
 
+        function renderThreats(threats) {
+            const tbody = document.getElementById('threatsTableBody');
+            tbody.innerHTML = '';
+            if (!threats || threats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-neutral-500 font-sans">No cracking attempts recorded. System secure.</td></tr>';
+                return;
+            }
+            threats.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = 'bg-hover transition duration-100 hover:bg-rose-950/20';
+                const ipDisplay = t.ip ? \`<button type="button" onclick="const s=this.querySelector('span');const rev=this.dataset.rev==='1';this.dataset.rev=rev?'0':'1';s.textContent=rev?'••••••••••':'\${t.ip}';this.classList.toggle('text-neutral-200',!rev);this.classList.toggle('text-neutral-500',rev);" data-rev="0" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-neutral-900 border border-subtle text-neutral-500 hover:text-rose-300 hover:border-rose-800 transition cursor-pointer select-none text-[11px]" title="Click to show/hide IP"><span>••••••••••</span><svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>\` : '-';
+                
+                const timeStr = new Date(t.timestamp).toLocaleTimeString() + ' ' + new Date(t.timestamp).toLocaleDateString();
+                const keyDisplay = t.key ? \`<span class="text-neutral-200 font-semibold select-all">\${t.key}</span>\` : '<span class="text-neutral-600">Unauthenticated</span>';
+                
+                const banBtn = t.key ? \`<button onclick="toggleBan('\${t.key}', 'active')" class="px-2 py-1 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800/80 rounded text-[11px] font-sans transition">Ban Key</button>\` : '';
+
+                tr.innerHTML = \`
+                    <td class="py-2.5 px-4 text-neutral-500 font-sans whitespace-nowrap">\${timeStr}</td>
+                    <td class="py-2.5 px-4"><span class="inline-flex items-center text-rose-400 font-sans font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5 shadow-[0_0_6px_rgba(244,63,94,0.8)]"></span>\${t.threat_type}</span></td>
+                    <td class="py-2.5 px-4">\${ipDisplay}</td>
+                    <td class="py-2.5 px-4 text-amber-300 font-sans">\${t.offending_app || 'N/A'}</td>
+                    <td class="py-2.5 px-4">\${keyDisplay}</td>
+                    <td class="py-2.5 px-4 text-neutral-400 font-sans max-w-xs truncate" title="\${t.details || ''}">\${t.details || '-'}</td>
+                    <td class="py-2.5 px-4 text-right space-x-1 font-sans">\${banBtn}</td>
+                \`;
+                tbody.appendChild(tr);
+            });
+        }
+
         function switchTab(t) {
+            document.getElementById('tabKeys').classList.add('hidden');
+            document.getElementById('tabLogs').classList.add('hidden');
+            document.getElementById('tabThreats').classList.add('hidden');
+
+            document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
+            document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
+            document.getElementById('tabBtnThreats').className = 'px-3 py-1 rounded-md text-xs font-medium text-rose-400/80 hover:text-rose-300 transition flex items-center space-x-1.5';
+
             if (t === 'keys') {
                 document.getElementById('tabKeys').classList.remove('hidden');
-                document.getElementById('tabLogs').classList.add('hidden');
                 document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition';
-                document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
-            } else {
-                document.getElementById('tabKeys').classList.add('hidden');
+            } else if (t === 'logs') {
                 document.getElementById('tabLogs').classList.remove('hidden');
                 document.getElementById('tabBtnLogs').className = 'px-3 py-1 rounded-md text-xs font-medium bg-neutral-800 text-white transition';
-                document.getElementById('tabBtnKeys').className = 'px-3 py-1 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition';
+            } else if (t === 'threats') {
+                document.getElementById('tabThreats').classList.remove('hidden');
+                document.getElementById('tabBtnThreats').className = 'px-3 py-1 rounded-md text-xs font-medium bg-rose-950/60 text-rose-200 border border-rose-800/60 transition flex items-center space-x-1.5';
             }
         }
 
+        async function clearCrackingAttempts() {
+            await api('/api/admin/clear-cracks', { method: 'POST' });
+            loadDashboard();
+        }
+
         async function resetHwid(key) {
-            if (!confirm(\`Reset HWID for key \${key}?\`)) return;
             await api('/api/admin/reset-hwid', { method: 'POST', body: JSON.stringify({ key }) });
             loadDashboard();
         }
@@ -330,7 +556,6 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         }
 
         async function deleteKey(key) {
-            if (!confirm(\`Delete key \${key}?\`)) return;
             await api('/api/admin/delete-key', { method: 'POST', body: JSON.stringify({ key }) });
             loadDashboard();
         }
