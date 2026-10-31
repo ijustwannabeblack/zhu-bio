@@ -231,7 +231,60 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 2. CUSTOMER DASHBOARD (COMPLETELY BLACK & WHITE THEMED)      -->
+    <!-- 2. EXPIRED LICENSE VIEW (PROMPT FOR NEW KEY)                 -->
+    <!-- ============================================================ -->
+    <div id="expiredView" class="hidden min-h-screen bg-[#07080a] flex items-center justify-center p-4">
+        <div class="card-dark w-full max-w-sm p-8 shadow-2xl relative bg-[#0f1117] border border-[#1e222d] rounded-2xl space-y-6">
+            
+            <!-- Brand / Header -->
+            <div class="text-center space-y-2.5">
+                <div class="flex justify-center mb-1">
+                    <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-9 h-9 object-contain">
+                </div>
+                <h2 class="text-lg font-bold text-white tracking-tight">License Expired</h2>
+                <p class="text-xs text-neutral-400 max-w-xs mx-auto">Your old subscription license has expired. Put in your new license key below to regain access.</p>
+            </div>
+
+            <!-- Old Expired License Details Box -->
+            <div class="p-4 rounded-xl bg-[#090a0e] border border-[#1e222d] space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider font-mono">OLD LICENSE</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/15 text-red-400 border border-red-500/25">Expired</span>
+                </div>
+                <div id="expiredKeyDisplay" class="font-mono text-xs text-neutral-300 font-medium truncate">KEY-••••••••••••••••</div>
+                <div class="text-[11px] text-neutral-500 flex items-center justify-between pt-1 border-t border-[#1a1c24]">
+                    <span>Account: <span id="expiredAccountEmail" class="text-neutral-300 font-medium">user@email.com</span></span>
+                </div>
+            </div>
+
+            <!-- New License Input Form -->
+            <form id="renewLicenseForm" onsubmit="handleRenewLicense(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-neutral-300 mb-1.5">New License Key</label>
+                    <input type="text" id="newLicenseKeyInput" required placeholder="XXXX-XXXX-XXXX-XXXX" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs font-mono placeholder-neutral-500 uppercase tracking-wider">
+                </div>
+
+                <div id="renewError" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5 text-center"></div>
+
+                <button type="submit" id="btnRenewSubmit" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 transition">
+                    <span>Activate New License</span>
+                </button>
+            </form>
+
+            <!-- Bottom Actions -->
+            <div class="flex items-center justify-between text-xs text-neutral-400 pt-2 border-t border-[#1a1c24]">
+                <button type="button" onclick="handleLogout()" class="hover:text-white transition flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    <span>Sign Out</span>
+                </button>
+                <span class="text-[11px] text-neutral-500">Need help? Ask support</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 3. CUSTOMER DASHBOARD (COMPLETELY BLACK & WHITE THEMED)      -->
     <!-- ============================================================ -->
     <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#07080a]">
 
@@ -1024,12 +1077,48 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             }
         }
 
+        async function handleRenewLicense(e) {
+            e.preventDefault();
+            const key = document.getElementById('newLicenseKeyInput').value.trim();
+            const errBox = document.getElementById('renewError');
+            const btn = document.getElementById('btnRenewSubmit');
+
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin mr-1.5">●</span> Activating...';
+
+            try {
+                const res = await fetch('/api/customer/renew-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    errBox.textContent = data.message || 'Failed to activate new license.';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                showToast('New license activated! Welcome back.');
+                await loadCustomerPortal();
+            } catch (err) {
+                errBox.textContent = 'Network error: ' + err.message;
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Activate New License</span>';
+            }
+        }
+
         async function loadCustomerPortal() {
             try {
                 const res = await fetch('/api/customer/me');
                 if (!res.ok) {
                     document.getElementById('authView').classList.remove('hidden');
                     document.getElementById('portalView').classList.add('hidden');
+                    document.getElementById('expiredView').classList.add('hidden');
                     return;
                 }
 
@@ -1037,11 +1126,33 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 if (!data || !data.success) {
                     document.getElementById('authView').classList.remove('hidden');
                     document.getElementById('portalView').classList.add('hidden');
+                    document.getElementById('expiredView').classList.add('hidden');
                     return;
                 }
 
                 currentCustomer = data.customer;
                 currentLicense = data.license;
+
+                // Check if license is expired
+                const isExpired = Boolean(
+                    currentLicense.is_expired ||
+                    (currentLicense.expires_at && currentLicense.expires_at <= Date.now()) ||
+                    currentLicense.status === 'expired'
+                );
+
+                if (isExpired) {
+                    document.getElementById('expiredKeyDisplay').textContent = currentLicense.key || 'Unknown';
+                    document.getElementById('expiredAccountEmail').textContent = currentCustomer.email;
+                    document.getElementById('renewError').classList.add('hidden');
+                    document.getElementById('newLicenseKeyInput').value = '';
+
+                    document.getElementById('expiredView').classList.remove('hidden');
+                    document.getElementById('portalView').classList.add('hidden');
+                    document.getElementById('authView').classList.add('hidden');
+                    return;
+                }
+
+                document.getElementById('expiredView').classList.add('hidden');
 
                 // Header Profile
                 document.getElementById('headerUserEmail').textContent = currentCustomer.email;

@@ -1462,6 +1462,8 @@ export default {
 
             const lic = await getLicense(env, currentCustomer.key);
             const loaderEnabled = await isLoaderEnabled(env);
+            const now = Date.now();
+            const isExpired = lic ? (Boolean(lic.expires_at && lic.expires_at <= now) || lic.status === 'expired') : true;
 
             return jsonResponse({
                 success: true,
@@ -1470,12 +1472,108 @@ export default {
                     discord_id: currentCustomer.discord_id || (lic ? lic.discord_id : null),
                     created_at: currentCustomer.created_at
                 },
-                license: lic || { key: currentCustomer.key, status: 'active', duration_days: 0 },
+                license: lic ? {
+                    ...lic,
+                    is_expired: isExpired
+                } : { key: currentCustomer.key, status: 'expired', duration_days: 0, is_expired: true },
                 loader: {
                     enabled: loaderEnabled,
                     status: loaderEnabled ? 'Undetected' : 'Updating'
                 }
             });
+        }
+
+        // Customer: Renew Expired License
+        if (path === '/api/customer/renew-license' && method === 'POST') {
+            if (!currentCustomer) {
+                return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
+            }
+
+            try {
+                const body = await request.json();
+                const newKey = (body.key || '').trim().toUpperCase();
+
+                if (!newKey) {
+                    return jsonResponse({ success: false, message: 'Please enter your new license key.' }, 400);
+                }
+
+                // Verify new license exists
+                const newLic = await getLicense(env, newKey);
+                if (!newLic) {
+                    return jsonResponse({ success: false, message: 'Invalid license key. Key does not exist.' }, 400);
+                }
+
+                if (newLic.status === 'banned') {
+                    return jsonResponse({ success: false, message: 'This license key has been revoked or banned.' }, 403);
+                }
+
+                const now = Date.now();
+                if (newLic.expires_at && newLic.expires_at <= now) {
+                    return jsonResponse({ success: false, message: 'This license key has already expired.' }, 400);
+                }
+
+                // Check if key is already registered to another account
+                if (kv) {
+                    const boundEmail = await kv.get('key_to_cust:' + newKey);
+                    if (boundEmail && boundEmail.toLowerCase() !== currentCustomer.email.toLowerCase()) {
+                        return jsonResponse({ success: false, message: 'This license key is already registered to another account.' }, 400);
+                    }
+                }
+
+                const oldKey = currentCustomer.key;
+
+                // Update customer record with new key
+                currentCustomer.key = newLic.key;
+                await saveCustomer(env, currentCustomer);
+
+                // Update KV binding
+                if (kv) {
+                    await kv.put('key_to_cust:' + newLic.key, currentCustomer.email);
+                }
+
+                // Activate new license for this customer
+                newLic.customer_email = currentCustomer.email;
+                newLic.discord_id = currentCustomer.discord_id;
+                newLic.status = 'active';
+                if (!newLic.activated_at) {
+                    newLic.activated_at = now;
+                    newLic.expires_at = newLic.duration_days === 0 ? null : now + (newLic.duration_days * 86400000);
+                }
+                await saveLicense(env, newLic);
+
+                // Update session
+                if (customerToken) {
+                    await saveCustomerSession(env, customerToken, {
+                        email: currentCustomer.email,
+                        key: newLic.key,
+                        discord_id: currentCustomer.discord_id,
+                        created_at: Date.now()
+                    });
+                }
+
+                // Update Discord roles
+                if (currentCustomer.discord_id) {
+                    try {
+                        await assignDiscordRole(env, DISCORD_GUILD_ID, currentCustomer.discord_id, DISCORD_ROLE_CUSTOMER);
+                        if (newLic.duration_days === 0 || !newLic.expires_at) {
+                            await assignDiscordRole(env, DISCORD_GUILD_ID, currentCustomer.discord_id, DISCORD_ROLE_LIFETIME);
+                        }
+                    } catch (e) {
+                        console.error('[Discord role error on renewal]', e);
+                    }
+                }
+
+                await addAuditLog(env, 'CUSTOMER_LICENSE_RENEWED', ip, newLic.key, `Customer ${currentCustomer.email} renewed license. Old key: ${oldKey}`);
+
+                return jsonResponse({
+                    success: true,
+                    message: 'License successfully activated! Access restored.',
+                    license: newLic
+                });
+            } catch (err) {
+                console.error('[Customer Renew License Error]', err);
+                return jsonResponse({ success: false, message: 'Failed to renew license: ' + err.message }, 500);
+            }
         }
 
         // Customer: Reset HWID directly
