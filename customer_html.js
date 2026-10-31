@@ -50,24 +50,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             opacity: 0.5;
             cursor: not-allowed;
         }
-        body.devtools-blocked * {
-            display: none !important;
-        }
-        body.devtools-blocked::before {
-            content: "Inspect Element is disabled on this portal for security reasons.";
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            width: 100vw;
-            background: #07080a;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-            padding: 20px;
-        }
     </style>
 </head>
 <body class="selection:bg-white/20 selection:text-white">
@@ -424,7 +406,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         </div>
 
                         
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DURATION</span>
                                 <span id="dashDuration" class="text-sm font-bold text-white">Lifetime</span>
@@ -432,10 +414,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">EXPIRATION</span>
                                 <span id="dashExpires" class="text-sm font-bold text-white">Never</span>
-                            </div>
-                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DISCORD ID</span>
-                                <span id="dashDiscordId" class="text-sm font-mono font-semibold text-white truncate block">Linked</span>
                             </div>
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">BOUND HWID</span>
@@ -457,7 +435,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         </div>
 
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                             
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex flex-col justify-between">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT EMAIL</span>
@@ -479,15 +457,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DISCORD ACCOUNT</span>
                                 <span id="dashDiscordAccount" class="text-sm font-mono font-semibold text-white truncate block">Linked</span>
-                            </div>
-
-                            
-                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">AUTHENTICATION</span>
-                                <span class="text-xs font-semibold text-white flex items-center gap-1.5 mt-0.5">
-                                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                    Email OTP Verified
-                                </span>
                             </div>
                         </div>
                     </div>
@@ -645,54 +614,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 console.log = console.info = console.warn = console.error = console.debug = function() {};
                 console.clear();
             } catch (_) {}
-
-            let devtoolsBlocked = false;
-
-            // 4. Wipe body when DevTools is opened so Elements tab shows nothing
-            function triggerDevToolsBlocked() {
-                if (devtoolsBlocked) return;
-                devtoolsBlocked = true;
-                if (document.body) {
-                    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#07080a;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.01em;text-align:center;padding:20px;">Inspect Element is disabled on this portal for security reasons.</div>';
-                }
-            }
-
-            // 5. Dimension detection for docked DevTools
-            function checkDevToolsDimensions() {
-                const threshold = 160;
-                const widthDiff = window.outerWidth - window.innerWidth;
-                const heightDiff = window.outerHeight - window.innerHeight;
-                const widthThreshold = widthDiff > threshold;
-                const heightThreshold = heightDiff > threshold;
-                if (!(heightThreshold && widthThreshold) && (widthThreshold || heightThreshold)) {
-                    triggerDevToolsBlocked();
-                } else if (devtoolsBlocked && !widthThreshold && !heightThreshold) {
-                    window.location.reload();
-                }
-            }
-
-            window.addEventListener('resize', checkDevToolsDimensions);
-            setInterval(checkDevToolsDimensions, 500);
-
-            // 6. Object getter trigger for undocked DevTools console
-            const dtDetector = new Image();
-            Object.defineProperty(dtDetector, 'id', {
-                get: function() {
-                    triggerDevToolsBlocked();
-                }
-            });
-            setInterval(function() {
-                try {
-                    console.dir(dtDetector);
-                    console.clear();
-                } catch (_) {}
-            }, 1000);
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', checkDevToolsDimensions);
-            } else {
-                checkDevToolsDimensions();
-            }
         })();
 
         let currentCustomer = null;
