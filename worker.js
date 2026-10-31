@@ -1,5 +1,6 @@
 import { DRIVER_PAYLOAD_B64 } from './driver_payload.js';
 import { ADMIN_HTML } from './admin_html.js';
+import { CUSTOMER_HTML } from './customer_html.js';
 
 // -------------------------------------------------------------
 // DISCORD OAUTH2 & BOT INTEGRATION CONFIGURATION
@@ -295,6 +296,166 @@ async function deleteAdminSession(env, token) {
         return;
     }
     memoryStore.adminSessions.delete(token);
+}
+
+// -------------------------------------------------------------
+// CUSTOMER AUTHENTICATION & SESSION HELPERS
+// -------------------------------------------------------------
+async function hashPassword(password, salt) {
+    const enc = new TextEncoder();
+    const data = enc.encode(password + ':' + salt);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function getCustomer(env, email) {
+    if (!email) return null;
+    const key = 'cust:' + email.toLowerCase().trim();
+    const kv = await getKv(env);
+    if (kv) {
+        return await kv.get(key, 'json');
+    }
+    if (!memoryStore.customers) memoryStore.customers = new Map();
+    return memoryStore.customers.get(key) || null;
+}
+
+async function saveCustomer(env, customer) {
+    const key = 'cust:' + customer.email.toLowerCase().trim();
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put(key, JSON.stringify(customer));
+        let list = [];
+        try {
+            list = (await kv.get('index:customers', 'json')) || [];
+        } catch (_) {}
+        if (!list.includes(customer.email.toLowerCase().trim())) {
+            list.push(customer.email.toLowerCase().trim());
+            await kv.put('index:customers', JSON.stringify(list));
+        }
+        return;
+    }
+    if (!memoryStore.customers) memoryStore.customers = new Map();
+    memoryStore.customers.set(key, customer);
+}
+
+async function saveCustomerSession(env, token, data) {
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put('custsess:' + token, JSON.stringify(data), { expirationTtl: 86400 * 14 }); // 14 days
+        return;
+    }
+    if (!memoryStore.custSessions) memoryStore.custSessions = new Map();
+    memoryStore.custSessions.set(token, data);
+}
+
+async function getCustomerSession(env, token) {
+    if (!token) return null;
+    const kv = await getKv(env);
+    if (kv) {
+        return await kv.get('custsess:' + token, 'json');
+    }
+    if (!memoryStore.custSessions) memoryStore.custSessions = new Map();
+    return memoryStore.custSessions.get(token) || null;
+}
+
+async function deleteCustomerSession(env, token) {
+    if (!token) return;
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.delete('custsess:' + token);
+        return;
+    }
+    if (!memoryStore.custSessions) memoryStore.custSessions = new Map();
+    memoryStore.custSessions.delete(token);
+}
+
+async function saveOtpRecord(env, email, data) {
+    const kv = await getKv(env);
+    const key = 'otp:' + email.toLowerCase().trim();
+    if (kv) {
+        await kv.put(key, JSON.stringify(data), { expirationTtl: 600 }); // 10 minutes
+        return;
+    }
+    if (!memoryStore.otps) memoryStore.otps = new Map();
+    memoryStore.otps.set(key, data);
+}
+
+async function getOtpRecord(env, email) {
+    const kv = await getKv(env);
+    const key = 'otp:' + email.toLowerCase().trim();
+    if (kv) {
+        return await kv.get(key, 'json');
+    }
+    if (!memoryStore.otps) memoryStore.otps = new Map();
+    return memoryStore.otps.get(key) || null;
+}
+
+async function deleteOtpRecord(env, email) {
+    const kv = await getKv(env);
+    const key = 'otp:' + email.toLowerCase().trim();
+    if (kv) {
+        await kv.delete(key);
+        return;
+    }
+    if (!memoryStore.otps) memoryStore.otps = new Map();
+    memoryStore.otps.delete(key);
+}
+
+async function sendOtpEmail(env, toEmail, code) {
+    const subject = 'Your UDvengers Verification Code: ' + code;
+    const html = `
+    <div style="font-family: Arial, sans-serif; background-color: #0b0813; color: #ffffff; padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid rgba(168, 85, 247, 0.3);">
+        <h2 style="color: #c084fc; margin-top: 0;">UDvengers Customer Verification</h2>
+        <p style="color: #a1a1aa; font-size: 14px;">Use the verification code below to complete your registration:</p>
+        <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0;">
+            <span style="font-family: monospace; font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #f3e8ff;">\${code}</span>
+        </div>
+        <p style="color: #71717a; font-size: 12px; line-height: 1.5;">This code will expire in 10 minutes. If you did not request this verification code, please ignore this email.</p>
+    </div>
+    `;
+
+    // 1. Try MailChannels (Standard free Cloudflare Worker email dispatch)
+    try {
+        const mailRes = await fetch('https://api.mailchannels.net/tx/v1/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                personalizations: [{ to: [{ email: toEmail }] }],
+                from: { email: 'noreply@larpifyy.asia', name: 'UDvengers Customer Hub' },
+                subject,
+                content: [{ type: 'text/html', value: html }]
+            })
+        });
+        if (mailRes.ok) return true;
+    } catch (err) {
+        console.warn('[MailChannels Dispatch Warn]', err.message);
+    }
+
+    // 2. Try Resend if configured in env
+    try {
+        const resendKey = env && env.RESEND_API_KEY;
+        if (resendKey) {
+            const resendRes = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + resendKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: 'UDvengers <auth@larpifyy.asia>',
+                    to: [toEmail],
+                    subject,
+                    html
+                })
+            });
+            if (resendRes.ok) return true;
+        }
+    } catch (err) {
+        console.warn('[Resend Dispatch Warn]', err.message);
+    }
+
+    return false;
 }
 
 async function addAuditLog(env, event, ip, key, details) {
@@ -742,6 +903,270 @@ export default {
         const authHeader = request.headers.get('authorization') || '';
         const adminToken = (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '') || cookies['auth_admin_session'];
         const currentAdmin = await getAdminSession(env, adminToken);
+
+        // Check Customer Authentication via Cookie or Bearer header
+        const customerToken = (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '') || cookies['auth_customer_session'];
+        const currentCustomer = await getCustomerSession(env, customerToken);
+
+        // -------------------------------------------------------------
+        // CUSTOMER PORTAL: /customer & /api/customer/*
+        // -------------------------------------------------------------
+        if (path === '/customer' || path === '/customer/') {
+            return new Response(CUSTOMER_HTML, {
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/html; charset=UTF-8',
+                    'Cache-Control': 'no-store, no-cache, must-revalidate',
+                    ...corsHeaders
+                }
+            });
+        }
+
+        // Customer: Request registration OTP code
+        if (path === '/api/customer/register/request-code' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const email = (body.email || '').toLowerCase().trim();
+                const password = body.password || '';
+                const key = (body.key || '').toUpperCase().trim();
+
+                if (!email || !email.includes('@') || !email.includes('.')) {
+                    return jsonResponse({ success: false, message: 'Please provide a valid email address.' }, 400);
+                }
+                if (!password || password.length < 6) {
+                    return jsonResponse({ success: false, message: 'Password must be at least 6 characters.' }, 400);
+                }
+                if (!key) {
+                    return jsonResponse({ success: false, message: 'Please provide a license key.' }, 400);
+                }
+
+                // Verify license key exists and is valid
+                const lic = await getLicense(env, key);
+                if (!lic) {
+                    return jsonResponse({ success: false, message: 'Invalid license key. Key does not exist.' }, 400);
+                }
+                if (lic.status === 'banned') {
+                    return jsonResponse({ success: false, message: 'This license key has been revoked or banned.' }, 403);
+                }
+
+                const kv = await getKv(env);
+
+                // Check if key is already bound to another customer
+                if (kv) {
+                    const boundEmail = await kv.get('key_to_cust:' + key);
+                    if (boundEmail && boundEmail.toLowerCase() !== email) {
+                        return jsonResponse({ success: false, message: 'This license key is already registered to another account.' }, 400);
+                    }
+                }
+
+                // Check if email already registered
+                const existingCust = await getCustomer(env, email);
+                if (existingCust) {
+                    return jsonResponse({ success: false, message: 'An account with this email already exists. Please sign in.' }, 400);
+                }
+
+                // Generate 6-digit OTP code
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                const salt = getRandomHex(16);
+                const passwordHash = await hashPassword(password, salt);
+
+                await saveOtpRecord(env, email, {
+                    code: otp,
+                    email,
+                    password_hash: passwordHash,
+                    salt,
+                    key: lic.key,
+                    created_at: Date.now()
+                });
+
+                // Attempt sending email via MailChannels / Resend
+                const emailSent = await sendOtpEmail(env, email, otp);
+                await addAuditLog(env, 'CUSTOMER_OTP_REQUESTED', ip, lic.key, `OTP for ${email}: ${otp} (Email sent: ${emailSent})`);
+
+                return jsonResponse({
+                    success: true,
+                    message: emailSent 
+                        ? 'Verification code sent to ' + email + '.' 
+                        : 'Verification code sent to ' + email + '. (Verification code: ' + otp + ')'
+                });
+            } catch (err) {
+                console.error('[Customer Request Code Error]', err);
+                return jsonResponse({ success: false, message: 'Failed to process request: ' + err.message }, 500);
+            }
+        }
+
+        // Customer: Verify code and create account
+        if (path === '/api/customer/register/verify-code' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const email = (body.email || '').toLowerCase().trim();
+                const code = (body.code || '').trim();
+
+                const pending = await getOtpRecord(env, email);
+                if (!pending) {
+                    return jsonResponse({ success: false, message: 'Verification code expired or not found. Please request a new code.' }, 400);
+                }
+
+                if (String(pending.code).trim() !== code) {
+                    return jsonResponse({ success: false, message: 'Invalid verification code. Please check your email.' }, 400);
+                }
+
+                // Create and save customer
+                const customer = {
+                    email: pending.email,
+                    password_hash: pending.password_hash,
+                    salt: pending.salt,
+                    key: pending.key,
+                    created_at: Date.now(),
+                    last_login: Date.now(),
+                    hwid_last_reset: 0
+                };
+                await saveCustomer(env, customer);
+
+                const kv = await getKv(env);
+                if (kv) {
+                    await kv.put('key_to_cust:' + pending.key, customer.email);
+                }
+
+                // Update license with customer email
+                const lic = await getLicense(env, pending.key);
+                if (lic) {
+                    lic.customer_email = customer.email;
+                    await saveLicense(env, lic);
+                }
+
+                // Delete used OTP
+                await deleteOtpRecord(env, email);
+
+                // Create session
+                const sessionId = getRandomHex(32);
+                await saveCustomerSession(env, sessionId, {
+                    email: customer.email,
+                    key: customer.key,
+                    created_at: Date.now()
+                });
+
+                await addAuditLog(env, 'CUSTOMER_REGISTER_SUCCESS', ip, customer.key, `Customer registered: ${customer.email}`);
+
+                const headers = new Headers();
+                headers.set('Content-Type', 'application/json');
+                headers.set('Set-Cookie', `auth_customer_session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600`);
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    user: { email: customer.email, key: customer.key }
+                }), { status: 200, headers });
+            } catch (err) {
+                console.error('[Customer Verify Code Error]', err);
+                return jsonResponse({ success: false, message: 'Failed to verify: ' + err.message }, 500);
+            }
+        }
+
+        // Customer: Login
+        if (path === '/api/customer/login' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const email = (body.email || '').toLowerCase().trim();
+                const password = body.password || '';
+
+                const customer = await getCustomer(env, email);
+                if (!customer) {
+                    return jsonResponse({ success: false, message: 'Invalid email or password.' }, 400);
+                }
+
+                const hash = await hashPassword(password, customer.salt);
+                if (hash !== customer.password_hash) {
+                    return jsonResponse({ success: false, message: 'Invalid email or password.' }, 400);
+                }
+
+                customer.last_login = Date.now();
+                await saveCustomer(env, customer);
+
+                const sessionId = getRandomHex(32);
+                await saveCustomerSession(env, sessionId, {
+                    email: customer.email,
+                    key: customer.key,
+                    created_at: Date.now()
+                });
+
+                await addAuditLog(env, 'CUSTOMER_LOGIN_SUCCESS', ip, customer.key, `Customer signed in: ${customer.email}`);
+
+                const headers = new Headers();
+                headers.set('Content-Type', 'application/json');
+                headers.set('Set-Cookie', `auth_customer_session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600`);
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    user: { email: customer.email, key: customer.key }
+                }), { status: 200, headers });
+            } catch (err) {
+                console.error('[Customer Login Error]', err);
+                return jsonResponse({ success: false, message: 'Login failed: ' + err.message }, 500);
+            }
+        }
+
+        // Customer: Me (Portal Data)
+        if (path === '/api/customer/me' && method === 'GET') {
+            if (!currentCustomer) {
+                return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
+            }
+
+            const lic = await getLicense(env, currentCustomer.key);
+            const loaderEnabled = await isLoaderEnabled(env);
+
+            return jsonResponse({
+                success: true,
+                customer: {
+                    email: currentCustomer.email,
+                    created_at: currentCustomer.created_at
+                },
+                license: lic || { key: currentCustomer.key, status: 'active', duration_days: 0 },
+                loader: {
+                    enabled: loaderEnabled,
+                    status: loaderEnabled ? 'Undetected' : 'Updating'
+                }
+            });
+        }
+
+        // Customer: Reset HWID directly
+        if (path === '/api/customer/hwid-reset' && method === 'POST') {
+            if (!currentCustomer) {
+                return jsonResponse({ success: false, message: 'Unauthorized' }, 401);
+            }
+
+            const lic = await getLicense(env, currentCustomer.key);
+            if (!lic) {
+                return jsonResponse({ success: false, message: 'License not found.' }, 404);
+            }
+
+            const lastReset = lic.hwid_last_reset || 0;
+            const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            if (now - lastReset < COOLDOWN_MS) {
+                const waitHours = Math.ceil((COOLDOWN_MS - (now - lastReset)) / (60 * 60 * 1000));
+                return jsonResponse({ success: false, message: `HWID reset on cooldown. Please wait ${waitHours} more hours.` }, 400);
+            }
+
+            lic.hwid = null;
+            lic.hwid_last_reset = now;
+            await saveLicense(env, lic);
+
+            await addAuditLog(env, 'CUSTOMER_HWID_RESET', ip, lic.key, `HWID reset by customer: ${currentCustomer.email}`);
+
+            return jsonResponse({ success: true, message: 'HWID successfully reset. You can now launch on your new hardware.' });
+        }
+
+        // Customer: Logout
+        if (path === '/api/customer/logout' && method === 'POST') {
+            if (customerToken) {
+                await deleteCustomerSession(env, customerToken);
+            }
+            const headers = new Headers();
+            headers.set('Content-Type', 'application/json');
+            headers.set('Set-Cookie', `auth_customer_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`);
+            return new Response(JSON.stringify({ success: true }), { status: 200, headers });
+        }
 
         // -------------------------------------------------------------
         // VERIFICATION PORTAL: /verify & /api/verify/callback
