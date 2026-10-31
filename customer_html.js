@@ -394,36 +394,38 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 3. TAB: HWID RESET -->
+                <!-- 3. TAB: HWID RESET (MATCHES DOWNLOAD CARD STYLE) -->
                 <div id="contentHwid" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
-                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
-                        <div class="border-b border-[#1a1c24] pb-4">
-                            <h3 class="text-sm font-bold text-white">Hardware ID Management</h3>
-                            <p class="text-xs text-neutral-400">Reset your hardware link if you updated PC components or reinstalled Windows.</p>
-                        </div>
-
-                        <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-5 space-y-3.5 text-xs">
-                            <div class="flex items-center justify-between">
-                                <span class="text-neutral-400 font-medium">Currently Linked Hardware:</span>
-                                <span id="hwidCurrentDisplay" class="font-mono font-semibold text-white">Unbound</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-neutral-400 font-medium">Reset Cooldown Policy:</span>
-                                <span class="text-neutral-300 font-medium">1 reset per 24 hours</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-neutral-400 font-medium">Cooldown Status:</span>
-                                <span id="hwidCooldownDisplay" class="text-emerald-400 font-semibold font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Available</span>
+                    <div class="flex flex-col sm:flex-row items-start gap-6">
+                        <!-- HWID Product Card at Top-Left -->
+                        <div class="w-full sm:w-80 bg-[#0f1117] border border-[#1e222d] rounded-2xl overflow-hidden shadow-2xl transition hover:border-[#2d3242]">
+                            <!-- Cover Banner / Image Icon -->
+                            <div class="relative w-full aspect-[16/9] bg-[#090a0e] overflow-hidden border-b border-[#1e222d]">
+                                <img src="/assets/download_icon.png" onerror="this.src='https://cdn.discordapp.com/attachments/1526175746169503854/1566122431121195059/images.png?ex=6ae764ac&is=6ae6132c&hm=587594191f3f458c9c07934dccfee736fd8af38d42e30a19156a7533e4bcd958&'" alt="HWID Lock" class="w-full h-full object-cover">
+                                <span id="hwidCooldownBadge" class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
+                                    Available
+                                </span>
                             </div>
 
-                            <div class="pt-2">
-                                <button onclick="requestHwidReset()" id="btnResetHwid" class="w-full py-2.5 rounded-lg btn-saas text-xs font-semibold shadow-sm transition">
-                                    Reset Hardware Link
+                            <!-- Card Body with Info & Reset Button -->
+                            <div class="p-5 space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-bold text-white font-mono">Fortnite External</span>
+                                        <span id="hwidCooldownDisplay" class="text-xs text-neutral-400 font-sans">1 reset / 24h</span>
+                                    </div>
+                                    <div class="mt-2 text-[11px] text-neutral-400">
+                                        <span>Linked HWID: </span>
+                                        <span id="hwidCurrentDisplay" class="font-mono text-neutral-300 font-medium">Unbound</span>
+                                    </div>
+                                </div>
+
+                                <button onclick="requestHwidReset()" id="btnResetHwid" class="btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Reset Hwid</span>
                                 </button>
                             </div>
                         </div>
-
-                        <p class="text-xs text-neutral-500">Launching Loader.exe on your new system will automatically link your new hardware signature.</p>
                     </div>
                 </div>
 
@@ -933,7 +935,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 showToast('Network error: ' + err.message, true);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>Reset Hardware Link</span>';
+                btn.innerHTML = '<span>Reset Hwid</span>';
             }
         }
 
@@ -973,7 +975,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 const hwidText = currentLicense.hwid ? (currentLicense.hwid.substring(0, 10) + '...') : 'Unbound';
                 document.getElementById('dashHwid').textContent = hwidText;
-                document.getElementById('hwidCurrentDisplay').textContent = currentLicense.hwid || 'Unbound (Ready to link)';
+                document.getElementById('hwidCurrentDisplay').textContent = currentLicense.hwid ? (currentLicense.hwid.substring(0, 14) + '...') : 'Unbound';
 
                 // Discord ID
                 const discordEl = document.getElementById('dashDiscordId');
@@ -986,17 +988,24 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 const now = Date.now();
                 const cooldownMs = 24 * 60 * 60 * 1000;
                 const cooldownEl = document.getElementById('hwidCooldownDisplay');
+                const cooldownBadge = document.getElementById('hwidCooldownBadge');
                 const resetBtn = document.getElementById('btnResetHwid');
 
                 if (now - lastReset < cooldownMs) {
                     const remainingHours = Math.ceil((cooldownMs - (now - lastReset)) / (60 * 60 * 1000));
-                    cooldownEl.textContent = 'Cooldown (' + remainingHours + 'h remaining)';
-                    cooldownEl.className = 'text-amber-400 font-semibold font-mono bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20';
+                    if (cooldownEl) cooldownEl.textContent = remainingHours + 'h remaining';
+                    if (cooldownBadge) {
+                        cooldownBadge.textContent = 'Cooldown (' + remainingHours + 'h)';
+                        cooldownBadge.className = 'absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md';
+                    }
                     resetBtn.disabled = true;
                     resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
-                    cooldownEl.textContent = 'Available';
-                    cooldownEl.className = 'text-emerald-400 font-semibold font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20';
+                    if (cooldownEl) cooldownEl.textContent = '1 reset / 24h';
+                    if (cooldownBadge) {
+                        cooldownBadge.textContent = 'Available';
+                        cooldownBadge.className = 'absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md';
+                    }
                     resetBtn.disabled = false;
                     resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
