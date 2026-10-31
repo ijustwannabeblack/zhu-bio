@@ -11,8 +11,8 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #07070a;
-            color: #ececed;
+            background-color: #f8fafc;
+            color: #0f172a;
             letter-spacing: -0.01em;
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
@@ -20,112 +20,136 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
-        .panel {
-            background: #0f0d17;
-            border: 1px solid rgba(168, 85, 247, 0.16);
-            border-radius: 14px;
+        .card-white {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         }
-        .input-field {
-            background: #0b0912;
-            border: 1px solid rgba(168, 85, 247, 0.22);
-            color: #ffffff;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        .input-box {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            transition: all 0.15s ease;
         }
-        .input-field:focus {
+        .input-box:focus {
             outline: none;
-            border-color: #a855f7;
-            box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.35);
+            border-color: #005b7f;
+            box-shadow: 0 0 0 3px rgba(0, 91, 127, 0.12);
         }
-        .btn-primary {
-            background: #9333ea;
+        .btn-saas {
+            background-color: #005b7f;
             color: #ffffff;
-            transition: background 0.15s ease, opacity 0.15s ease;
+            transition: all 0.15s ease;
         }
-        .btn-primary:hover {
-            background: #a855f7;
+        .btn-saas:hover {
+            background-color: #004763;
         }
-        .btn-primary:disabled {
-            opacity: 0.5;
+        .btn-saas:disabled {
+            opacity: 0.55;
             cursor: not-allowed;
         }
     </style>
 </head>
-<body class="selection:bg-purple-900/60 selection:text-white flex flex-col justify-between">
+<body class="selection:bg-sky-100 selection:text-sky-900">
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-neutral-900 border border-purple-500/30 text-neutral-100 text-xs shadow-2xl">
-        <span id="toastDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span id="toastMsg">Notification</span>
+    <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs shadow-xl">
+        <span id="toastDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span id="toastMsg" class="font-medium">Notification</span>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 1. AUTH MODAL VIEW (SHOWN IF USER IS NOT LOGGED IN) -->
+    <!-- 1. AUTH MODAL VIEW (MATCHING IMAGE 2 "Welcome back!")         -->
     <!-- ============================================================ -->
-    <div id="authView" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="panel w-full max-w-sm p-6 relative overflow-hidden">
+    <div id="authView" class="hidden min-h-screen bg-[#f1f5f9] flex items-center justify-center p-4">
+        <div class="card-white w-full max-w-sm p-8 shadow-xl relative bg-white">
 
-            <!-- Brand Header -->
+            <!-- Title & Welcome Header matching Image 2 -->
             <div class="text-center mb-6">
-                <div class="inline-flex items-center gap-2 mb-1">
-                    <span class="font-bold text-base tracking-tight text-white">UDvengers</span>
-                    <span class="text-[10px] font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">Customer</span>
+                <div class="inline-flex items-center gap-2 mb-2">
+                    <div class="w-6 h-6 rounded-md bg-[#005b7f] text-white flex items-center justify-center font-bold text-xs">U</div>
+                    <span class="font-bold text-base tracking-tight text-gray-900">UDvengers</span>
                 </div>
-                <p class="text-xs text-neutral-400">Sign in or register your license key.</p>
+                <h1 class="text-2xl font-bold text-[#0f172a] tracking-tight">Welcome back!</h1>
+                <p class="text-xs text-gray-500 mt-1">Sign in to your customer dashboard</p>
             </div>
 
-            <!-- Tab Switcher: Sign In / Register -->
-            <div class="flex p-1 bg-neutral-900/80 rounded-lg border border-neutral-800 mb-5">
-                <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-medium rounded-md transition text-white bg-purple-600/90 shadow-sm">
-                    Sign In
+            <!-- Tab Switcher: Log In / Register Key -->
+            <div class="flex p-1 bg-gray-100 rounded-lg mb-6 border border-gray-200">
+                <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm">
+                    Log in
                 </button>
-                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white">
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-medium rounded-md transition text-gray-500 hover:text-gray-900">
                     Register Key
                 </button>
             </div>
 
-            <!-- TAB A: SIGN IN FORM -->
-            <form id="signInForm" onsubmit="handleSignIn(event)" class="space-y-3.5">
+            <!-- TAB A: SIGN IN FORM (EXACT INPUT & EYE DESIGN FROM IMAGE 2) -->
+            <form id="signInForm" onsubmit="handleSignIn(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-neutral-300 mb-1">Email</label>
-                    <input type="email" id="loginEmail" required placeholder="you@domain.com" class="input-field w-full px-3 py-2 rounded-lg text-xs placeholder-neutral-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-neutral-300 mb-1">Password</label>
-                    <input type="password" id="loginPassword" required placeholder="••••••••••••" class="input-field w-full px-3 py-2 rounded-lg text-xs placeholder-neutral-500">
+                    <div class="flex items-center gap-1.5 mb-1.5">
+                        <label class="text-xs font-medium text-gray-700">Customer email or license</label>
+                        <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#005b7f] text-white text-[9px] font-bold cursor-help" title="Enter your account email">?</span>
+                    </div>
+                    <input type="email" id="loginEmail" required placeholder="Customer email or license" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
                 </div>
 
-                <div id="loginError" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5"></div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Password</label>
+                    <div class="flex items-stretch rounded-lg border border-gray-300 focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-white transition overflow-hidden">
+                        <input type="password" id="loginPassword" required placeholder="Password" class="w-full px-3.5 py-2.5 text-xs text-gray-900 bg-transparent outline-none placeholder-gray-400">
+                        <button type="button" onclick="toggleInputPassword('loginPassword', this)" class="px-3 border-l border-gray-200 text-gray-400 hover:text-gray-600 bg-gray-50 flex items-center justify-center transition" title="Show/Hide Password">
+                            <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
 
-                <button type="submit" id="btnSignInSubmit" class="btn-primary w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide flex items-center justify-center gap-1.5 mt-2">
-                    <span>Sign In</span>
+                <div id="loginError" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5"></div>
+
+                <button type="submit" id="btnSignInSubmit" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
+                    <span>Log in</span>
                 </button>
+
+                <div class="text-center pt-2">
+                    <span class="text-xs text-gray-500">Forgot password? </span>
+                    <a href="javascript:void(0)" onclick="showToast('Please open a ticket in Discord for password reset.')" class="text-xs text-[#005b7f] font-semibold hover:underline">Reset</a>
+                </div>
             </form>
 
-            <!-- TAB B: REGISTER STEP 1 (Email, Discord ID, Password, Key) -->
+            <!-- TAB B: REGISTER STEP 1 (Email, Discord User ID, Password, License Key) -->
             <form id="registerStep1Form" onsubmit="handleRequestOtp(event)" class="hidden space-y-3.5">
                 <div>
-                    <label class="block text-xs font-medium text-neutral-300 mb-1">Email</label>
-                    <input type="email" id="regEmail" required placeholder="you@domain.com" class="input-field w-full px-3 py-2 rounded-lg text-xs placeholder-neutral-500">
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Email address</label>
+                    <input type="email" id="regEmail" required placeholder="you@domain.com" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
                 </div>
+
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="text-xs font-medium text-neutral-300">Discord User ID</label>
-                        <span class="text-[10px] text-neutral-500">For server roles</span>
+                        <label class="text-xs font-medium text-gray-700">Discord User ID</label>
+                        <span class="text-[10px] text-gray-400">For Discord roles</span>
                     </div>
-                    <input type="text" id="regDiscordId" required placeholder="e.g. 1415022792214052915" class="input-field w-full px-3 py-2 rounded-lg text-xs font-mono placeholder-neutral-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-neutral-300 mb-1">Password</label>
-                    <input type="password" id="regPassword" required minlength="6" placeholder="At least 6 characters" class="input-field w-full px-3 py-2 rounded-lg text-xs placeholder-neutral-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-neutral-300 mb-1">License Key</label>
-                    <input type="text" id="regKey" required placeholder="LIFETIME-XXXX-XXXX-XXXX" class="input-field w-full px-3 py-2 rounded-lg text-xs font-mono uppercase tracking-wider placeholder-neutral-500">
+                    <input type="text" id="regDiscordId" required placeholder="e.g. 1415022792214052915" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs font-mono placeholder-gray-400">
                 </div>
 
-                <div id="regStep1Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5"></div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
+                    <div class="flex items-stretch rounded-lg border border-gray-300 focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-white transition overflow-hidden">
+                        <input type="password" id="regPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-gray-900 bg-transparent outline-none placeholder-gray-400">
+                        <button type="button" onclick="toggleInputPassword('regPassword', this)" class="px-3 border-l border-gray-200 text-gray-400 hover:text-gray-600 bg-gray-50 flex items-center justify-center transition">
+                            <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
 
-                <button type="submit" id="btnRequestOtp" class="btn-primary w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide flex items-center justify-center gap-1.5 mt-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">License Key</label>
+                    <input type="text" id="regKey" required placeholder="LIFETIME-XXXX-XXXX-XXXX" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider placeholder-gray-400">
+                </div>
+
+                <div id="regStep1Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5"></div>
+
+                <button type="submit" id="btnRequestOtp" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
                     <span>Continue & Send Code</span>
                 </button>
             </form>
@@ -133,213 +157,259 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             <!-- TAB B: REGISTER STEP 2 (Enter OTP Code) -->
             <form id="registerStep2Form" onsubmit="handleVerifyOtp(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
-                    <h3 class="text-xs font-semibold text-white">Verification Code Sent</h3>
-                    <p class="text-[11px] text-neutral-400 mt-1">Check your inbox at <span id="displayOtpEmail" class="text-purple-300 font-medium"></span></p>
+                    <h3 class="text-xs font-semibold text-gray-900">Verification Code Sent</h3>
+                    <p class="text-[11px] text-gray-500 mt-1">Check your inbox at <span id="displayOtpEmail" class="text-[#005b7f] font-semibold"></span></p>
                 </div>
 
                 <div>
-                    <input type="text" id="otpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-field w-full px-4 py-2.5 rounded-lg text-center text-lg font-mono tracking-[0.4em] placeholder-neutral-600 focus:tracking-[0.4em]">
+                    <input type="text" id="otpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-box w-full px-4 py-3 rounded-lg text-center text-lg font-mono tracking-[0.4em] placeholder-gray-300 focus:tracking-[0.4em]">
                 </div>
 
-                <div id="regStep2Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5 text-center"></div>
+                <div id="regStep2Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5 text-center"></div>
 
-                <button type="submit" id="btnVerifyOtp" class="btn-primary w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide flex items-center justify-center gap-1.5">
-                    <span>Verify & Enter Portal</span>
+                <button type="submit" id="btnVerifyOtp" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5">
+                    <span>Verify & Enter Dashboard</span>
                 </button>
 
                 <div class="flex items-center justify-between text-[11px] pt-1">
-                    <button type="button" onclick="backToStep1()" class="text-neutral-400 hover:text-white transition">← Change details</button>
-                    <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-purple-400 hover:text-purple-300 transition">Resend code</button>
+                    <button type="button" onclick="backToStep1()" class="text-gray-500 hover:text-gray-900 transition">← Change details</button>
+                    <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-[#005b7f] hover:underline font-semibold transition">Resend code</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 2. CUSTOMER DASHBOARD PANEL (SHOWN WHEN LOGGED IN) -->
+    <!-- 2. CUSTOMER DASHBOARD (MATCHING IMAGE 1 - VALYN SAAS WITH LEFT TABS) -->
     <!-- ============================================================ -->
-    <div id="portalView" class="hidden min-h-screen flex flex-col">
-        <!-- TOP NAVIGATION BAR -->
-        <header class="border-b border-neutral-800 bg-[#09080e]/90 backdrop-blur-md sticky top-0 z-30">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-sm tracking-tight text-white">UDvengers</span>
-                    <span class="text-[10px] font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">Customer</span>
+    <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#f8fafc]">
+
+        <!-- LEFT SIDEBAR -->
+        <aside class="w-full md:w-60 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Brand Header matching Valyn -->
+                <div class="h-16 px-5 border-b border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-[#005b7f] text-white flex items-center justify-center font-bold text-xs shadow-sm">U</div>
+                        <span class="font-bold text-base tracking-tight text-gray-900">UDvengers</span>
+                    </div>
+                    <span class="text-[10px] font-semibold text-[#005b7f] bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full">Customer</span>
                 </div>
 
-                <!-- User Email & Minimalist Logout -->
-                <div class="flex items-center gap-3">
-                    <span id="headerUserEmail" class="text-xs text-neutral-300 font-medium">user@email.com</span>
-                    <span class="text-neutral-700">•</span>
-                    <button onclick="handleLogout()" class="text-xs text-neutral-400 hover:text-rose-400 transition">Log out</button>
-                </div>
-            </div>
+                <!-- Navigation Section -->
+                <div class="p-3 space-y-1">
+                    <div class="px-3 pt-3 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Main</div>
 
-            <!-- SUB-NAV: SLEEK HORIZONTAL TABS -->
-            <div class="border-t border-neutral-800/60 bg-[#07060b]">
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto py-1.5">
-                    <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white bg-purple-600/25 border border-purple-500/40 transition shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#005b7f] bg-sky-50 border border-sky-100 transition text-left">
+                        <svg class="w-4 h-4 text-[#005b7f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                         <span>Dashboard</span>
                     </button>
-                    <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Downloads</span>
+
+                    <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Client Downloads</span>
                     </button>
-                    <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+
+                    <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         <span>HWID Reset</span>
                     </button>
-                    <button onclick="switchPortalTab('guide')" id="pTabGuide" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+
+                    <button onclick="switchPortalTab('guide')" id="pTabGuide" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         <span>Setup Guide</span>
                     </button>
                 </div>
             </div>
-        </header>
 
-        <!-- MAIN LAYOUT -->
-        <main class="max-w-4xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-5 flex-1">
-
-            <!-- 1. TAB: DASHBOARD OVERVIEW -->
-            <div id="contentDashboard" class="space-y-4">
-                <div class="panel p-5 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-neutral-800">
-                        <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Active License</h3>
-                        <span id="dashLicenseBadge" class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
-                    </div>
-
-                    <!-- Masked Key Display -->
-                    <div class="bg-[#0b0912] border border-neutral-800 rounded-lg p-3.5 flex items-center justify-between">
-                        <div>
-                            <span class="text-[10px] text-neutral-500 block mb-0.5">KEY</span>
-                            <span id="dashKeyText" class="text-xs font-mono text-neutral-200 tracking-wider">••••••••••••••••••••••••</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="toggleKeyVisibility()" class="p-1.5 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition" title="Show/Hide">
-                                <svg id="eyeIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            </button>
-                            <button onclick="copyLicenseKey()" class="p-1.5 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-purple-300 transition" title="Copy Key">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            </button>
+            <!-- User Profile in Sidebar Bottom -->
+            <div class="p-3 border-t border-gray-200">
+                <div class="p-2.5 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center gap-2 min-w-0 pr-2">
+                        <div class="w-7 h-7 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-xs shrink-0" id="userAvatar">U</div>
+                        <div class="min-w-0">
+                            <div id="headerUserEmail" class="text-xs font-semibold text-gray-900 truncate">user@email.com</div>
+                            <div class="text-[10px] text-gray-500 font-medium">Verified Customer</div>
                         </div>
                     </div>
-
-                    <!-- Subscription Details Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs pt-1">
-                        <div class="bg-neutral-900/40 border border-neutral-800/80 rounded-lg p-3">
-                            <span class="text-neutral-500 text-[10px] block mb-0.5">DURATION</span>
-                            <span id="dashDuration" class="text-white font-medium">Lifetime</span>
-                        </div>
-                        <div class="bg-neutral-900/40 border border-neutral-800/80 rounded-lg p-3">
-                            <span class="text-neutral-500 text-[10px] block mb-0.5">EXPIRES</span>
-                            <span id="dashExpires" class="text-white font-medium">Never</span>
-                        </div>
-                        <div class="bg-neutral-900/40 border border-neutral-800/80 rounded-lg p-3">
-                            <span class="text-neutral-500 text-[10px] block mb-0.5">DISCORD ID</span>
-                            <span id="dashDiscordId" class="font-mono text-purple-300 text-xs truncate block">Linked</span>
-                        </div>
-                        <div class="bg-neutral-900/40 border border-neutral-800/80 rounded-lg p-3">
-                            <span class="text-neutral-500 text-[10px] block mb-0.5">HARDWARE (HWID)</span>
-                            <span id="dashHwid" class="font-mono text-neutral-300 text-xs truncate block">Unbound</span>
-                        </div>
-                    </div>
+                    <button onclick="handleLogout()" class="p-1.5 text-gray-400 hover:text-rose-600 transition" title="Log Out">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
                 </div>
             </div>
+        </aside>
 
-            <!-- 2. TAB: DOWNLOADS -->
-            <div id="contentDownloads" class="hidden space-y-4">
-                <div class="panel p-5 space-y-4">
-                    <div class="border-b border-neutral-800 pb-3">
-                        <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Client Download</h3>
-                        <p class="text-xs text-neutral-400 mt-0.5">Run as Administrator on Windows 10/11.</p>
-                    </div>
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 min-h-screen flex flex-col bg-[#f8fafc]">
 
-                    <div class="bg-[#0b0912] border border-neutral-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-semibold text-white font-mono">Loader.exe</span>
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20">Release</span>
-                            </div>
-                            <p class="text-xs text-neutral-400 mt-0.5">64-bit Executable • Size: 8.2 MB</p>
-                        </div>
-                        <a href="/assets/Loader.exe" download="Loader.exe" class="btn-primary px-4 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Download Loader</span>
-                        </a>
-                    </div>
+            <!-- Top Header matching Valyn -->
+            <header class="h-16 bg-white border-b border-gray-200 px-6 sm:px-8 flex items-center justify-between">
+                <div>
+                    <h2 id="topBarTitle" class="text-base font-bold text-gray-900">Dashboard</h2>
+                    <p class="text-xs text-gray-500">Manage your subscription and client access</p>
                 </div>
-            </div>
-
-            <!-- 3. TAB: HWID RESET -->
-            <div id="contentHwid" class="hidden space-y-4">
-                <div class="panel p-5 space-y-4">
-                    <div class="border-b border-neutral-800 pb-3">
-                        <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Hardware Management</h3>
-                        <p class="text-xs text-neutral-400 mt-0.5">Reset your hardware link once every 24 hours.</p>
-                    </div>
-
-                    <div class="bg-[#0b0912] border border-neutral-800 rounded-lg p-4 space-y-3 text-xs">
-                        <div class="flex items-center justify-between">
-                            <span class="text-neutral-400">Current HWID:</span>
-                            <span id="hwidCurrentDisplay" class="font-mono text-purple-300">Unbound</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-neutral-400">Status:</span>
-                            <span id="hwidCooldownDisplay" class="text-emerald-400 font-medium">Available</span>
-                        </div>
-
-                        <div class="pt-2">
-                            <button onclick="requestHwidReset()" id="btnResetHwid" class="w-full py-2.5 rounded-lg bg-purple-600/90 hover:bg-purple-600 text-white text-xs font-semibold transition">
-                                Reset Hardware Link
-                            </button>
-                        </div>
-                    </div>
-
-                    <p class="text-[11px] text-neutral-500">Launching the Loader on your new PC will automatically bind your hardware configuration.</p>
+                <div class="flex items-center gap-3">
+                    <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                    </span>
                 </div>
-            </div>
+            </header>
 
-            <!-- 4. TAB: SETUP GUIDE -->
-            <div id="contentGuide" class="hidden space-y-4">
-                <div class="panel p-5 space-y-4">
-                    <div class="border-b border-neutral-800 pb-3">
-                        <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Setup Instructions</h3>
-                        <p class="text-xs text-neutral-400 mt-0.5">Follow these 3 quick steps to run the client.</p>
-                    </div>
+            <!-- Dynamic Content -->
+            <main class="flex-1 p-6 sm:p-8 max-w-5xl space-y-6">
 
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 p-3.5 rounded-lg bg-[#0b0912] border border-neutral-800">
-                            <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 text-xs font-semibold flex items-center justify-center shrink-0 border border-purple-500/20">1</span>
+                <!-- 1. TAB: DASHBOARD -->
+                <div id="contentDashboard" class="space-y-6">
+                    <div class="card-white p-6 space-y-5">
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
                             <div>
-                                <div class="text-xs font-medium text-white">Extract & Exclude</div>
-                                <div class="text-xs text-neutral-400 mt-0.5">Download Loader.exe and place it in a designated folder or USB drive. Add the folder to your antivirus exclusions.</div>
+                                <h3 class="text-sm font-bold text-gray-900">Subscription License</h3>
+                                <p class="text-xs text-gray-500">Your unique cryptographic key for loader authentication.</p>
+                            </div>
+                            <span class="text-xs font-semibold text-[#005b7f] bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">Registered</span>
+                        </div>
+
+                        <!-- Masked Key Box -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block mb-0.5">LICENSE KEY</span>
+                                <span id="dashKeyText" class="text-sm font-mono font-medium text-gray-800 tracking-wider">••••••••••••••••••••••••</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="toggleKeyVisibility()" class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-600 hover:text-gray-900 text-xs font-medium transition shadow-sm" title="Show/Hide">
+                                    <span id="eyeText">Show</span>
+                                </button>
+                                <button onclick="copyLicenseKey()" class="px-3 py-1.5 rounded-lg btn-saas text-white text-xs font-semibold transition shadow-sm" title="Copy Key">
+                                    Copy Key
+                                </button>
                             </div>
                         </div>
 
-                        <div class="flex items-start gap-3 p-3.5 rounded-lg bg-[#0b0912] border border-neutral-800">
-                            <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 text-xs font-semibold flex items-center justify-center shrink-0 border border-purple-500/20">2</span>
-                            <div>
-                                <div class="text-xs font-medium text-white">Run as Administrator</div>
-                                <div class="text-xs text-neutral-400 mt-0.5">Right-click <span class="text-purple-300 font-mono">Loader.exe</span> and click <strong>Run as administrator</strong>.</div>
+                        <!-- Stat Cards Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                            <div class="card-white p-4">
+                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">DURATION</span>
+                                <span id="dashDuration" class="text-sm font-bold text-gray-900">Lifetime</span>
                             </div>
-                        </div>
-
-                        <div class="flex items-start gap-3 p-3.5 rounded-lg bg-[#0b0912] border border-neutral-800">
-                            <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 text-xs font-semibold flex items-center justify-center shrink-0 border border-purple-500/20">3</span>
-                            <div>
-                                <div class="text-xs font-medium text-white">Activate & Launch Game</div>
-                                <div class="text-xs text-neutral-400 mt-0.5">Paste your license key. Once the loader prompts, start Fortnite and press <kbd class="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-purple-300 font-mono text-[10px]">INSERT</kbd> in-game.</div>
+                            <div class="card-white p-4">
+                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">EXPIRATION</span>
+                                <span id="dashExpires" class="text-sm font-bold text-gray-900">Never</span>
+                            </div>
+                            <div class="card-white p-4">
+                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">DISCORD ID</span>
+                                <span id="dashDiscordId" class="text-sm font-mono font-semibold text-[#005b7f] truncate block">Linked</span>
+                            </div>
+                            <div class="card-white p-4">
+                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">BOUND HWID</span>
+                                <span id="dashHwid" class="text-sm font-mono font-medium text-gray-700 truncate block">Unbound</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-        </main>
+                <!-- 2. TAB: DOWNLOADS (DOWNLOAD IS ONLY HERE) -->
+                <div id="contentDownloads" class="hidden space-y-6">
+                    <div class="card-white p-6 space-y-5">
+                        <div class="border-b border-gray-100 pb-4">
+                            <h3 class="text-sm font-bold text-gray-900">Client Downloads</h3>
+                            <p class="text-xs text-gray-500">Download the official client binary. Always run as Administrator.</p>
+                        </div>
+
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-sky-100 text-[#005b7f] flex items-center justify-center shrink-0 font-bold font-mono text-sm">
+                                    EXE
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-bold text-gray-900 font-mono">Loader.exe</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Latest</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-0.5">Windows 10 / 11 64-bit • File size: 8.2 MB</p>
+                                </div>
+                            </div>
+                            <a href="/assets/Loader.exe" download="Loader.exe" class="btn-saas px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shrink-0 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>Download Loader</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. TAB: HWID RESET -->
+                <div id="contentHwid" class="hidden space-y-6">
+                    <div class="card-white p-6 space-y-5">
+                        <div class="border-b border-gray-100 pb-4">
+                            <h3 class="text-sm font-bold text-gray-900">Hardware ID Management</h3>
+                            <p class="text-xs text-gray-500">Reset your hardware link if you updated PC components or reinstalled Windows.</p>
+                        </div>
+
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3.5 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-500 font-medium">Currently Linked Hardware:</span>
+                                <span id="hwidCurrentDisplay" class="font-mono font-semibold text-gray-800">Unbound</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-500 font-medium">Reset Cooldown Policy:</span>
+                                <span class="text-gray-700 font-medium">1 reset per 24 hours</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-500 font-medium">Cooldown Status:</span>
+                                <span id="hwidCooldownDisplay" class="text-emerald-700 font-semibold font-mono bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Available</span>
+                            </div>
+
+                            <div class="pt-2">
+                                <button onclick="requestHwidReset()" id="btnResetHwid" class="w-full py-2.5 rounded-lg btn-saas text-xs font-semibold shadow-sm transition">
+                                    Reset Hardware Link
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-400">Launching Loader.exe on your new system will automatically link your new hardware signature.</p>
+                    </div>
+                </div>
+
+                <!-- 4. TAB: SETUP GUIDE -->
+                <div id="contentGuide" class="hidden space-y-6">
+                    <div class="card-white p-6 space-y-5">
+                        <div class="border-b border-gray-100 pb-4">
+                            <h3 class="text-sm font-bold text-gray-900">Setup Instructions</h3>
+                            <p class="text-xs text-gray-500">Quick 3-step guide to run the client.</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="card-white p-4 flex items-start gap-3.5">
+                                <span class="w-6 h-6 rounded-lg bg-sky-50 text-[#005b7f] text-xs font-bold flex items-center justify-center shrink-0 border border-sky-100">1</span>
+                                <div>
+                                    <div class="text-xs font-bold text-gray-900">Extract & Exclude</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Download Loader.exe and place it in a designated folder or USB drive. Add the folder to your antivirus exclusions.</div>
+                                </div>
+                            </div>
+
+                            <div class="card-white p-4 flex items-start gap-3.5">
+                                <span class="w-6 h-6 rounded-lg bg-sky-50 text-[#005b7f] text-xs font-bold flex items-center justify-center shrink-0 border border-sky-100">2</span>
+                                <div>
+                                    <div class="text-xs font-bold text-gray-900">Run as Administrator</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Right-click <span class="text-[#005b7f] font-mono font-semibold">Loader.exe</span> and select <strong>Run as administrator</strong>.</div>
+                                </div>
+                            </div>
+
+                            <div class="card-white p-4 flex items-start gap-3.5">
+                                <span class="w-6 h-6 rounded-lg bg-sky-50 text-[#005b7f] text-xs font-bold flex items-center justify-center shrink-0 border border-sky-100">3</span>
+                                <div>
+                                    <div class="text-xs font-bold text-gray-900">Activate & Launch Game</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">Paste your license key. Once the loader prompts, start Fortnite and press <kbd class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-300 text-gray-800 font-mono text-[11px]">INSERT</kbd> in-game.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
     </div>
 
-    <!-- CLIENT LOGIC SCRIPT -->
+    <!-- CLIENT SCRIPT -->
     <script>
         let currentCustomer = null;
         let currentLicense = null;
@@ -353,12 +423,27 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             if (!toast) return;
 
             txt.textContent = msg;
-            dot.className = isError ? 'w-2 h-2 rounded-full bg-rose-500 shrink-0' : 'w-2 h-2 rounded-full bg-emerald-400 shrink-0';
-            toast.className = 'fixed top-5 right-5 z-50 transform translate-y-0 opacity-100 pointer-events-auto transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-neutral-900 border ' + (isError ? 'border-rose-500/40 text-rose-200' : 'border-purple-500/30 text-neutral-100') + ' text-xs shadow-2xl';
+            dot.className = isError ? 'w-2 h-2 rounded-full bg-rose-500 shrink-0' : 'w-2 h-2 rounded-full bg-emerald-500 shrink-0';
+            toast.className = 'fixed top-5 right-5 z-50 transform translate-y-0 opacity-100 pointer-events-auto transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border ' + (isError ? 'border-rose-200 text-rose-800' : 'border-gray-200 text-gray-800') + ' text-xs shadow-xl';
 
             setTimeout(() => {
-                toast.className = 'fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-neutral-900 border border-purple-500/30 text-neutral-100 text-xs shadow-2xl';
+                toast.className = 'fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs shadow-xl';
             }, 3000);
+        }
+
+        function toggleInputPassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            const icon = btn.querySelector('.eye-icon');
+            if (icon) {
+                if (isPassword) {
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>';
+                } else {
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+                }
+            }
         }
 
         function switchAuthTab(tab) {
@@ -369,14 +454,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             const formReg2 = document.getElementById('registerStep2Form');
 
             if (tab === 'signin') {
-                btnIn.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-white bg-purple-600/90 shadow-sm';
-                btnReg.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white';
+                btnIn.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm';
+                btnReg.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-gray-500 hover:text-gray-900';
                 formIn.classList.remove('hidden');
                 formReg1.classList.add('hidden');
                 formReg2.classList.add('hidden');
             } else {
-                btnReg.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-white bg-purple-600/90 shadow-sm';
-                btnIn.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white';
+                btnReg.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm';
+                btnIn.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-gray-500 hover:text-gray-900';
                 formIn.classList.add('hidden');
                 formReg1.classList.remove('hidden');
                 formReg2.classList.add('hidden');
@@ -470,7 +555,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 errBox.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>Verify & Enter Portal</span>';
+                btn.innerHTML = '<span>Verify & Enter Dashboard</span>';
             }
         }
 
@@ -511,7 +596,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
             errBox.classList.add('hidden');
             btn.disabled = true;
-            btn.innerHTML = '<span class="animate-spin mr-1.5">●</span> Signing in...';
+            btn.innerHTML = '<span class="animate-spin mr-1.5">●</span> Logging in...';
 
             try {
                 const res = await fetch('/api/customer/login', {
@@ -527,14 +612,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     return;
                 }
 
-                showToast('Signed in successfully.');
+                showToast('Logged in successfully.');
                 await loadCustomerPortal();
             } catch (err) {
                 errBox.textContent = 'Network error: ' + err.message;
                 errBox.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>Sign In</span>';
+                btn.innerHTML = '<span>Log in</span>';
             }
         }
 
@@ -547,14 +632,23 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
         function switchPortalTab(tab) {
             const tabs = ['dashboard', 'downloads', 'hwid', 'guide'];
+            const titles = {
+                dashboard: 'Dashboard',
+                downloads: 'Client Downloads',
+                hwid: 'HWID Management',
+                guide: 'Setup Guide'
+            };
+
+            document.getElementById('topBarTitle').textContent = titles[tab] || 'Dashboard';
+
             tabs.forEach(t => {
                 const btn = document.getElementById('pTab' + t.charAt(0).toUpperCase() + t.slice(1));
                 const content = document.getElementById('content' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (t === tab) {
-                    btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-white bg-purple-600/25 border border-purple-500/40 transition shrink-0';
+                    btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#005b7f] bg-sky-50 border border-sky-100 transition text-left';
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-neutral-400 hover:text-white transition shrink-0';
+                    btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-transparent transition text-left';
                     content.classList.add('hidden');
                 }
             });
@@ -562,12 +656,15 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
         function toggleKeyVisibility() {
             const keyEl = document.getElementById('dashKeyText');
+            const eyeText = document.getElementById('eyeText');
             if (!currentLicense) return;
             isKeyVisible = !isKeyVisible;
             if (isKeyVisible) {
                 keyEl.textContent = currentLicense.key;
+                eyeText.textContent = 'Hide';
             } else {
                 keyEl.textContent = '••••••••••••••••••••••••';
+                eyeText.textContent = 'Show';
             }
         }
 
@@ -623,12 +720,15 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 currentCustomer = data.customer;
                 currentLicense = data.license;
 
-                // Header
+                // Header Profile
                 document.getElementById('headerUserEmail').textContent = currentCustomer.email;
+                const initial = (currentCustomer.email || 'U').charAt(0).toUpperCase();
+                document.getElementById('userAvatar').textContent = initial;
 
                 // License Card
                 const keyEl = document.getElementById('dashKeyText');
                 keyEl.textContent = '••••••••••••••••••••••••';
+                document.getElementById('eyeText').textContent = 'Show';
                 isKeyVisible = false;
 
                 const isLifetime = !currentLicense.expires_at || currentLicense.duration_days === 0;
@@ -655,12 +755,12 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 if (now - lastReset < cooldownMs) {
                     const remainingHours = Math.ceil((cooldownMs - (now - lastReset)) / (60 * 60 * 1000));
                     cooldownEl.textContent = 'Cooldown (' + remainingHours + 'h remaining)';
-                    cooldownEl.className = 'text-amber-400 font-medium font-mono';
+                    cooldownEl.className = 'text-amber-700 font-semibold font-mono bg-amber-50 px-2 py-0.5 rounded border border-amber-200';
                     resetBtn.disabled = true;
                     resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
                     cooldownEl.textContent = 'Available';
-                    cooldownEl.className = 'text-emerald-400 font-medium';
+                    cooldownEl.className = 'text-emerald-700 font-semibold font-mono bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200';
                     resetBtn.disabled = false;
                     resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
