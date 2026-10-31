@@ -732,7 +732,6 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 fetchAuthorizedMembers();
             }
         }
-        }
 
         function showToast(msg) {
             let t = document.getElementById('toastNotice');
