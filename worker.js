@@ -10,6 +10,8 @@ const ALLOWED_DISCORD_ID = '1415022792214052915';
 const DISCORD_GUILD_ID = '1549785920490971187';
 const DISCORD_ROLE_CUSTOMER = '1550990740329467904';
 const DISCORD_ROLE_LIFETIME = '1551043327317516348';
+const DISCORD_ROLE_VERIFIED = '1550780294896812174';
+const DISCORD_VERIFY_CHANNEL_ID = '1551017201455210637';
 
 function getBotToken(env) {
     if (env && env.DISCORD_BOT_TOKEN) return env.DISCORD_BOT_TOKEN;
@@ -328,6 +330,151 @@ async function getAuditLogs(env) {
     return memoryStore.logs;
 }
 
+// -------------------------------------------------------------
+// OAUTH2 VERIFIED MEMBERS STORAGE & BACKUP HELPERS
+// -------------------------------------------------------------
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+async function saveOAuthMember(env, member) {
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put('oauth_member:' + member.user_id, JSON.stringify(member));
+        let allIds = [];
+        try {
+            allIds = (await kv.get('index:oauth_members', 'json')) || [];
+        } catch (e) {
+            allIds = [];
+        }
+        if (!allIds.includes(member.user_id)) {
+            allIds.push(member.user_id);
+            await kv.put('index:oauth_members', JSON.stringify(allIds));
+        }
+        return;
+    }
+    if (!memoryStore.oauthMembers) memoryStore.oauthMembers = new Map();
+    memoryStore.oauthMembers.set(member.user_id, member);
+}
+
+async function getOAuthMember(env, userId) {
+    const kv = await getKv(env);
+    if (kv) {
+        try {
+            return await kv.get('oauth_member:' + userId, 'json');
+        } catch (e) {
+            return null;
+        }
+    }
+    if (!memoryStore.oauthMembers) memoryStore.oauthMembers = new Map();
+    return memoryStore.oauthMembers.get(userId) || null;
+}
+
+async function getAllOAuthMembers(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        let allIds = [];
+        try {
+            allIds = (await kv.get('index:oauth_members', 'json')) || [];
+        } catch (e) {
+            allIds = [];
+        }
+        const members = [];
+        for (const id of allIds) {
+            try {
+                const m = await kv.get('oauth_member:' + id, 'json');
+                if (m && m.user_id) members.push(m);
+            } catch (e) {}
+        }
+        return members.sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
+    }
+    if (!memoryStore.oauthMembers) memoryStore.oauthMembers = new Map();
+    return Array.from(memoryStore.oauthMembers.values()).sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
+}
+
+function renderVerificationPage({ success, user, error }) {
+    const avatarUrl = user?.avatar 
+        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+        : 'https://cdn.discordapp.com/embed/avatars/0.png';
+    const username = user?.username ? escapeHtml(user.username) : 'Discord User';
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${success ? 'Verified Successfully' : 'Verification Status'}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #070709;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.15), transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(147, 51, 234, 0.08), transparent 35%);
+        }
+        .glass-card {
+            background: rgba(18, 14, 26, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(168, 85, 247, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-neutral-100 flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-md rounded-2xl p-7 text-center relative overflow-hidden">
+        ${success ? `
+        <div class="w-20 h-20 mx-auto mb-5 relative">
+            <img src="${avatarUrl}" alt="${username}" class="w-20 h-20 rounded-full border-2 border-purple-500/50 shadow-lg object-cover">
+            <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-[#120e1a] shadow">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/25 mb-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Verified Member
+        </div>
+        <h1 class="text-xl font-bold text-white mb-1">Welcome, ${username}!</h1>
+        <p class="text-neutral-400 text-xs leading-relaxed mb-6">
+            Your Discord account has been authorized. The <span class="text-purple-300 font-semibold">Verified</span> role has been granted and your server access is unlocked.
+        </p>
+        <div class="bg-neutral-900/60 border border-neutral-800 rounded-xl p-3.5 mb-6 text-left flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+                <svg class="w-4 h-4 text-purple-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span class="text-neutral-300">Server Access Status</span>
+            </div>
+            <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+            </span>
+        </div>
+        <a href="discord://" class="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-lg shadow-purple-600/30 transition">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028z"/></svg>
+            Return to Discord
+        </a>
+        <p class="text-[11px] text-neutral-500 mt-3">You can also safely close this browser window.</p>
+        ` : `
+        <div class="w-16 h-16 mx-auto mb-4 bg-rose-500/10 border border-rose-500/25 rounded-full flex items-center justify-center text-rose-400">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </div>
+        <h1 class="text-lg font-bold text-white mb-2">Verification Incomplete</h1>
+        <p class="text-neutral-400 text-xs mb-6">${error || 'Authorization was cancelled or expired. Please try again.'}</p>
+        <a href="/verify" class="w-full inline-block py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow transition">
+            Try Verification Again
+        </a>
+        `}
+    </div>
+</body>
+</html>`;
+}
+
 async function isLoaderEnabled(env) {
     const kv = await getKv(env);
     if (kv) {
@@ -489,6 +636,136 @@ export default {
         const authHeader = request.headers.get('authorization') || '';
         const adminToken = (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '') || cookies['auth_admin_session'];
         const currentAdmin = await getAdminSession(env, adminToken);
+
+        // -------------------------------------------------------------
+        // VERIFICATION PORTAL: /verify & /api/verify/callback
+        // -------------------------------------------------------------
+        if (path === '/verify') {
+            const verifyRedirectUri = `${hostOrigin}/api/verify/callback`;
+            const verifyOAuthUrl = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(verifyRedirectUri)}&scope=identify%20guilds.join&prompt=consent`;
+            return Response.redirect(verifyOAuthUrl, 302);
+        }
+
+        if (path === '/api/verify/callback') {
+            const errorParam = url.searchParams.get('error');
+            const errorDesc = url.searchParams.get('error_description');
+            if (errorParam) {
+                return new Response(renderVerificationPage({
+                    success: false,
+                    error: errorDesc || 'Discord authorization was rejected or cancelled.'
+                }), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+            }
+
+            const code = url.searchParams.get('code');
+            if (!code) {
+                return new Response(renderVerificationPage({
+                    success: false,
+                    error: 'Missing authorization code from Discord.'
+                }), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+            }
+
+            try {
+                const verifyRedirectUri = `${hostOrigin}/api/verify/callback`;
+                const tokenResponse = await fetch('https://discord.com/api/v10/oauth2/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        client_id: DISCORD_CLIENT_ID,
+                        client_secret: DISCORD_CLIENT_SECRET,
+                        grant_type: 'authorization_code',
+                        code,
+                        redirect_uri: verifyRedirectUri
+                    })
+                });
+
+                if (!tokenResponse.ok) {
+                    const errText = await tokenResponse.text();
+                    console.error('[OAuth Token Exchange Error]', errText);
+                    return new Response(renderVerificationPage({
+                        success: false,
+                        error: 'Failed to exchange authorization token with Discord. Please try again.'
+                    }), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+                }
+
+                const tokenData = await tokenResponse.json();
+
+                // Fetch User Details
+                const userResponse = await fetch('https://discord.com/api/v10/users/@me', {
+                    headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+                });
+
+                if (!userResponse.ok) {
+                    return new Response(renderVerificationPage({
+                        success: false,
+                        error: 'Could not fetch your Discord user details.'
+                    }), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+                }
+
+                const discordUser = await userResponse.json();
+
+                // Save authorized member record for server migration / backups
+                const memberRecord = {
+                    user_id: discordUser.id,
+                    username: `${discordUser.username}${discordUser.discriminator && discordUser.discriminator !== '0' ? '#' + discordUser.discriminator : ''}`,
+                    global_name: discordUser.global_name || discordUser.username,
+                    avatar: discordUser.avatar,
+                    access_token: tokenData.access_token,
+                    refresh_token: tokenData.refresh_token,
+                    expires_at: Date.now() + (tokenData.expires_in * 1000),
+                    scope: tokenData.scope,
+                    verified_at: Date.now(),
+                    guild_id: DISCORD_GUILD_ID,
+                    ip
+                };
+                await saveOAuthMember(env, memberRecord);
+
+                // Assign Verified Role (1550780294896812174) in Server (1549785920490971187)
+                const botToken = getBotToken(env);
+                let roleAssigned = false;
+
+                // 1. Try assigning role to existing guild member
+                const roleRes = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${discordUser.id}/roles/${DISCORD_ROLE_VERIFIED}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bot ${botToken}`,
+                        'X-Audit-Log-Reason': 'Member verified via web portal'
+                    }
+                });
+
+                if (roleRes.ok) {
+                    roleAssigned = true;
+                } else if (roleRes.status === 404) {
+                    // Not currently in guild -> Add user to guild with verified role using guilds.join access_token
+                    const joinRes = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${discordUser.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bot ${botToken}`,
+                            'Content-Type': 'application/json',
+                            'X-Audit-Log-Reason': 'Joined and verified via web portal'
+                        },
+                        body: JSON.stringify({
+                            access_token: tokenData.access_token,
+                            roles: [DISCORD_ROLE_VERIFIED]
+                        })
+                    });
+                    if (joinRes.ok) roleAssigned = true;
+                }
+
+                await addAuditLog(env, 'MEMBER_VERIFIED', ip, discordUser.username, `User ${discordUser.id} verified, role assigned: ${roleAssigned}`);
+
+                return new Response(renderVerificationPage({
+                    success: true,
+                    user: discordUser
+                }), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+
+            } catch (err) {
+                console.error('[Verify Callback Error]', err);
+                return new Response(renderVerificationPage({
+                    success: false,
+                    error: err.message || 'An unexpected verification error occurred.'
+                }), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+            }
+        }
 
         // -------------------------------------------------------------
         // 1. DISCORD OAUTH2 CALLBACK: /api/admin/discord/callback
@@ -1055,6 +1332,7 @@ export default {
                     const loaderReason = await getLoaderDisableReason(env);
                     const loaderDisabledAt = await getLoaderDisabledAt(env);
                     const crackingAttempts = await getCrackingAttempts(env);
+                    const authorizedMembers = await getAllOAuthMembers(env);
 
                     const effectiveNow = loaderEnabled ? now : (loaderDisabledAt || now);
                     const active = licenses.filter(l => l.status === 'active' && (!l.expires_at || l.expires_at >= effectiveNow)).length;
@@ -1068,7 +1346,7 @@ export default {
                         loader_enabled: loaderEnabled,
                         loader_disable_reason: loaderReason,
                         loader_disabled_at: loaderDisabledAt,
-                        stats: { total, active, banned, cracks: crackingAttempts.length, payloadLoaded: true }
+                        stats: { total, active, banned, cracks: crackingAttempts.length, authorized_members: authorizedMembers.length, payloadLoaded: true }
                     });
                 } catch (err) {
                     console.error('Error serving admin overview:', err);
@@ -1076,6 +1354,114 @@ export default {
                         success: false,
                         error: 'Failed to load dashboard data: ' + err.message
                     }, 500);
+                }
+            }
+
+            if (path === '/api/admin/members' && method === 'GET') {
+                try {
+                    const members = await getAllOAuthMembers(env);
+                    return jsonResponse({
+                        success: true,
+                        total: members.length,
+                        members: members.map(m => ({
+                            user_id: m.user_id,
+                            username: m.username,
+                            global_name: m.global_name,
+                            avatar: m.avatar,
+                            verified_at: m.verified_at,
+                            expired: Date.now() > (m.expires_at || 0)
+                        }))
+                    });
+                } catch (e) {
+                    return jsonResponse({ success: false, error: e.message }, 500);
+                }
+            }
+
+            if (path === '/api/admin/members/pull' && method === 'POST') {
+                try {
+                    const body = await request.json().catch(() => ({}));
+                    const targetGuildId = String(body.new_guild_id || body.guild_id || '').trim();
+                    if (!targetGuildId) {
+                        return jsonResponse({ success: false, error: 'Target Server (Guild) ID is required.' }, 400);
+                    }
+
+                    const members = await getAllOAuthMembers(env);
+                    if (members.length === 0) {
+                        return jsonResponse({ success: false, error: 'No authorized members found in database.' }, 400);
+                    }
+
+                    const botToken = getBotToken(env);
+                    let successCount = 0;
+                    let failedCount = 0;
+                    const details = [];
+
+                    for (const member of members) {
+                        try {
+                            let token = member.access_token;
+                            // Refresh token if close to expiry
+                            if (Date.now() >= (member.expires_at || 0) - 60000 && member.refresh_token) {
+                                try {
+                                    const refRes = await fetch('https://discord.com/api/v10/oauth2/token', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                        body: new URLSearchParams({
+                                            client_id: DISCORD_CLIENT_ID,
+                                            client_secret: DISCORD_CLIENT_SECRET,
+                                            grant_type: 'refresh_token',
+                                            refresh_token: member.refresh_token
+                                        })
+                                    });
+                                    if (refRes.ok) {
+                                        const refData = await refRes.json();
+                                        token = refData.access_token;
+                                        member.access_token = refData.access_token;
+                                        member.refresh_token = refData.refresh_token || member.refresh_token;
+                                        member.expires_at = Date.now() + (refData.expires_in * 1000);
+                                        await saveOAuthMember(env, member);
+                                    }
+                                } catch (e) {
+                                    console.error('Token refresh error:', e);
+                                }
+                            }
+
+                            // Add member to new guild
+                            const addRes = await fetch(`https://discord.com/api/v10/guilds/${targetGuildId}/members/${member.user_id}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `Bot ${botToken}`,
+                                    'Content-Type': 'application/json',
+                                    'X-Audit-Log-Reason': 'Server restore & member migration'
+                                },
+                                body: JSON.stringify({
+                                    access_token: token
+                                })
+                            });
+
+                            if (addRes.status === 201 || addRes.status === 204) {
+                                successCount++;
+                                details.push({ user_id: member.user_id, username: member.username, status: addRes.status === 201 ? 'added' : 'already_member' });
+                            } else {
+                                failedCount++;
+                                const errText = await addRes.text();
+                                details.push({ user_id: member.user_id, username: member.username, status: 'failed', code: addRes.status, detail: errText });
+                            }
+                        } catch (mErr) {
+                            failedCount++;
+                            details.push({ user_id: member.user_id, status: 'error', error: mErr.message });
+                        }
+                    }
+
+                    await addAuditLog(env, 'MEMBERS_PULLED', ip, '', `Target Guild: ${targetGuildId}, Success: ${successCount}, Failed: ${failedCount}`);
+
+                    return jsonResponse({
+                        success: true,
+                        total: members.length,
+                        pulled: successCount,
+                        failed: failedCount,
+                        details: details.slice(0, 50)
+                    });
+                } catch (err) {
+                    return jsonResponse({ success: false, error: err.message }, 500);
                 }
             }
 

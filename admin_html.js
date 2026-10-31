@@ -78,6 +78,14 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     </div>
                     <span id="sidebarLoaderDot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
                 </button>
+
+                <button onclick="switchTab('members')" id="tabBtnMembers" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-purple-300 hover:bg-neutral-900 transition">
+                    <div class="flex items-center space-x-2.5">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <span>Member Restore</span>
+                    </div>
+                    <span id="sidebarMemberCount" class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/25">0</span>
+                </button>
             </nav>
 
             <!-- SIDEBAR FOOTER: USER & LOGOUT -->
@@ -275,6 +283,68 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- TAB 5: MEMBER RESTORE / BACKUP             -->
+            <!-- ========================================== -->
+            <div id="tabMembers" class="hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-card border border-subtle rounded-xl p-5 space-y-3 md:col-span-1">
+                        <div class="text-[11px] font-medium uppercase tracking-wider text-neutral-500 font-mono">Database Total</div>
+                        <div class="text-3xl font-bold text-purple-400 font-mono" id="totalAuthorizedMembers">0</div>
+                        <p class="text-xs text-neutral-400">Total authorized Discord members saved in database with guilds.join scope.</p>
+                    </div>
+
+                    <div class="bg-card border border-subtle rounded-xl p-5 space-y-4 md:col-span-2">
+                        <div>
+                            <h3 class="text-sm font-semibold text-neutral-100 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-purple-400"></span> Emergency Server Member Restore
+                            </h3>
+                            <p class="text-xs text-neutral-400 mt-1">If your Discord server is falsely terminated or raided, you can pull all authorized verified members into a new server with one click.</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-medium uppercase tracking-wider text-neutral-400 mb-1">New Discord Server (Guild) ID</label>
+                                <input type="text" id="targetGuildInput" placeholder="e.g. 1549785920490971187" class="w-full h-9 px-3 bg-neutral-900 border border-subtle rounded-lg text-xs font-mono text-neutral-200 placeholder-neutral-600 focus:outline-none focus:border-purple-500">
+                            </div>
+
+                            <button id="btnPullMembers" onclick="pullMembersToNewServer()" class="h-9 px-4 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg shadow-sm shadow-purple-600/20 transition flex items-center space-x-2">
+                                <svg class="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                <span>Pull All Members to New Server</span>
+                            </button>
+
+                            <div id="pullStatusBox" class="hidden p-3 rounded-lg bg-neutral-900 border border-subtle text-xs"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE: VERIFIED MEMBERS LIST -->
+                <div class="bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
+                    <div class="p-4 border-b border-subtle flex items-center justify-between">
+                        <div class="text-xs font-semibold text-neutral-200">Authorized Members List</div>
+                        <button onclick="fetchAuthorizedMembers()" class="text-xs text-neutral-400 hover:text-neutral-200 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="border-b border-subtle bg-neutral-950/40 text-[11px] font-mono text-neutral-400">
+                                    <th class="py-2.5 px-4">User</th>
+                                    <th class="py-2.5 px-4">Discord ID</th>
+                                    <th class="py-2.5 px-4">Verified Date</th>
+                                    <th class="py-2.5 px-4 text-right">OAuth Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody" class="divide-y divide-neutral-900">
+                                <tr><td colspan="4" class="py-6 text-center text-xs text-neutral-500">Loading authorized members...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -402,7 +472,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         }
 
         function switchTab(t) {
-            const tabs = ['keys', 'logs', 'threats', 'loader'];
+            const tabs = ['keys', 'logs', 'threats', 'loader', 'members'];
             tabs.forEach(tab => {
                 const view = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
                 const btn = document.getElementById('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1));
@@ -419,6 +489,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 }
             });
             toggleSidebar(false);
+            if (t === 'members') fetchAuthorizedMembers();
         }
 
         function updateLoaderButton(enabled) {
@@ -545,6 +616,12 @@ export const ADMIN_HTML = `<!DOCTYPE html>
             const sideCount = document.getElementById('sidebarLicenseCount');
             if (sideCount) sideCount.textContent = data.stats.total;
 
+            const memberCount = data.stats.authorized_members !== undefined ? data.stats.authorized_members : 0;
+            const sideMemberCount = document.getElementById('sidebarMemberCount');
+            if (sideMemberCount) sideMemberCount.textContent = memberCount;
+            const totalMembersEl = document.getElementById('totalAuthorizedMembers');
+            if (totalMembersEl) totalMembersEl.textContent = memberCount;
+
             const badge = document.getElementById('threatCountBadge');
             if (badge) {
                 if (crackCount > 0) {
@@ -554,6 +631,107 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     badge.classList.add('hidden');
                 }
             }
+        }
+
+        async function fetchAuthorizedMembers() {
+            try {
+                const res = await fetch('/api/admin/members');
+                if (!res.ok) return;
+                const data = await res.json();
+                const total = data.total || 0;
+                const badge = document.getElementById('sidebarMemberCount');
+                if (badge) badge.textContent = total;
+                const totalEl = document.getElementById('totalAuthorizedMembers');
+                if (totalEl) totalEl.textContent = total;
+
+                const tbody = document.getElementById('membersTableBody');
+                if (!tbody) return;
+                if (!data.members || data.members.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-xs text-neutral-500 font-sans">No authorized members recorded yet. Once users verify, they appear here.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.members.map(m => {
+                    const avatar = m.avatar ? \`https://cdn.discordapp.com/avatars/\${m.user_id}/\${m.avatar}.png?size=32\` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                    const dateStr = m.verified_at ? new Date(m.verified_at).toLocaleString() : 'N/A';
+                    return \`
+                    <tr class="hover:bg-neutral-900/50 transition">
+                        <td class="py-2.5 px-4 text-xs font-sans flex items-center space-x-2.5">
+                            <img src="\${avatar}" class="w-6 h-6 rounded-full border border-neutral-700 object-cover" />
+                            <span class="text-neutral-200 font-medium">\${escapeHtml(m.username || 'User')}</span>
+                        </td>
+                        <td class="py-2.5 px-4 text-xs text-neutral-400 font-mono">\${m.user_id}</td>
+                        <td class="py-2.5 px-4 text-xs text-neutral-400 font-mono">\${dateStr}</td>
+                        <td class="py-2.5 px-4 text-xs text-right">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono \${m.expired ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                                \${m.expired ? 'Refreshable' : 'Ready'}
+                            </span>
+                        </td>
+                    </tr>
+                    \`;
+                }).join('');
+            } catch (e) {
+                console.error('Fetch members error:', e);
+            }
+        }
+
+        async function pullMembersToNewServer() {
+            const guildInput = document.getElementById('targetGuildInput');
+            const targetGuildId = guildInput ? guildInput.value.trim() : '';
+            if (!targetGuildId) {
+                alert('Please enter the New Discord Server (Guild) ID.');
+                return;
+            }
+
+            if (!confirm(\`Are you sure you want to pull all authorized members into new server ID: \${targetGuildId}?\\n\\nMake sure your Discord Bot is invited to this new server with Manage Roles and Create Instant Invite permissions!\`)) {
+                return;
+            }
+
+            const btn = document.getElementById('btnPullMembers');
+            const statusDiv = document.getElementById('pullStatusBox');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Migrating Members...';
+            }
+            if (statusDiv) {
+                statusDiv.classList.remove('hidden');
+                statusDiv.innerHTML = \`<div class="text-xs text-purple-300 font-mono animate-pulse">Contacting Discord API and pulling authorized members into \${targetGuildId}...</div>\`;
+            }
+
+            try {
+                const res = await fetch('/api/admin/members/pull', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ new_guild_id: targetGuildId })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    if (statusDiv) statusDiv.innerHTML = \`<div class="text-xs text-rose-400 font-mono">Error: \${data.error || 'Failed to pull members'}</div>\`;
+                    alert(data.error || 'Migration failed');
+                } else {
+                    if (statusDiv) {
+                        statusDiv.innerHTML = \`
+                            <div class="text-xs text-emerald-400 font-mono font-semibold mb-1">
+                                ✓ Migration Complete: \${data.pulled} / \${data.total} members processed!
+                            </div>
+                            <div class="text-[11px] text-neutral-400 font-mono">
+                                Added/Joined: \${data.pulled} | Failed/Blocked: \${data.failed}
+                            </div>
+                        \`;
+                    }
+                    alert(\`Migration Complete!\\nSuccessfully pulled \${data.pulled} members into server \${targetGuildId}\`);
+                }
+            } catch (err) {
+                if (statusDiv) statusDiv.innerHTML = \`<div class="text-xs text-rose-400 font-mono">Network error: \${err.message}</div>\`;
+                alert('Network error: ' + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Pull All Members to New Server';
+                }
+                fetchAuthorizedMembers();
+            }
+        }
         }
 
         function showToast(msg) {
