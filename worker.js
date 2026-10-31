@@ -1473,7 +1473,13 @@ export default {
                     created_at: currentCustomer.created_at
                 },
                 license: lic ? {
-                    ...lic,
+                    key: lic.key,
+                    status: lic.status,
+                    duration_days: lic.duration_days,
+                    expires_at: lic.expires_at,
+                    hwid: lic.hwid,
+                    hwid_last_reset: lic.hwid_last_reset,
+                    discord_id: lic.discord_id,
                     is_expired: isExpired
                 } : { key: currentCustomer.key, status: 'expired', duration_days: 0, is_expired: true },
                 loader: {
