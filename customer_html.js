@@ -424,14 +424,9 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                     
                     <div class="card-dark p-6 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
-                        <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
-                            <div>
-                                <h3 class="text-sm font-bold text-white tracking-tight">User Information</h3>
-                                <p class="text-xs text-neutral-400">Account profile identity and verification credentials</p>
-                            </div>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white border border-white/15">
-                                Verified Customer
-                            </span>
+                        <div class="pb-4 border-b border-[#1a1c24]">
+                            <h3 class="text-sm font-bold text-white tracking-tight">User Information</h3>
+                            <p class="text-xs text-neutral-400">Account profile identity and verification credentials</p>
                         </div>
 
                         
