@@ -1245,7 +1245,7 @@ export default {
                     }
                 } catch (e) {}
             }
-            return Response.redirect('https://cdn.discordapp.com/attachments/1566180865896357888/1566180880400121996/Loader.exe?ex=6ae79b1c&is=6ae6499c&hm=160ed7e4ed63536c5b036181a2a3bdb7bfec726556ece196d0772922cd17900a&', 302);
+            return Response.redirect('https://cdn.discordapp.com/attachments/1566180865896357888/1566190753636556840/Loader.exe?ex=6ae7a44e&is=6ae652ce&hm=b83c0026a9360010e290131f55124632c96d1a179b2762f23f4f7d46ce20e213&', 302);
         }
 
         if (path === '/assets/Loader.exe') {

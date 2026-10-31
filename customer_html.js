@@ -511,7 +511,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 <div>
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-bold text-white">Fortnite External</span>
-                                        <span class="text-xs text-neutral-400 font-sans">8.3 MB</span>
+                                        <span class="text-xs text-neutral-400 font-sans">7.9 MB</span>
                                     </div>
                                 </div>
 
