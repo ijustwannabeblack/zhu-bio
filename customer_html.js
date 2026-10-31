@@ -425,6 +425,54 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 2. User Information Card -->
+                    <div class="card-dark p-6 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
+                        <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
+                            <div>
+                                <h3 class="text-sm font-bold text-white tracking-tight">User Information</h3>
+                                <p class="text-xs text-neutral-400">Account profile identity and verification credentials</p>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white border border-white/15">
+                                Verified Customer
+                            </span>
+                        </div>
+
+                        <!-- User Info 4 Stats Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                            <!-- 1. Registered Email (IN A SPOILER) -->
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex flex-col justify-between">
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT EMAIL</span>
+                                <div class="flex items-center justify-between gap-1.5">
+                                    <span id="dashSpoilerEmail" onclick="toggleEmailSpoiler()" class="text-xs font-mono font-medium cursor-pointer rounded px-2 py-0.5 transition bg-neutral-800 text-transparent select-none hover:bg-neutral-700 truncate" title="Click to reveal email">user@email.com</span>
+                                    <button type="button" onclick="toggleEmailSpoiler()" class="text-neutral-400 hover:text-white transition p-1 shrink-0" title="Reveal / Hide Email">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 2. Account Created / Member Since -->
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT CREATED</span>
+                                <span id="dashAccountCreated" class="text-sm font-semibold text-white">Oct 31, 2026</span>
+                            </div>
+
+                            <!-- 3. Linked Discord Account -->
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DISCORD ACCOUNT</span>
+                                <span id="dashDiscordAccount" class="text-sm font-mono font-semibold text-white truncate block">Linked</span>
+                            </div>
+
+                            <!-- 4. Security & Authentication Status -->
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">AUTHENTICATION</span>
+                                <span class="text-xs font-semibold text-white flex items-center gap-1.5 mt-0.5">
+                                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    Email OTP Verified
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 2. TAB: STATUS (SERVICE UPTIME & COMPONENT STATUS) -->
@@ -1004,6 +1052,20 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             }
         }
 
+        let isEmailSpoilerRevealed = false;
+        function toggleEmailSpoiler() {
+            isEmailSpoilerRevealed = !isEmailSpoilerRevealed;
+            const el = document.getElementById('dashSpoilerEmail');
+            if (!el) return;
+            if (isEmailSpoilerRevealed) {
+                el.className = 'text-xs font-mono font-medium cursor-pointer rounded px-2 py-0.5 transition bg-white/10 text-white select-text truncate';
+                el.title = 'Click to hide email';
+            } else {
+                el.className = 'text-xs font-mono font-medium cursor-pointer rounded px-2 py-0.5 transition bg-neutral-800 text-transparent select-none hover:bg-neutral-700 truncate';
+                el.title = 'Click to reveal email';
+            }
+        }
+
         function copyLicenseKey() {
             if (!currentLicense || !currentLicense.key) return;
             navigator.clipboard.writeText(currentLicense.key).then(() => {
@@ -1224,6 +1286,25 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 const discordEl = document.getElementById('dashDiscordId');
                 if (discordEl) {
                     discordEl.textContent = currentCustomer.discord_id || (currentLicense && currentLicense.discord_id) || 'Linked';
+                }
+
+                // User Information Section
+                const spoilerEl = document.getElementById('dashSpoilerEmail');
+                if (spoilerEl) spoilerEl.textContent = currentCustomer.email || 'user@email.com';
+
+                const createdEl = document.getElementById('dashAccountCreated');
+                if (createdEl) {
+                    if (currentCustomer.created_at) {
+                        const d = new Date(currentCustomer.created_at);
+                        createdEl.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    } else {
+                        createdEl.textContent = 'Oct 31, 2026';
+                    }
+                }
+
+                const discAccEl = document.getElementById('dashDiscordAccount');
+                if (discAccEl) {
+                    discAccEl.textContent = currentCustomer.discord_id || (currentLicense && currentLicense.discord_id) || 'Linked';
                 }
 
                 // HWID Live Cooldown calculation (24h)
