@@ -398,105 +398,6 @@ async function getAllOAuthMembers(env) {
     return Array.from(memoryStore.oauthMembers.values()).sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
 }
 
-function renderVerifyLoadingPage(targetUrl) {
-    const escapedUrl = escapeHtml(targetUrl);
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="2;url=${escapedUrl}">
-    <title>UDvengers • Connecting to Verification...</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #070709;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.18), transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(147, 51, 234, 0.1), transparent 40%);
-        }
-        .glass-card {
-            background: rgba(18, 14, 26, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(168, 85, 247, 0.28);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 50px rgba(168, 85, 247, 0.18);
-        }
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.06); opacity: 0.35; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
-        .animate-ring {
-            animation: pulse-ring 2s infinite ease-in-out;
-        }
-        @keyframes progress-anim {
-            0% { width: 10%; }
-            50% { width: 68%; }
-            100% { width: 100%; }
-        }
-        .animate-progress {
-            animation: progress-anim 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-    </style>
-</head>
-<body class="min-h-screen text-neutral-100 flex items-center justify-center p-4">
-    <div class="glass-card w-full max-w-sm rounded-2xl p-7 text-center relative overflow-hidden">
-        <!-- Ambient Top Glow -->
-        <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-36 h-36 bg-purple-600/30 blur-2xl rounded-full pointer-events-none"></div>
-
-        <!-- Animated Center Loader -->
-        <div class="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-            <div class="absolute inset-0 rounded-full border-2 border-purple-500/20"></div>
-            <div class="absolute inset-0 rounded-full border-2 border-transparent border-t-purple-500 border-r-purple-400 animate-spin"></div>
-            <div class="absolute inset-2 rounded-full bg-purple-500/10 animate-ring"></div>
-            <svg class="w-8 h-8 text-purple-400 relative z-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-            </svg>
-        </div>
-
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/25 mb-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping"></span> Portal Handshake
-        </div>
-
-        <h1 class="text-lg font-bold text-white mb-1.5 tracking-tight">UDvengers Verification</h1>
-        <p class="text-xs text-neutral-400 mb-5">Connecting to Discord Authorization...</p>
-
-        <!-- Animated Progress Bar -->
-        <div class="w-full bg-neutral-900/80 rounded-full h-1.5 p-0.5 overflow-hidden border border-purple-500/20 mb-5">
-            <div class="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-purple-400 h-full rounded-full animate-progress"></div>
-        </div>
-
-        <!-- Safe & Secure Info -->
-        <div class="bg-purple-950/20 border border-purple-500/20 rounded-xl p-3 mb-4 text-left text-xs">
-            <div class="flex items-center gap-2 text-purple-300 font-semibold mb-1">
-                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span>100% Safe & Zero Info Saved</span>
-            </div>
-            <p class="text-[11px] text-neutral-400 leading-relaxed">
-                Official Discord OAuth2. Protects our community against false server terminations. No passwords or private info are ever accessed.
-            </p>
-        </div>
-
-        <p class="text-[11px] text-neutral-500">
-            If you are not redirected automatically, <a href="${escapedUrl}" class="text-purple-400 hover:text-purple-300 underline font-medium">click here</a>.
-        </p>
-    </div>
-
-    <script>
-        setTimeout(function() {
-            window.location.href = ${JSON.stringify(targetUrl)};
-        }, 1100);
-    </script>
-</body>
-</html>`;
-}
-
 function renderVerificationPage({ success, user, error }) {
     const avatarUrl = user?.avatar 
         ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
@@ -522,7 +423,7 @@ function renderVerificationPage({ success, user, error }) {
                 radial-gradient(circle at 100% 100%, rgba(147, 51, 234, 0.1), transparent 40%);
         }
         .glass-card {
-            background: rgba(18, 14, 26, 0.9);
+            background: rgba(18, 14, 26, 0.92);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(168, 85, 247, 0.28);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 50px rgba(168, 85, 247, 0.18);
@@ -535,6 +436,13 @@ function renderVerificationPage({ success, user, error }) {
         .animate-ring {
             animation: pulse-ring 2s infinite ease-in-out;
         }
+        @keyframes fillBarAnimation {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        .fill-bar-active {
+            animation: fillBarAnimation 3000ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
         .fade-transition {
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
@@ -546,7 +454,7 @@ function renderVerificationPage({ success, user, error }) {
         <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-36 h-36 bg-purple-600/30 blur-2xl rounded-full pointer-events-none"></div>
 
         ${success ? `
-        <!-- Loading State (Runs for 3 Seconds) -->
+        <!-- Loading State (Runs for exactly 3 Seconds) -->
         <div id="loadingBox" class="fade-transition">
             <div class="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
                 <div class="absolute inset-0 rounded-full border-2 border-purple-500/20"></div>
@@ -561,12 +469,18 @@ function renderVerificationPage({ success, user, error }) {
                 <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span> Synchronizing
             </div>
 
-            <h1 class="text-lg font-bold text-white mb-1.5 tracking-tight">Authorizing Account</h1>
+            <h1 class="text-lg font-bold text-white mb-1 tracking-tight">Authorizing Account</h1>
             <p id="stepLabel" class="text-xs text-neutral-400 mb-5">Verifying credentials with Discord...</p>
 
-            <!-- 3-Second Progress Bar -->
-            <div class="w-full bg-neutral-900/80 rounded-full h-1.5 p-0.5 overflow-hidden border border-purple-500/20 mb-4">
-                <div id="progressBar" class="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-purple-400 h-full rounded-full transition-all ease-linear w-0" style="transition-duration: 3000ms;"></div>
+            <!-- Percentage Display -->
+            <div class="flex items-center justify-between text-xs font-mono text-purple-300 font-semibold mb-2 px-1">
+                <span class="text-neutral-400 font-normal">Progress</span>
+                <span id="percentNumber">0%</span>
+            </div>
+
+            <!-- Visible Animated Progress Bar -->
+            <div class="w-full bg-[#130f1e] rounded-full h-3 p-0.5 border border-purple-500/35 shadow-inner mb-4 overflow-hidden">
+                <div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-500 to-rose-400 fill-bar-active shadow-md shadow-purple-500/50" style="width: 0%;"></div>
             </div>
 
             <p class="text-[11px] text-neutral-500">Please do not close this window...</p>
@@ -601,27 +515,40 @@ function renderVerificationPage({ success, user, error }) {
         </div>
 
         <script>
-            // Start progress bar animation
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    const bar = document.getElementById('progressBar');
+            const startTime = performance.now();
+            const duration = 3000;
+            const bar = document.getElementById('progressBar');
+            const num = document.getElementById('percentNumber');
+            const stepLabel = document.getElementById('stepLabel');
+
+            function tick(now) {
+                const elapsed = now - startTime;
+                const ratio = Math.min(1, elapsed / duration);
+                const pct = Math.floor(ratio * 100);
+
+                if (bar) bar.style.width = (ratio * 100) + '%';
+                if (num) num.textContent = pct + '%';
+
+                if (stepLabel) {
+                    if (ratio > 0.7) {
+                        stepLabel.textContent = 'Finalizing permissions...';
+                    } else if (ratio > 0.35) {
+                        stepLabel.textContent = 'Assigning server roles...';
+                    }
+                }
+
+                if (ratio < 1) {
+                    requestAnimationFrame(tick);
+                } else {
                     if (bar) bar.style.width = '100%';
-                }, 50);
-            });
+                    if (num) num.textContent = '100%';
+                    revealSuccess();
+                }
+            }
 
-            // Update step text across the 3 seconds
-            setTimeout(() => {
-                const label = document.getElementById('stepLabel');
-                if (label) label.textContent = 'Assigning server roles...';
-            }, 1200);
+            requestAnimationFrame(tick);
 
-            setTimeout(() => {
-                const label = document.getElementById('stepLabel');
-                if (label) label.textContent = 'Finalizing permissions...';
-            }, 2200);
-
-            // Reveal success state after exactly 3 seconds
-            setTimeout(() => {
+            function revealSuccess() {
                 const loadingBox = document.getElementById('loadingBox');
                 const successBox = document.getElementById('successBox');
 
@@ -636,7 +563,7 @@ function renderVerificationPage({ success, user, error }) {
                         });
                     }, 300);
                 }
-            }, 3000);
+            }
         </script>
         ` : `
         <!-- Error State -->
@@ -822,9 +749,8 @@ export default {
         if (path === '/verify') {
             const verifyRedirectUri = `${hostOrigin}/api/verify/callback`;
             const verifyOAuthUrl = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(verifyRedirectUri)}&scope=identify%20guilds.join&prompt=consent`;
-            return new Response(renderVerifyLoadingPage(verifyOAuthUrl), {
-                headers: { 'Content-Type': 'text/html; charset=utf-8' }
-            });
+            // Direct 302 redirect: zero loading screen before authorization
+            return Response.redirect(verifyOAuthUrl, 302);
         }
 
         if (path === '/api/verify/callback') {
