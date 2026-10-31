@@ -487,7 +487,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         </div>
 
                         
-                        <div class="flex items-center justify-between text-[11px] text-neutral-500 pt-1 font-mono">
+                        <div class="flex items-center justify-between text-[11px] text-neutral-500 pt-1 font-sans">
                             <span>1 day ago</span>
                             <div class="flex items-center gap-2 flex-1 px-4">
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
