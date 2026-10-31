@@ -75,13 +75,13 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 <p id="authSubtitle" class="text-xs text-neutral-400 mt-1">Sign in to your customer dashboard</p>
             </div>
 
-            <!-- Tab Switcher: Log In / Register Key (Hidden in Reset Mode) -->
+            <!-- Tab Switcher: Log In / Register (Hidden in Reset Mode) -->
             <div id="authTabSwitcher" class="flex p-1 bg-[#090a0e] rounded-lg mb-6 border border-[#1e222d]">
                 <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-white bg-[#181b24] shadow-sm">
                     Log in
                 </button>
                 <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white">
-                    Register Key
+                    Register
                 </button>
             </div>
 
@@ -150,7 +150,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 <div id="regStep1Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5"></div>
 
                 <button type="submit" id="btnRequestOtp" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
-                    <span>Continue & Send Code</span>
+                    <span>Register</span>
                 </button>
             </form>
 
@@ -361,31 +361,34 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 2. TAB: DOWNLOADS (DOWNLOAD IS ONLY HERE) -->
+                <!-- 2. TAB: DOWNLOADS (DOWNLOAD CARD AT TOP-LEFT WITH BANNER ICON & BOTTOM BUTTON) -->
                 <div id="contentDownloads" class="hidden space-y-6">
-                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
-                        <div class="border-b border-[#1a1c24] pb-4">
-                            <h3 class="text-sm font-bold text-white">Client Downloads</h3>
-                            <p class="text-xs text-neutral-400">Download the official client binary. Always run as Administrator.</p>
-                        </div>
-
-                        <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0 font-bold font-mono text-sm border border-sky-500/20">
-                                    EXE
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-sm font-bold text-white font-mono">Loader.exe</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Latest</span>
-                                    </div>
-                                    <p class="text-xs text-neutral-400 mt-0.5">Windows 10 / 11 64-bit • File size: 8.2 MB</p>
-                                </div>
+                    <div class="flex flex-col sm:flex-row items-start gap-6">
+                        <!-- Top-Left Download Product Card -->
+                        <div class="w-full sm:w-80 bg-[#0f1117] border border-[#1e222d] rounded-2xl overflow-hidden shadow-2xl transition hover:border-[#2d3242]">
+                            <!-- Cover Banner / Image Icon -->
+                            <div class="relative w-full aspect-[16/9] bg-[#090a0e] overflow-hidden border-b border-[#1e222d]">
+                                <img src="/assets/download_icon.png" onerror="this.src='https://cdn.discordapp.com/attachments/1526175746169503854/1566122431121195059/images.png?ex=6ae764ac&is=6ae6132c&hm=587594191f3f458c9c07934dccfee736fd8af38d42e30a19156a7533e4bcd958&'" alt="Client Cover" class="w-full h-full object-cover">
+                                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
+                                    Latest
+                                </span>
                             </div>
-                            <a href="/assets/Loader.exe" download="Loader.exe" class="btn-saas px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shrink-0 shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span>Download Loader</span>
-                            </a>
+
+                            <!-- Card Body with Info & Bottom Download Button -->
+                            <div class="p-5 space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-bold text-white font-mono">Loader.exe</span>
+                                        <span class="text-xs text-neutral-400 font-sans">8.2 MB</span>
+                                    </div>
+                                    <p class="text-xs text-neutral-400 mt-1">Windows 10 / 11 64-bit • Run as Administrator</p>
+                                </div>
+
+                                <a href="/assets/Loader.exe" download="Loader.exe" class="btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    <span>Download Loader</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -709,7 +712,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 errBox.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>Continue & Send Code</span>';
+                btn.innerHTML = '<span>Register</span>';
             }
         }
 
