@@ -489,7 +489,7 @@ async function sendOtpEmail(env, toEmail, code) {
     const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #070709; color: #ffffff; padding: 36px 28px; border-radius: 12px; max-width: 480px; margin: 20px auto; border: 1px solid rgba(168, 85, 247, 0.25);">
         <div style="text-align: center; margin-bottom: 24px;">
-            <div style="display: inline-block; padding: 5px 12px; border-radius: 9999px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">UDvengers Customer Hub</div>
+            <div style="display: inline-block; padding: 5px 14px; border-radius: 9999px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">UDvengers</div>
             <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 16px 0 6px 0; letter-spacing: -0.02em;">Account Verification</h2>
             <p style="color: #a1a1aa; font-size: 13px; margin: 0; line-height: 1.5;">Enter the 6-digit confirmation code below to finish setting up your account.</p>
         </div>
@@ -583,7 +583,7 @@ async function sendOtpEmail(env, toEmail, code) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    sender: { name: 'UDvengers Customer Hub', email: 'auth@larpifyy.asia' },
+                    sender: { name: 'UDvengers', email: 'auth@larpifyy.asia' },
                     to: [{ email: toEmail }],
                     subject,
                     htmlContent: html

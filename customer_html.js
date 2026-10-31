@@ -191,31 +191,25 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     <!-- ============================================================ -->
     <!-- 2. CUSTOMER DASHBOARD PANEL (SHOWN WHEN LOGGED IN) -->
     <!-- ============================================================ -->
-    <div id="portalView" class="hidden min-h-screen flex flex-col">
+    <div id="portalView" class="hidden min-h-screen flex flex-col bg-[#07050d]">
         <!-- TOP NAVIGATION BAR -->
-        <header class="h-16 border-b border-purple-500/20 bg-[#09070f]/80 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between sticky top-0 z-40">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-900 to-purple-600/40 border border-purple-500/30 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                </div>
-                <div>
-                    <span class="font-bold text-sm tracking-tight text-white">UDvengers</span>
-                    <span class="ml-2 text-[11px] font-semibold text-purple-400 font-mono px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">Customer</span>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <!-- Cheat Status Indicator -->
-                <div class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-400 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="headerStatusText">Undetected • v2.4.1</span>
+        <header class="border-b border-purple-500/15 bg-[#090712]/90 backdrop-blur-md sticky top-0 z-30">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-900 to-purple-600/40 border border-purple-500/30 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm tracking-tight text-white">UDvengers</span>
+                        <span class="text-[11px] font-semibold text-purple-400 font-mono px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">Customer</span>
+                    </div>
                 </div>
 
                 <!-- User Dropdown & Logout -->
-                <div class="flex items-center gap-2 pl-2 border-l border-neutral-800">
-                    <div class="text-right hidden md:block">
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
                         <div id="headerUserEmail" class="text-xs font-semibold text-neutral-200">user@email.com</div>
                         <div class="text-[10px] text-neutral-500 font-mono">Verified Customer</div>
                     </div>
@@ -224,175 +218,110 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </button>
                 </div>
             </div>
+
+            <!-- SUB-NAV: SLEEK HORIZONTAL TABS -->
+            <div class="border-t border-purple-500/10 bg-[#06040a]">
+                <div class="max-w-5xl mx-auto px-4 sm:px-6 flex items-center gap-2 overflow-x-auto py-2">
+                    <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-purple-600/80 border border-purple-500/40 shadow-sm transition shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 border border-transparent transition shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Downloads</span>
+                    </button>
+                    <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 border border-transparent transition shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <span>HWID Reset</span>
+                    </button>
+                    <button onclick="switchPortalTab('guide')" id="pTabGuide" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 border border-transparent transition shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <span>Setup Guide</span>
+                    </button>
+                </div>
+            </div>
         </header>
 
         <!-- MAIN LAYOUT -->
-        <div class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-8 flex flex-col lg:flex-row gap-6">
+        <main class="max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 flex-1">
 
-            <!-- SIDEBAR TABS -->
-            <aside class="w-full lg:w-56 shrink-0 flex flex-row lg:flex-col gap-1.5 bg-[#0e0a17]/60 p-2 rounded-2xl border border-purple-500/15 overflow-x-auto">
-                <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-purple-600/90 shadow-sm transition shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                    <span>Dashboard</span>
-                </button>
+            <!-- 1. TAB: DASHBOARD OVERVIEW -->
+            <div id="contentDashboard" class="space-y-6">
+                <!-- Top Welcome Banner (Clean, No Download Button) -->
+                <div class="glass-panel rounded-2xl p-6 relative overflow-hidden">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-purple-400 font-mono">Customer Access</span>
+                    <h2 class="text-xl font-bold text-white mt-1">Fortnite External <span class="text-purple-400">UDvengers</span></h2>
+                    <p class="text-xs text-neutral-400 mt-1">Kernel driver streamed directly to memory. Streamproof with zero on-disk footprint.</p>
+                </div>
 
-                <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 transition shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span>Downloads</span>
-                </button>
+                <!-- License Details Card (Full Width, No System Status Card) -->
+                <div class="glass-panel rounded-2xl p-6 space-y-5">
+                    <div class="flex items-center justify-between pb-3 border-b border-purple-500/15">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                            License Subscription
+                        </h3>
+                        <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
+                    </div>
 
-                <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 transition shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    <span>HWID Reset</span>
-                </button>
-
-                <button onclick="switchPortalTab('guide')" id="pTabGuide" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 transition shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                    <span>Setup Guide</span>
-                </button>
-            </aside>
-
-            <!-- TAB CONTENT AREA -->
-            <main class="flex-1 min-w-0 space-y-6">
-
-                <!-- 1. TAB: DASHBOARD OVERVIEW -->
-                <div id="contentDashboard" class="space-y-6">
-                    <!-- Top Welcome & Hero Banner -->
-                    <div class="glass-panel rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div class="relative z-10">
-                            <span class="text-[11px] font-semibold uppercase tracking-wider text-purple-400 font-mono">Customer Access</span>
-                            <h2 class="text-xl font-bold text-white mt-1">Fortnite External <span class="text-purple-400">UDvengers</span></h2>
-                            <p class="text-xs text-neutral-400 mt-1">Kernel driver streamed directly to memory. Streamproof with zero on-disk footprint.</p>
+                    <!-- Masked Key Display -->
+                    <div class="bg-[#100c1a] border border-purple-500/25 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-neutral-500 font-mono block">YOUR LICENSE KEY</span>
+                            <span id="dashKeyText" class="text-sm font-mono text-neutral-200 tracking-wider">••••••••••••••••••••••••</span>
                         </div>
-                        <a href="/assets/Loader.exe" download="Loader.exe" class="btn-gradient relative z-10 px-5 py-3 rounded-xl text-xs font-semibold text-white shadow-lg flex items-center gap-2 shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Download Loader.exe</span>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="toggleKeyVisibility()" class="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition" title="Show/Hide">
+                                <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                            <button onclick="copyLicenseKey()" class="p-2 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-purple-300 transition" title="Copy Key">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Subscription Duration, Expiry & HWID -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div class="bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-3.5">
+                            <span class="text-neutral-500 text-[10px] block font-mono">DURATION</span>
+                            <span id="dashDuration" class="text-white font-semibold text-sm">Lifetime</span>
+                        </div>
+                        <div class="bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-3.5">
+                            <span class="text-neutral-500 text-[10px] block font-mono">EXPIRES</span>
+                            <span id="dashExpires" class="text-white font-semibold text-sm">Never</span>
+                        </div>
+                        <div class="bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-3.5">
+                            <span class="text-neutral-500 text-[10px] block font-mono">BOUND HARDWARE (HWID)</span>
+                            <span id="dashHwid" class="font-mono text-purple-300 text-xs truncate block mt-0.5">Unbound</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. TAB: DOWNLOADS & SETUP -->
+            <div id="contentDownloads" class="hidden space-y-6">
+                <div class="glass-panel rounded-2xl p-6 space-y-6">
+                    <div>
+                        <h3 class="text-base font-bold text-white">Client Loader Downloads</h3>
+                        <p class="text-xs text-neutral-400 mt-1">Download the official Amethyst Loader binary. Always run as Administrator.</p>
+                    </div>
+
+                    <!-- Main Download Card (Download is ONLY here) -->
+                    <div class="glass-card rounded-2xl p-5 border border-purple-500/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-white font-mono">Loader.exe</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">Release Build</span>
+                            </div>
+                            <p class="text-xs text-neutral-400">Windows 10 / 11 64-bit • Direct Kernel Injection</p>
+                        </div>
+                        <a href="/assets/Loader.exe" download="Loader.exe" class="btn-gradient px-6 py-2.5 rounded-xl text-xs font-semibold text-white shadow-md flex items-center gap-2 shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span>Download Loader.exe (8.2 MB)</span>
                         </a>
                     </div>
-
-                    <!-- Grid: License Card + System Status -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        <!-- License Details Card -->
-                        <div class="glass-panel rounded-2xl p-6 space-y-4">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-                                    License Subscription
-                                </h3>
-                                <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
-                            </div>
-
-                            <!-- Masked Key Display -->
-                            <div class="bg-[#100c1a] border border-purple-500/25 rounded-xl p-3.5 flex items-center justify-between">
-                                <div>
-                                    <span class="text-[10px] text-neutral-500 font-mono block">YOUR LICENSE KEY</span>
-                                    <span id="dashKeyText" class="text-xs font-mono text-neutral-200 tracking-wider">••••••••••••••••••••••••</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <button onclick="toggleKeyVisibility()" class="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition" title="Show/Hide">
-                                        <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    </button>
-                                    <button onclick="copyLicenseKey()" class="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-purple-300 transition" title="Copy Key">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Subscription Duration & Expiry -->
-                            <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="bg-neutral-900/60 border border-neutral-800 rounded-xl p-3">
-                                    <span class="text-neutral-500 text-[10px] block">DURATION</span>
-                                    <span id="dashDuration" class="text-white font-semibold">Lifetime</span>
-                                </div>
-                                <div class="bg-neutral-900/60 border border-neutral-800 rounded-xl p-3">
-                                    <span class="text-neutral-500 text-[10px] block">EXPIRES</span>
-                                    <span id="dashExpires" class="text-white font-semibold">Never</span>
-                                </div>
-                            </div>
-
-                            <!-- HWID Status -->
-                            <div class="flex items-center justify-between text-xs pt-1 border-t border-neutral-800">
-                                <span class="text-neutral-400">Bound Hardware (HWID):</span>
-                                <span id="dashHwid" class="font-mono text-purple-300">Unbound</span>
-                            </div>
-                        </div>
-
-                        <!-- System & Cheat Status Card -->
-                        <div class="glass-panel rounded-2xl p-6 space-y-4">
-                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                System Integrity & Status
-                            </h3>
-
-                            <div class="space-y-2.5 text-xs">
-                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
-                                    <span class="text-neutral-400">Cheat Detection Status</span>
-                                    <span class="text-emerald-400 font-semibold font-mono flex items-center gap-1.5">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Undetected
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
-                                    <span class="text-neutral-400">Anticheat Engine</span>
-                                    <span class="text-neutral-200 font-mono">EAC / BattlEye Bypassed</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
-                                    <span class="text-neutral-400">Streamproof Overlay</span>
-                                    <span class="text-purple-300 font-mono">OBS & Discord Hidden</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/60 border border-neutral-800">
-                                    <span class="text-neutral-400">Current Game Version</span>
-                                    <span class="text-neutral-200 font-mono">v32.10 Supported</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
-
-                <!-- 2. TAB: DOWNLOADS & SETUP -->
-                <div id="contentDownloads" class="hidden space-y-6">
-                    <div class="glass-panel rounded-2xl p-6 space-y-6">
-                        <div>
-                            <h3 class="text-base font-bold text-white">Client Loader Downloads</h3>
-                            <p class="text-xs text-neutral-400 mt-1">Download the official Amethyst Loader binary. Always run as Administrator.</p>
-                        </div>
-
-                        <!-- Main Download Card -->
-                        <div class="glass-card rounded-2xl p-5 border border-purple-500/25 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm font-bold text-white font-mono">Loader.exe</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20">Release Build</span>
-                                </div>
-                                <p class="text-xs text-neutral-400">SHA256: <span class="font-mono text-[11px] text-neutral-500">4CAEAD5C45648155CA8AB0A4B249...</span></p>
-                            </div>
-                            <a href="/assets/Loader.exe" download="Loader.exe" class="btn-gradient px-6 py-2.5 rounded-xl text-xs font-semibold text-white shadow-md flex items-center gap-2 shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                <span>Download (8.2 MB)</span>
-                            </a>
-                        </div>
-
-                        <!-- Hotkey Info Box -->
-                        <div class="bg-neutral-900/60 border border-neutral-800 rounded-xl p-4">
-                            <h4 class="text-xs font-semibold text-white mb-2">Default Menu Controls</h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                                <div class="p-2.5 rounded-lg bg-neutral-950/70 border border-neutral-800">
-                                    <span class="text-neutral-500 text-[10px] block">TOGGLE MENU</span>
-                                    <span class="font-mono font-semibold text-purple-300">INSERT</span>
-                                </div>
-                                <div class="p-2.5 rounded-lg bg-neutral-950/70 border border-neutral-800">
-                                    <span class="text-neutral-500 text-[10px] block">EMERGENCY EXIT</span>
-                                    <span class="font-mono font-semibold text-rose-400">END</span>
-                                </div>
-                                <div class="p-2.5 rounded-lg bg-neutral-950/70 border border-neutral-800">
-                                    <span class="text-neutral-500 text-[10px] block">AIMBOT BIND</span>
-                                    <span class="font-mono font-semibold text-purple-300">RIGHT CLICK</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
 
 
                 <!-- 3. TAB: HWID RESET -->
@@ -479,8 +408,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-            </main>
-        </div>
+        </main>
     </div>
 
     <!-- CLIENT LOGIC SCRIPT -->
@@ -688,10 +616,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 const btn = document.getElementById('pTab' + t.charAt(0).toUpperCase() + t.slice(1));
                 const content = document.getElementById('content' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (t === tab) {
-                    btn.className = 'flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-purple-600/90 shadow-sm transition shrink-0';
+                    btn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-purple-600/80 border border-purple-500/40 shadow-sm transition shrink-0';
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = 'flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 transition shrink-0';
+                    btn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-900/60 border border-transparent transition shrink-0';
                     content.classList.add('hidden');
                 }
             });
