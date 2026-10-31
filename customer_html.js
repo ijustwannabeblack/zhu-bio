@@ -252,7 +252,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                     <!-- DASHBOARD BUTTON -->
                     <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
                         <span>Dashboard</span>
                     </button>
 
@@ -366,15 +369,46 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 2. TAB: STATUS (REQUESTED TAB - EMPTY PLACEHOLDER) -->
+                <!-- 2. TAB: STATUS (SERVICE UPTIME & COMPONENT STATUS) -->
                 <div id="contentStatus" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
-                    <div class="card-dark p-6 space-y-4 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
-                        <div class="border-b border-[#1a1c24] pb-4">
-                            <h3 class="text-sm font-bold text-white tracking-tight">System Status</h3>
-                            <p class="text-xs text-neutral-400">Live operational telemetry and component status.</p>
+                    <div class="card-dark p-6 sm:p-7 space-y-6 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
+                        <div class="border-b border-[#1a1c24] pb-4 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm font-bold text-white tracking-tight">System Status</h3>
+                                <p class="text-xs text-neutral-400">Live operational telemetry and component uptime.</p>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/25">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                Major Outage
+                            </span>
                         </div>
-                        <div class="py-12 text-center text-xs text-neutral-500">
-                            No status reports at this time.
+
+                        <!-- System Status Component Card (All Red Uptime Bars) -->
+                        <div class="p-5 sm:p-6 rounded-xl bg-[#090a0e] border border-[#1e222d] space-y-4">
+                            <!-- Header: Service Name on Left, Status on Right -->
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-bold text-white tracking-tight">Fortnite External</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                                    <span class="text-xs font-semibold text-red-500">Offline</span>
+                                </div>
+                            </div>
+
+                            <!-- 90 Red Uptime Bars -->
+                            <div class="flex items-center gap-[2.5px] h-8 sm:h-9 w-full">
+                                ${Array.from({ length: 90 }, () => '<div class="flex-1 h-full rounded-[2px] bg-red-500 hover:bg-red-400 hover:scale-y-110 transition-all cursor-pointer" title="Offline (0% uptime)"></div>').join('')}
+                            </div>
+
+                            <!-- Footer: 90 days ago ... divider with uptime ... Today -->
+                            <div class="flex items-center justify-between text-[11px] text-neutral-400 pt-1 font-mono">
+                                <span>90 days ago</span>
+                                <div class="flex items-center gap-2 flex-1 px-4">
+                                    <div class="h-px bg-[#1e222d] flex-1"></div>
+                                    <span class="text-red-400 text-[10px] font-semibold uppercase tracking-wider font-sans">0% uptime</span>
+                                    <div class="h-px bg-[#1e222d] flex-1"></div>
+                                </div>
+                                <span>Today</span>
+                            </div>
                         </div>
                     </div>
                 </div>
