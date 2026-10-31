@@ -277,7 +277,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     <span>Sign Out</span>
                 </button>
-                <span class="text-[11px] text-neutral-500">Need help? Ask support</span>
+                <span class="text-[11px] text-neutral-500">Need help? <a href="https://discord.gg/udvengers" target="_blank" rel="noopener noreferrer" class="text-neutral-400 hover:text-white underline transition">Ask support</a></span>
             </div>
 
         </div>
