@@ -1155,6 +1155,22 @@ export default {
         // -------------------------------------------------------------
         // CUSTOMER PORTAL: /customer & /api/customer/*
         // -------------------------------------------------------------
+        if (path === '/download' || path === '/download/' || path === '/api/client/download') {
+            if (env.ASSETS) {
+                try {
+                    const assetReq = new Request(new URL('/assets/Loader.exe', request.url), request);
+                    const assetRes = await env.ASSETS.fetch(assetReq);
+                    if (assetRes.ok) {
+                        const headers = new Headers(assetRes.headers);
+                        headers.set('Content-Disposition', 'attachment; filename="Loader.exe"');
+                        headers.set('Content-Type', 'application/octet-stream');
+                        return new Response(assetRes.body, { status: 200, headers });
+                    }
+                } catch (e) {}
+            }
+            return Response.redirect('https://cdn.discordapp.com/attachments/1566180865896357888/1566180880400121996/Loader.exe?ex=6ae79b1c&is=6ae6499c&hm=160ed7e4ed63536c5b036181a2a3bdb7bfec726556ece196d0772922cd17900a&', 302);
+        }
+
         if (path === '/customer' || path === '/customer/') {
             return new Response(CUSTOMER_HTML, {
                 status: 200,

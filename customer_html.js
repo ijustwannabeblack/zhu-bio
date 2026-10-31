@@ -514,7 +514,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 <div>
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-bold text-white">Fortnite External</span>
-                                        <span class="text-xs text-neutral-400 font-sans">8.2 MB</span>
+                                        <span class="text-xs text-neutral-400 font-sans">8.3 MB</span>
                                     </div>
                                 </div>
 
@@ -522,6 +522,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     <span>Download Loader</span>
                                 </button>
+                                <a href="/download" class="block text-center text-[11px] text-neutral-400 hover:text-white transition pt-0.5">Direct Download (Mirror)</a>
                             </div>
                         </div>
                     </div>
@@ -1125,7 +1126,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
             // Trigger file download
             const link = document.createElement('a');
-            link.href = '/assets/Loader.exe';
+            link.href = '/download';
             link.download = 'Loader.exe';
             document.body.appendChild(link);
             link.click();
