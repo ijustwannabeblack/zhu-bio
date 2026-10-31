@@ -350,7 +350,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         <div class="w-7 h-7 rounded-full bg-white/10 text-white border border-white/15 flex items-center justify-center font-bold text-xs shrink-0" id="userAvatar">U</div>
                         <div class="min-w-0">
                             <div id="headerUserEmail" class="text-xs font-semibold text-white truncate">user@email.com</div>
-                            <div class="text-[10px] text-neutral-400 font-medium">Verified Customer</div>
                         </div>
                     </div>
                     <button onclick="handleLogout()" class="p-1.5 text-neutral-400 hover:text-rose-400 transition" title="Log Out">
@@ -435,7 +434,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         </div>
 
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                             
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex flex-col justify-between">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT EMAIL</span>
@@ -447,16 +446,9 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 </div>
                             </div>
 
-                            
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT CREATED</span>
                                 <span id="dashAccountCreated" class="text-sm font-semibold text-white">Oct 31, 2026</span>
-                            </div>
-
-                            
-                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DISCORD ACCOUNT</span>
-                                <span id="dashDiscordAccount" class="text-sm font-mono font-semibold text-white truncate block">Linked</span>
                             </div>
                         </div>
                     </div>
@@ -640,8 +632,8 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                     <tr class="text-neutral-500 border-b border-[#1a1c24]">
                                         <th class="pb-3 font-semibold w-14">RANK</th>
                                         <th class="pb-3 font-semibold">PLAYER / ACCOUNT</th>
+                                        <th class="pb-3 font-semibold">OVERALL TIME USED</th>
                                         <th class="pb-3 font-semibold">SESSIONS</th>
-                                        <th class="pb-3 font-semibold">TOTAL USAGE TIME</th>
                                         <th class="pb-3 font-semibold text-right">CONTEST REWARD</th>
                                     </tr>
                                 </thead>
@@ -693,6 +685,24 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 console.log = console.info = console.warn = console.error = console.debug = function() {};
                 console.clear();
             } catch (_) {}
+
+            // 4. DevTools detection: if Inspect Element is opened, blank out the view completely
+            let devToolsTriggered = false;
+            function checkDevTools() {
+                const wDiff = window.outerWidth - window.innerWidth;
+                const hDiff = window.outerHeight - window.innerHeight;
+                if (wDiff > 160 || hDiff > 160) {
+                    if (!devToolsTriggered) {
+                        devToolsTriggered = true;
+                        document.body.style.display = 'none';
+                    }
+                } else if (devToolsTriggered) {
+                    devToolsTriggered = false;
+                    document.body.style.display = '';
+                }
+            }
+            window.addEventListener('resize', checkDevTools);
+            setInterval(checkDevTools, 500);
         })();
 
         let currentCustomer = null;
@@ -1576,23 +1586,50 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
 
         let currentUsageData = null;
+        let liveSessionTickerInterval = null;
+        let activeSessionStartTime = 0;
+        let isSessionCurrentlyActive = false;
 
-        function formatUsageTime(totalSec) {
-            const sec = Number(totalSec) || 0;
-            if (sec <= 0) return '0m';
-            const hrs = Math.floor(sec / 3600);
+        function formatDurationFull(totalSec) {
+            const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
+            const days = Math.floor(sec / 86400);
+            const hours = Math.floor((sec % 86400) / 3600);
             const mins = Math.floor((sec % 3600) / 60);
-            const remainderSecs = sec % 60;
-            if (hrs > 0) return hrs + 'h ' + mins + 'm';
-            if (mins > 0) return mins + 'm';
-            return remainderSecs + 's';
+            const secs = sec % 60;
+
+            const parts = [];
+            if (days > 0) parts.push(days + (days === 1 ? ' day' : ' days'));
+            if (hours > 0 || days > 0) parts.push(hours + (hours === 1 ? ' hr' : ' hrs'));
+            if (mins > 0 || hours > 0 || days > 0) parts.push(mins + (mins === 1 ? ' min' : ' mins'));
+            parts.push(secs + (secs === 1 ? ' sec' : ' secs'));
+
+            return parts.join(', ');
+        }
+
+        function formatDurationCompact(totalSec) {
+            const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
+            const days = Math.floor(sec / 86400);
+            const hours = Math.floor((sec % 86400) / 3600);
+            const mins = Math.floor((sec % 3600) / 60);
+            const secs = sec % 60;
+
+            if (days > 0) {
+                return days + 'd ' + hours + 'h ' + mins + 'm ' + secs + 's';
+            }
+            if (hours > 0) {
+                return hours + 'h ' + mins + 'm ' + secs + 's';
+            }
+            if (mins > 0) {
+                return mins + 'm ' + secs + 's';
+            }
+            return secs + 's';
         }
 
         function renderUsageStats(usage) {
             if (!usage) return;
             currentUsageData = usage;
 
-            const isActive = Boolean(usage.is_active);
+            isSessionCurrentlyActive = Boolean(usage.is_active);
             const totalSec = Number(usage.total_seconds) || 0;
             const lastSec = Number(usage.last_session_seconds) || 0;
             const curSec = Number(usage.current_session_seconds) || 0;
@@ -1602,31 +1639,45 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             const header = document.getElementById('sessionStatusHeader');
             const msgDisplay = document.getElementById('usageMessageDisplay');
             const subtext = document.getElementById('sessionStatusSubtext');
+            const statTotal = document.getElementById('statTotalUsage');
+            const statLast = document.getElementById('statLastSession');
+            const statCount = document.getElementById('statSessionCount');
 
-            if (isActive) {
+            if (statCount) statCount.textContent = sessCount;
+
+            if (liveSessionTickerInterval) {
+                clearInterval(liveSessionTickerInterval);
+                liveSessionTickerInterval = null;
+            }
+
+            if (isSessionCurrentlyActive) {
+                activeSessionStartTime = Date.now() - ((curSec || 1) * 1000);
                 if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
                 if (header) header.textContent = 'External Client Active';
-                if (msgDisplay) {
-                    msgDisplay.innerHTML = 'Active Session: <span class="text-emerald-400 font-mono">' + formatUsageTime(curSec || 60) + '</span>';
-                }
                 if (subtext) subtext.textContent = 'UDvengers is running • Live heartbeat recording session time';
+
+                const updateTicker = function() {
+                    const elapsed = Math.max(1, Math.floor((Date.now() - activeSessionStartTime) / 1000));
+                    if (msgDisplay) {
+                        msgDisplay.innerHTML = 'Active Session: <span class="text-emerald-400 font-mono tracking-tight">' + formatDurationFull(elapsed) + '</span>';
+                    }
+                    if (statLast) statLast.textContent = formatDurationCompact(elapsed);
+                    if (statTotal) statTotal.textContent = formatDurationCompact(totalSec + elapsed);
+                };
+
+                updateTicker();
+                liveSessionTickerInterval = setInterval(updateTicker, 1000);
             } else {
                 if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-neutral-500';
                 if (header) header.textContent = 'External Client Closed';
+                const closedSec = lastSec || totalSec || 0;
                 if (msgDisplay) {
-                    msgDisplay.innerHTML = 'You used UDvengers for: <span class="text-emerald-400 font-mono">' + formatUsageTime(lastSec || totalSec) + '</span>';
+                    msgDisplay.innerHTML = 'You used UDvengers for: <span class="text-emerald-400 font-mono tracking-tight">' + formatDurationFull(closedSec) + '</span>';
                 }
                 if (subtext) subtext.textContent = 'External closed • Playtime saved to your account';
+                if (statLast) statLast.textContent = formatDurationCompact(closedSec);
+                if (statTotal) statTotal.textContent = formatDurationCompact(totalSec);
             }
-
-            const statTotal = document.getElementById('statTotalUsage');
-            if (statTotal) statTotal.textContent = formatUsageTime(totalSec);
-
-            const statLast = document.getElementById('statLastSession');
-            if (statLast) statLast.textContent = formatUsageTime(lastSec);
-
-            const statCount = document.getElementById('statSessionCount');
-            if (statCount) statCount.textContent = sessCount;
         }
 
         async function fetchLeaderboardAndUsage() {
@@ -1657,27 +1708,43 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                             let rewardBadge = '';
                             if (rank === 1) {
-                                rewardBadge = '<span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-semibold">Free Lifetime Key</span>';
+                                rewardBadge = '<span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-semibold whitespace-nowrap">Free Lifetime Key</span>';
                             } else if (rank <= 3) {
-                                rewardBadge = '<span class="px-2 py-0.5 rounded-md bg-white/5 text-neutral-300 border border-white/10 text-[10px] font-medium">Contender</span>';
+                                rewardBadge = '<span class="px-2 py-0.5 rounded-md bg-white/5 text-neutral-300 border border-white/10 text-[10px] font-medium whitespace-nowrap">Contender</span>';
                             } else {
                                 rewardBadge = '<span class="text-neutral-500 text-[11px]">-</span>';
                             }
 
-                            const displayName = item.discord_id ? ('Discord ' + item.discord_id) : (item.masked_key || 'Player');
+                            const username = item.username || item.handle || 'Player';
+                            const handle = item.handle ? ('@' + item.handle) : (item.user_id ? ('ID: ' + item.user_id) : '');
+
+                            let avatarHtml = '';
+                            if (item.avatar_url) {
+                                avatarHtml = '<img src="' + item.avatar_url + '" class="w-7 h-7 rounded-full bg-neutral-800 object-cover shrink-0 border border-white/10" alt="' + username + '">';
+                            } else {
+                                const initial = username.charAt(0).toUpperCase();
+                                avatarHtml = '<div class="w-7 h-7 rounded-full bg-neutral-800 text-white font-bold text-xs flex items-center justify-center shrink-0 border border-white/10">' + initial + '</div>';
+                            }
+
                             const rowClass = isMe ? 'bg-emerald-500/10 text-white font-medium border-l-2 border-emerald-400' : 'hover:bg-white/[0.02]';
 
                             html += '<tr class="' + rowClass + ' transition">' +
                                 '<td class="py-3.5 pr-2 font-mono">' + rankBadge + '</td>' +
                                 '<td class="py-3.5">' +
-                                    '<div class="flex items-center gap-2">' +
-                                        '<span class="font-semibold text-white">' + displayName + '</span>' +
-                                        (isMe ? '<span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-500 text-black uppercase">YOU</span>' : '') +
-                                        (item.is_active ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Currently Playing"></span>' : '') +
+                                    '<div class="flex items-center gap-2.5 min-w-0">' +
+                                        avatarHtml +
+                                        '<div class="min-w-0">' +
+                                            '<div class="flex items-center gap-1.5">' +
+                                                '<span class="font-semibold text-white truncate">' + username + '</span>' +
+                                                (isMe ? '<span class="px-1.5 py-0.2 text-[9px] font-bold rounded bg-emerald-500 text-black uppercase shrink-0">YOU</span>' : '') +
+                                                (item.is_active ? '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" title="Currently Playing"></span>' : '') +
+                                            '</div>' +
+                                            (handle ? '<div class="text-[10px] text-neutral-500 truncate">' + handle + '</div>' : '') +
+                                        '</div>' +
                                     '</div>' +
                                 '</td>' +
+                                '<td class="py-3.5 font-mono text-emerald-400 font-semibold">' + formatDurationCompact(item.total_seconds) + '</td>' +
                                 '<td class="py-3.5 text-neutral-400">' + (item.sessions || 1) + ' sessions</td>' +
-                                '<td class="py-3.5 font-mono text-emerald-400 font-semibold">' + formatUsageTime(item.total_seconds) + '</td>' +
                                 '<td class="py-3.5 text-right">' + rewardBadge + '</td>' +
                             '</tr>';
                         });

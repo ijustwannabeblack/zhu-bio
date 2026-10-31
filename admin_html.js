@@ -31,14 +31,14 @@ export const ADMIN_HTML = `<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex antialiased selection:bg-neutral-800 selection:text-white">
 
-    <!-- MOBILE SIDEBAR BACKDROP -->
+    
     <div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-sm lg:hidden"></div>
 
-    <!-- LEFT SIDEBAR -->
+    
     <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-60 bg-[#09090b] border-r border-subtle flex flex-col justify-between transition-transform duration-200 -translate-x-full lg:translate-x-0 lg:static shrink-0 select-none">
         
         <div class="flex flex-col h-full">
-            <!-- BRAND HEADER -->
+            
             <div class="h-14 px-5 border-b border-subtle flex items-center justify-between shrink-0">
                 <span class="font-bold tracking-tight text-sm text-neutral-100">Authentication</span>
                 <button onclick="toggleSidebar(false)" class="lg:hidden text-neutral-400 hover:text-white p-1">
@@ -46,7 +46,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </button>
             </div>
 
-            <!-- TABS LIST -->
+            
             <nav class="p-3 space-y-1 flex-1">
                 <button onclick="switchTab('keys')" id="tabBtnKeys" class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium bg-neutral-800 text-white transition">
                     <div class="flex items-center space-x-2.5">
@@ -88,7 +88,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </button>
             </nav>
 
-            <!-- SIDEBAR FOOTER: USER & LOGOUT -->
+            
             <div class="p-3 border-t border-subtle shrink-0">
                 <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-900/60 border border-subtle">
                     <div class="flex items-center space-x-2 min-w-0">
@@ -103,10 +103,10 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
+    
     <div class="flex-1 min-w-0 flex flex-col min-h-screen">
         
-        <!-- MOBILE TOP BAR -->
+        
         <header class="lg:hidden h-14 border-b border-subtle px-4 flex items-center justify-between bg-[#09090b] sticky top-0 z-30">
             <button onclick="toggleSidebar(true)" class="p-1.5 text-neutral-400 hover:text-white rounded border border-subtle">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
@@ -115,10 +115,10 @@ export const ADMIN_HTML = `<!DOCTYPE html>
             <div class="w-8"></div>
         </header>
 
-        <!-- MAIN PAGE WRAPPER -->
+        
         <main class="flex-1 px-4 sm:px-8 py-6 max-w-6xl w-full mx-auto space-y-6">
 
-            <!-- DISABLED BANNER -->
+            
             <div id="disabledBanner" class="hidden p-3 sm:p-3.5 bg-rose-950/50 border border-rose-900/70 rounded-xl text-xs text-rose-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-lg">
                 <div class="flex items-center space-x-2 flex-wrap gap-y-1.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0 shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
@@ -130,7 +130,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </button>
             </div>
 
-            <!-- STATS ROW (4 CARDS) -->
+            
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
                 <div class="bg-card border border-subtle rounded-xl p-3.5 sm:p-4 flex flex-col justify-between">
                     <div class="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-neutral-500 mb-1 truncate font-mono">Total Licenses</div>
@@ -153,28 +153,28 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- TAB 1: LICENSES                            -->
-            <!-- ========================================== -->
+            
+            
+            
             <div id="tabKeys" class="space-y-4">
                 
-                <!-- LICENSES CONTROLS BAR -->
+                
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <!-- SEARCH INPUT -->
+                    
                     <div class="relative w-full sm:w-72">
                         <svg class="w-3.5 h-3.5 absolute left-3 top-2.5 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                         <input type="text" id="searchInput" oninput="filterLicenses()" placeholder="Search key, HWID, note..."
                             class="w-full h-8 pl-8 pr-3 bg-neutral-900 border border-subtle rounded-lg text-xs text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition">
                     </div>
 
-                    <!-- CREATE KEY BUTTON -->
+                    
                     <button onclick="openModal('generateModal')" class="h-8 px-3.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-1.5 shadow-sm whitespace-nowrap self-start sm:self-auto">
                         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                         <span>Create Key</span>
                     </button>
                 </div>
 
-                <!-- TABLE -->
+                
                 <div class="bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left text-xs min-w-[620px]">
@@ -190,16 +190,16 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                                 </tr>
                             </thead>
                             <tbody id="licenseTableBody" class="divide-y divide-neutral-900 font-mono">
-                                <!-- Dynamic Rows -->
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- TAB 2: AUDIT LOGS                          -->
-            <!-- ========================================== -->
+            
+            
+            
             <div id="tabLogs" class="hidden space-y-4">
                 <div class="bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
                     <div class="overflow-x-auto custom-scrollbar">
@@ -214,16 +214,16 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                                 </tr>
                             </thead>
                             <tbody id="logsTableBody" class="divide-y divide-neutral-900 font-mono">
-                                <!-- Dynamic Rows -->
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- TAB 3: CRACKING ATTEMPTS                   -->
-            <!-- ========================================== -->
+            
+            
+            
             <div id="tabThreats" class="hidden space-y-4">
                 <div class="bg-card border border-rose-950/40 rounded-xl overflow-hidden shadow-sm">
                     <div class="px-3.5 sm:px-4 py-3 bg-rose-950/20 border-b border-rose-900/30 flex items-center justify-between">
@@ -249,16 +249,16 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                                 </tr>
                             </thead>
                             <tbody id="threatsTableBody" class="divide-y divide-neutral-900 font-mono">
-                                <!-- Dynamic Rows -->
+                                
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- TAB 4: LOADER CONTROL                      -->
-            <!-- ========================================== -->
+            
+            
+            
             <div id="tabLoader" class="hidden space-y-4">
                 <div class="bg-card border border-subtle rounded-xl p-5 max-w-xl space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-subtle">
@@ -305,9 +305,9 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- TAB 5: MEMBER RESTORE / BACKUP             -->
-            <!-- ========================================== -->
+            
+            
+            
             <div id="tabMembers" class="hidden space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-card border border-subtle rounded-xl p-5 space-y-3 md:col-span-1">
@@ -340,7 +340,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- TABLE: VERIFIED MEMBERS LIST -->
+                
                 <div class="bg-card border border-subtle rounded-xl overflow-hidden shadow-sm">
                     <div class="p-4 border-b border-subtle flex items-center justify-between">
                         <div class="text-xs font-semibold text-neutral-200">Authorized Members List</div>
@@ -370,7 +370,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         </main>
     </div>
 
-    <!-- MODAL: GENERATE KEYS -->
+    
     <div id="generateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div class="bg-card w-full max-w-md p-5 rounded-xl border border-subtle shadow-2xl space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-subtle">
@@ -419,7 +419,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- MODAL: RESULT KEYS -->
+    
     <div id="resultModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div class="bg-card w-full max-w-md p-5 rounded-xl border border-subtle shadow-2xl space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-subtle">
@@ -443,7 +443,7 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- MODAL: DISABLE LOADER WITH REASON -->
+    
     <div id="disableModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
         <div class="bg-card w-full max-w-md p-5 rounded-xl border border-rose-900/60 shadow-2xl space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-subtle">
@@ -476,6 +476,36 @@ export const ADMIN_HTML = `<!DOCTYPE html>
     </div>
 
     <script>
+        (function() {
+            document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+            document.addEventListener('keydown', function(e) {
+                if (e.keyCode === 123 || e.key === 'F12') { e.preventDefault(); e.stopPropagation(); return false; }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67 || e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'i' || e.key === 'j' || e.key === 'c')) {
+                    e.preventDefault(); e.stopPropagation(); return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.keyCode === 85 || e.keyCode === 83 || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+                    e.preventDefault(); e.stopPropagation(); return false;
+                }
+            }, true);
+            try { console.log = console.info = console.warn = console.error = console.debug = function() {}; console.clear(); } catch (_) {}
+            let devToolsTriggered = false;
+            function checkDevTools() {
+                const wDiff = window.outerWidth - window.innerWidth;
+                const hDiff = window.outerHeight - window.innerHeight;
+                if (wDiff > 160 || hDiff > 160) {
+                    if (!devToolsTriggered) {
+                        devToolsTriggered = true;
+                        document.body.style.display = 'none';
+                    }
+                } else if (devToolsTriggered) {
+                    devToolsTriggered = false;
+                    document.body.style.display = '';
+                }
+            }
+            window.addEventListener('resize', checkDevTools);
+            setInterval(checkDevTools, 500);
+        })();
+
         let allLicenses = [];
         let gLoaderEnabled = true;
         let gLoaderDisabledAt = 0;
