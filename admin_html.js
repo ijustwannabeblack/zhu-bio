@@ -702,11 +702,17 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         async function toggleBan(key, currentStatus) {
             const newStatus = currentStatus === 'banned' ? 'active' : 'banned';
             await api('/api/admin/set-status', { method: 'POST', body: JSON.stringify({ key, status: newStatus }) });
+            showToast(newStatus === 'banned' ? 'Key banned & Discord roles revoked' : 'Key unbanned');
             loadDashboard();
         }
 
         async function deleteKey(key) {
-            await api('/api/admin/delete-key', { method: 'POST', body: JSON.stringify({ key }) });
+            const res = await api('/api/admin/delete-key', { method: 'POST', body: JSON.stringify({ key }) });
+            if (res && res.roles_revoked && res.revoked_roles && res.revoked_roles.length > 0) {
+                showToast(\`Key deleted & Discord roles revoked: \${res.revoked_roles.join(', ')}\`);
+            } else {
+                showToast('Key deleted');
+            }
             loadDashboard();
         }
 

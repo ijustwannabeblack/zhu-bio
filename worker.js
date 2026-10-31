@@ -2,11 +2,84 @@ import { DRIVER_PAYLOAD_B64 } from './driver_payload.js';
 import { ADMIN_HTML } from './admin_html.js';
 
 // -------------------------------------------------------------
-// DISCORD OAUTH2 SECURITY CONFIGURATION
+// DISCORD OAUTH2 & BOT INTEGRATION CONFIGURATION
 // -------------------------------------------------------------
 const DISCORD_CLIENT_ID = '1565727420739227748';
 const DISCORD_CLIENT_SECRET = 'hjw53zJFLDZ0kw50FbHNX1bQAWVqOkP3';
 const ALLOWED_DISCORD_ID = '1415022792214052915';
+const DISCORD_GUILD_ID = '1549785920490971187';
+const DISCORD_ROLE_CUSTOMER = '1550990740329467904';
+const DISCORD_ROLE_LIFETIME = '1551043327317516348';
+
+function getBotToken(env) {
+    if (env && env.DISCORD_BOT_TOKEN) return env.DISCORD_BOT_TOKEN;
+    return atob('TVRVMk5UY3lOelF5TURjek9USXlOemMwT0EuR1R1REM4LjVmMDVuNTAwdzFyTXBXS3UwdzFzUWJiRUdmdU45VXptRkRLc3Bz');
+}
+
+function getDiscordIdForLicense(lic) {
+    if (!lic) return null;
+    if (lic.discord_id) return String(lic.discord_id).trim();
+    if (lic.note) {
+        const match = lic.note.match(/for\s+<@(\d+)>/i) || lic.note.match(/<@(\d+)>/) || lic.note.match(/\b\d{17,20}\b/);
+        if (match) return (match[1] || match[0]).trim();
+    }
+    return null;
+}
+
+async function revokeDiscordRole(env, guildId, userId, roleId) {
+    if (!guildId || !userId || !roleId) return false;
+    try {
+        const token = getBotToken(env);
+        const url = `https://discord.com/api/v10/guilds/${guildId}/members/${userId}/roles/${roleId}`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bot ${token}`,
+                'X-Audit-Log-Reason': 'License deleted or revoked via Web Dashboard'
+            }
+        });
+        return res.ok || res.status === 404;
+    } catch (err) {
+        console.error(`[Discord Role Revoke Error] Member ${userId}, Role ${roleId}:`, err);
+        return false;
+    }
+}
+
+async function syncDiscordRolesOnKeyRemoval(env, discordId, excludeKey) {
+    if (!discordId) return { revoked: false, roles: [] };
+
+    const all = await getAllLicenses(env);
+    const now = Date.now();
+
+    // Check if the user has any remaining active, non-expired license
+    const remaining = all.filter(l => {
+        if (l.key === excludeKey) return false;
+        const otherId = getDiscordIdForLicense(l);
+        if (otherId !== discordId) return false;
+        if (l.status === 'banned') return false;
+        if (l.expires_at && l.expires_at <= now) return false;
+        return true;
+    });
+
+    const revokedRoles = [];
+
+    if (remaining.length === 0) {
+        // No remaining active licenses -> revoke both Customer and Lifetime roles
+        await revokeDiscordRole(env, DISCORD_GUILD_ID, discordId, DISCORD_ROLE_CUSTOMER);
+        await revokeDiscordRole(env, DISCORD_GUILD_ID, discordId, DISCORD_ROLE_LIFETIME);
+        revokedRoles.push('Customer', 'Lifetime');
+    } else {
+        // Still has active licenses, but check if any of them are Lifetime
+        const hasLifetime = remaining.some(l => l.duration_days === 0 || !l.expires_at);
+        if (!hasLifetime) {
+            // No lifetime key remains -> revoke Lifetime role only, keep Customer role
+            await revokeDiscordRole(env, DISCORD_GUILD_ID, discordId, DISCORD_ROLE_LIFETIME);
+            revokedRoles.push('Lifetime');
+        }
+    }
+
+    return { revoked: revokedRoles.length > 0, roles: revokedRoles };
+}
 
 // -------------------------------------------------------------
 // CRYPTO HELPERS (Web Crypto API - Native Cloudflare Edge)
@@ -938,6 +1011,7 @@ export default {
                     created_at: now,
                     activated_at: null,
                     expires_at: null,
+                    discord_id: target_discord_id || null,
                     note: note || `Generated via Discord Bot by <@${admin_discord_id || 'admin'}> for <@${target_discord_id || 'user'}>`,
                     last_login: null
                 };
@@ -1118,21 +1192,50 @@ export default {
             }
 
             if (path === '/api/admin/set-status' && method === 'POST') {
-                const body = await request.json();
+                const body = await request.json().catch(() => ({}));
                 const lic = await getLicense(env, body.key);
                 if (lic && ['active', 'banned'].includes(body.status)) {
                     lic.status = body.status;
                     await saveLicense(env, lic);
-                    await addAuditLog(env, 'STATUS_CHANGE', ip, body.key, `Status changed to ${body.status}`);
+
+                    let syncDetail = '';
+                    const discordId = getDiscordIdForLicense(lic);
+                    if (body.status === 'banned' && discordId) {
+                        const sync = await syncDiscordRolesOnKeyRemoval(env, discordId, lic.key);
+                        if (sync.roles.length) {
+                            syncDetail = `. Discord <@${discordId}> roles revoked: ${sync.roles.join(', ')}`;
+                        }
+                    }
+
+                    await addAuditLog(env, 'STATUS_CHANGE', ip, body.key, `Status changed to ${body.status}${syncDetail}`);
                 }
                 return jsonResponse({ success: true });
             }
 
             if (path === '/api/admin/delete-key' && method === 'POST') {
-                const body = await request.json();
-                await deleteLicense(env, body.key);
-                await addAuditLog(env, 'KEY_DELETED', ip, body.key, 'Deleted by Discord Owner');
-                return jsonResponse({ success: true });
+                const body = await request.json().catch(() => ({}));
+                const keyToDelete = (body.key || '').trim();
+                const lic = await getLicense(env, keyToDelete);
+                
+                const discordId = lic ? getDiscordIdForLicense(lic) : null;
+                await deleteLicense(env, keyToDelete);
+
+                let syncResult = { revoked: false, roles: [] };
+                if (discordId) {
+                    syncResult = await syncDiscordRolesOnKeyRemoval(env, discordId, keyToDelete);
+                }
+
+                const logDetail = discordId
+                    ? `Deleted by Owner. Discord <@${discordId}> roles revoked: ${syncResult.roles.length ? syncResult.roles.join(', ') : 'None (other active key remains)'}`
+                    : 'Deleted by Owner';
+
+                await addAuditLog(env, 'KEY_DELETED', ip, keyToDelete, logDetail);
+                return jsonResponse({ 
+                    success: true, 
+                    discord_id: discordId, 
+                    roles_revoked: syncResult.revoked, 
+                    revoked_roles: syncResult.roles 
+                });
             }
         }
 
