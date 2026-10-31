@@ -241,12 +241,11 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         <aside class="w-full md:w-60 bg-[#0b0c10] border-r border-[#1a1c24] flex flex-col justify-between shrink-0 text-white">
             <div>
                 <!-- Brand Header with Witch Hat Logo -->
-                <div class="h-16 px-5 border-b border-[#1a1c24] flex items-center justify-between">
+                <div class="h-16 px-5 border-b border-[#1a1c24] flex items-center">
                     <div class="flex items-center gap-2.5">
                         <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-7 h-7 object-contain">
                         <span class="font-bold text-base tracking-tight text-white">UDvengers</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-neutral-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Customer Panel</span>
                 </div>
 
                 <!-- Navigation Section -->
