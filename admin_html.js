@@ -281,6 +281,28 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                         </button>
                     </div>
                 </div>
+
+                <div class="bg-card border border-subtle rounded-xl p-5 max-w-xl space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-subtle">
+                        <div>
+                            <h3 class="text-sm font-semibold text-neutral-100">Customer Portal Maintenance</h3>
+                            <p class="text-xs text-neutral-400">Purge customer accounts, sessions, and license bindings.</p>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">Portal</span>
+                    </div>
+
+                    <div class="p-3 rounded-lg bg-neutral-900 border border-subtle space-y-1">
+                        <div class="text-[11px] text-neutral-400 font-medium">Customer Data Wipe</div>
+                        <div class="text-xs text-neutral-400">Permanently clears all customer login profiles, active session cookies, pending OTP codes, and unlinks customer emails from licenses.</div>
+                    </div>
+
+                    <div class="pt-1">
+                        <button id="wipeCustomersBtn" onclick="wipeAllCustomerAccounts()" class="h-9 px-4 bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-500/30 text-xs font-semibold rounded-lg transition duration-150 flex items-center space-x-2 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <span>Purge All Customer Data</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- ========================================== -->
@@ -552,6 +574,27 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                 loadDashboard();
             } else {
                 alert('Failed to disable loaders: ' + (res?.message || 'Server error'));
+            }
+        }
+
+        async function wipeAllCustomerAccounts() {
+            if (!confirm('Are you sure you want to permanently delete all customer accounts, active sessions, and unbind license keys?')) return;
+            const btn = document.getElementById('wipeCustomersBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin mr-1.5">●</span> Purging...';
+            try {
+                const res = await api('/api/admin/customer/wipe-all', { method: 'POST' });
+                if (res && res.success) {
+                    alert('All customer data has been completely wiped from the database.');
+                    loadDashboard();
+                } else {
+                    alert('Failed to purge customer data: ' + (res?.message || 'Server error'));
+                }
+            } catch (err) {
+                alert('Error purging customer data: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg><span>Purge All Customer Data</span>';
             }
         }
 

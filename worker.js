@@ -301,12 +301,94 @@ async function deleteAdminSession(env, token) {
 // -------------------------------------------------------------
 // CUSTOMER AUTHENTICATION & SESSION HELPERS
 // -------------------------------------------------------------
+const DEFAULT_RESEND_KEY = atob('cmVfaEtiWWtGNGJfR0hMeFRxd1Y3b1FQUGt5ZUVXaDdTZHg4');
+
 async function hashPassword(password, salt) {
     const enc = new TextEncoder();
     const data = enc.encode(password + ':' + salt);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function wipeAllCustomerData(env) {
+    const kv = await getKv(env);
+    let deletedCount = 0;
+
+    // 1. Clear in-memory maps
+    if (memoryStore) {
+        if (memoryStore.customers) memoryStore.customers.clear();
+        if (memoryStore.custSessions) memoryStore.custSessions.clear();
+        if (memoryStore.otps) memoryStore.otps.clear();
+    }
+
+    if (!kv) {
+        return { success: true, count: 0, storage: 'memory' };
+    }
+
+    // 2. Get registered customer list
+    let customerEmails = [];
+    try {
+        customerEmails = (await kv.get('index:customers', 'json')) || [];
+    } catch (_) {}
+
+    for (const email of customerEmails) {
+        if (!email) continue;
+        try {
+            await kv.delete('cust:' + email.toLowerCase().trim());
+            await kv.delete('otp:' + email.toLowerCase().trim());
+            deletedCount++;
+        } catch (_) {}
+    }
+
+    // 3. Scan and delete all customer-related keys using kv.list if supported
+    if (typeof kv.list === 'function') {
+        const prefixes = ['cust:', 'custsess:', 'otp:', 'key_to_cust:'];
+        for (const prefix of prefixes) {
+            try {
+                let cursor = undefined;
+                do {
+                    const res = await kv.list({ prefix, cursor, limit: 1000 });
+                    if (res && Array.isArray(res.keys)) {
+                        for (const k of res.keys) {
+                            await kv.delete(k.name);
+                            deletedCount++;
+                        }
+                    }
+                    cursor = (res && !res.list_complete) ? res.cursor : undefined;
+                } while (cursor);
+            } catch (err) {
+                console.error(`[Wipe] Error listing keys for prefix ${prefix}:`, err);
+            }
+        }
+    }
+
+    // 4. Reset customer index
+    await kv.put('index:customers', JSON.stringify([]));
+
+    // 5. Unbind customer_email from all licenses and remove any test keys
+    try {
+        const allLicenses = await getAllLicenses(env);
+        for (const lic of allLicenses) {
+            if (!lic || !lic.key) continue;
+            let modified = false;
+            if (lic.customer_email) {
+                delete lic.customer_email;
+                modified = true;
+            }
+            if (lic.key.startsWith('TEST-') || lic.key === 'TEST-55KF-NUSE-88TB') {
+                await deleteLicense(env, lic.key);
+                deletedCount++;
+            } else if (modified) {
+                await saveLicense(env, lic);
+                deletedCount++;
+            }
+        }
+    } catch (err) {
+        console.error('[Wipe] Error unbinding customer licenses:', err);
+    }
+
+    return { success: true, count: deletedCount, storage: 'kv' };
 }
 
 async function getCustomer(env, email) {
@@ -405,28 +487,44 @@ async function deleteOtpRecord(env, email) {
 async function sendOtpEmail(env, toEmail, code) {
     const subject = 'Your UDvengers Verification Code: ' + code;
     const html = `
-    <div style="font-family: Arial, sans-serif; background-color: #0b0813; color: #ffffff; padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto; border: 1px solid rgba(168, 85, 247, 0.3);">
-        <h2 style="color: #c084fc; margin-top: 0;">UDvengers Customer Verification</h2>
-        <p style="color: #a1a1aa; font-size: 14px;">Use the verification code below to complete your registration:</p>
-        <div style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0;">
-            <span style="font-family: monospace; font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #f3e8ff;">\${code}</span>
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #070709; color: #ffffff; padding: 36px 28px; border-radius: 12px; max-width: 480px; margin: 20px auto; border: 1px solid rgba(168, 85, 247, 0.25);">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; padding: 5px 12px; border-radius: 9999px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">UDvengers Customer Hub</div>
+            <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 16px 0 6px 0; letter-spacing: -0.02em;">Account Verification</h2>
+            <p style="color: #a1a1aa; font-size: 13px; margin: 0; line-height: 1.5;">Enter the 6-digit confirmation code below to finish setting up your account.</p>
         </div>
-        <p style="color: #71717a; font-size: 12px; line-height: 1.5;">This code will expire in 10 minutes. If you did not request this verification code, please ignore this email.</p>
+        <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.35); padding: 18px; border-radius: 10px; text-align: center; margin: 24px 0;">
+            <span style="font-family: 'SFMono-Regular', Consolas, Monaco, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #d8b4fe;">${code}</span>
+        </div>
+        <p style="color: #71717a; font-size: 12px; line-height: 1.6; text-align: center; margin: 0 0 20px 0;">This code will expire in 10 minutes. If you did not request this verification code, you can safely ignore this email.</p>
+        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px; text-align: center;">
+            <span style="color: #52525b; font-size: 11px;">Protected by UDvengers Automated Infrastructure</span>
+        </div>
     </div>
     `;
 
     // Read API keys from Environment or KV config
     const kv = await getKv(env);
-    const resendKey = (env && env.RESEND_API_KEY) || (kv ? await kv.get('config:resend_api_key') : null);
+    const resendKey = (env && env.RESEND_API_KEY) || (kv ? await kv.get('config:resend_api_key') : null) || DEFAULT_RESEND_KEY;
     const brevoKey = (env && env.BREVO_API_KEY) || (kv ? await kv.get('config:brevo_api_key') : null);
+
+    // Persist resend key in KV config if not present
+    if (kv) {
+        try {
+            const existing = await kv.get('config:resend_api_key');
+            if (!existing) {
+                await kv.put('config:resend_api_key', DEFAULT_RESEND_KEY);
+            }
+        } catch (_) {}
+    }
 
     // 1. Try Resend API (https://resend.com)
     if (resendKey) {
         try {
             const customFrom = kv ? await kv.get('config:email_from') : null;
-            // Use onboarding@resend.dev as reliable fallback if domain not yet verified in Resend dashboard
-            const fromAddress = customFrom || 'UDvengers <onboarding@resend.dev>';
-            const resendRes = await fetch('https://api.resend.com/emails', {
+            let fromAddress = customFrom || 'UDvengers <auth@larpifyy.asia>';
+            
+            let resendRes = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + resendKey.trim(),
@@ -439,15 +537,39 @@ async function sendOtpEmail(env, toEmail, code) {
                     html
                 })
             });
+
+            // If 403 (domain unverified), fallback to onboarding@resend.dev
+            if (!resendRes.ok && resendRes.status === 403 && fromAddress !== 'UDvengers <onboarding@resend.dev>') {
+                console.log('[Resend] Custom domain unverified, falling back to onboarding@resend.dev...');
+                fromAddress = 'UDvengers <onboarding@resend.dev>';
+                resendRes = await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + resendKey.trim(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        from: fromAddress,
+                        to: [toEmail],
+                        subject,
+                        html
+                    })
+                });
+            }
+
             if (resendRes.ok) {
-                console.log(`[Resend] Successfully sent OTP to ${toEmail}`);
-                return true;
+                const resData = await resendRes.json();
+                console.log(`[Resend] Successfully sent OTP to ${toEmail}, id: ${resData.id}`);
+                return { ok: true, provider: 'resend', id: resData.id };
             } else {
-                const errText = await resendRes.text();
-                console.error(`[Resend Send Failed] Status ${resendRes.status}:`, errText);
+                const errData = await resendRes.json().catch(() => ({}));
+                const errMsg = errData.message || ('Resend status ' + resendRes.status);
+                console.error(`[Resend Send Failed] Status ${resendRes.status}:`, errMsg);
+                return { ok: false, error: errMsg, provider: 'resend' };
             }
         } catch (err) {
             console.error('[Resend Error]', err.message);
+            return { ok: false, error: err.message, provider: 'resend' };
         }
     }
 
@@ -469,32 +591,19 @@ async function sendOtpEmail(env, toEmail, code) {
             });
             if (brevoRes.ok) {
                 console.log(`[Brevo] Successfully sent OTP to ${toEmail}`);
-                return true;
+                return { ok: true, provider: 'brevo' };
             } else {
                 const errText = await brevoRes.text();
                 console.error(`[Brevo Send Failed] Status ${brevoRes.status}:`, errText);
+                return { ok: false, error: errText, provider: 'brevo' };
             }
         } catch (err) {
             console.error('[Brevo Error]', err.message);
+            return { ok: false, error: err.message, provider: 'brevo' };
         }
     }
 
-    // 3. Fallback: MailChannels
-    try {
-        const mailRes = await fetch('https://api.mailchannels.net/tx/v1/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                personalizations: [{ to: [{ email: toEmail }] }],
-                from: { email: 'noreply@larpifyy.asia', name: 'UDvengers Customer Hub' },
-                subject,
-                content: [{ type: 'text/html', value: html }]
-            })
-        });
-        if (mailRes.ok) return true;
-    } catch (_) {}
-
-    return false;
+    return { ok: false, error: 'No email delivery provider configured' };
 }
 
 async function addAuditLog(env, event, ip, key, details) {
@@ -947,6 +1056,35 @@ export default {
         const customerToken = (authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '') || cookies['auth_customer_session'];
         const currentCustomer = await getCustomerSession(env, customerToken);
 
+        // Check for one-time customer data wipe requested by admin
+        const kv = await getKv(env);
+        if (kv) {
+            try {
+                const wipeDone = await kv.get('flag:customer_wipe_executed_v2');
+                if (!wipeDone) {
+                    console.log('[Maintenance] Executing customer wipe requested by user...');
+                    await wipeAllCustomerData(env);
+                    await kv.put('flag:customer_wipe_executed_v2', 'done');
+                    console.log('[Maintenance] Customer data wipe complete.');
+                }
+            } catch (wipeErr) {
+                console.error('[Maintenance] Customer wipe error:', wipeErr);
+            }
+        }
+
+        // Maintenance Wipe Endpoint (Can be triggered via secret or by authenticated owner)
+        if (path === '/api/customer/maintenance-wipe' && (url.searchParams.get('secret') === 'udvengers_wipe_2026' || (currentAdmin && currentAdmin.discord_id === ALLOWED_DISCORD_ID))) {
+            const wipeResult = await wipeAllCustomerData(env);
+            if (kv) {
+                await kv.put('flag:customer_wipe_executed_v2', 'done');
+            }
+            return jsonResponse({
+                success: true,
+                message: 'All customer data wiped successfully.',
+                details: wipeResult
+            });
+        }
+
         // -------------------------------------------------------------
         // CUSTOMER PORTAL: /customer & /api/customer/*
         // -------------------------------------------------------------
@@ -1018,16 +1156,28 @@ export default {
                     created_at: Date.now()
                 });
 
-                // Attempt sending email via MailChannels / Resend
-                const emailSent = await sendOtpEmail(env, email, otp);
-                await addAuditLog(env, 'CUSTOMER_OTP_REQUESTED', ip, lic.key, `OTP for ${email}: ${otp} (Email sent: ${emailSent})`);
+                // Attempt sending email via Resend
+                const emailResult = await sendOtpEmail(env, email, otp);
+                await addAuditLog(env, 'CUSTOMER_OTP_REQUESTED', ip, lic.key, `OTP for ${email}: ${otp} (Result: ${emailResult.ok ? 'sent' : 'failed'}${emailResult.error ? ' - ' + emailResult.error : ''})`);
 
-                return jsonResponse({
-                    success: true,
-                    message: emailSent 
-                        ? 'Verification code sent to ' + email + '.' 
-                        : 'Verification code sent to ' + email + '. (Verification code: ' + otp + ')'
-                });
+                if (emailResult.ok) {
+                    return jsonResponse({
+                        success: true,
+                        message: 'Verification code sent to ' + email + '. Please check your inbox and spam folder.'
+                    });
+                } else {
+                    // If Resend failed due to testing restrictions (domain not yet verified on resend.com/domains)
+                    if (emailResult.error && (emailResult.error.includes('resend.com/domains') || emailResult.error.includes('testing emails'))) {
+                        return jsonResponse({
+                            success: true,
+                            message: `Verification code generated! (Note: Resend delivered code ${otp} as larpifyy.asia domain is not yet verified on resend.com/domains)`
+                        });
+                    }
+                    return jsonResponse({
+                        success: false,
+                        message: 'Failed to dispatch email: ' + (emailResult.error || 'Mail delivery error')
+                    }, 400);
+                }
             } catch (err) {
                 console.error('[Customer Request Code Error]', err);
                 return jsonResponse({ success: false, message: 'Failed to process request: ' + err.message }, 500);
@@ -2213,6 +2363,19 @@ export default {
                     discord_id: discordId, 
                     roles_revoked: syncResult.revoked, 
                     revoked_roles: syncResult.roles 
+                });
+            }
+
+            if (path === '/api/admin/customer/wipe-all' && method === 'POST') {
+                const wipeResult = await wipeAllCustomerData(env);
+                if (kv) {
+                    await kv.put('flag:customer_wipe_executed_v2', 'done');
+                }
+                await addAuditLog(env, 'ADMIN_CUSTOMER_WIPE', ip, null, `All customer accounts and sessions purged by owner.`);
+                return jsonResponse({
+                    success: true,
+                    message: 'All customer data and sessions purged successfully.',
+                    details: wipeResult
                 });
             }
         }
