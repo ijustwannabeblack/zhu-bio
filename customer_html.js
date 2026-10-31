@@ -50,23 +50,41 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             opacity: 0.5;
             cursor: not-allowed;
         }
+        body.devtools-blocked * {
+            display: none !important;
+        }
+        body.devtools-blocked::before {
+            content: "Inspect Element is disabled on this portal for security reasons.";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            background: #07080a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body class="selection:bg-white/20 selection:text-white">
 
-    <!-- TOAST NOTIFICATION CONTAINER -->
+    
     <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#14161f] border border-[#262a38] text-white text-xs shadow-2xl">
         <span id="toastDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span id="toastMsg" class="font-medium">Notification</span>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- 1. AUTH MODAL VIEW (PURE BLACK & WHITE MONOCHROME)           -->
-    <!-- ============================================================ -->
+    
+    
+    
     <div id="authView" class="hidden min-h-screen bg-[#07080a] flex items-center justify-center p-4">
         <div class="card-dark w-full max-w-sm p-8 shadow-2xl relative bg-[#0f1117]">
 
-            <!-- Title & Logo Header with Witch Hat Icon -->
+            
             <div class="text-center mb-6">
                 <div class="inline-flex items-center gap-2 mb-2">
                     <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-8 h-8 object-contain">
@@ -76,7 +94,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 <p id="authSubtitle" class="text-xs text-neutral-400 mt-1">Sign in to your customer dashboard</p>
             </div>
 
-            <!-- Tab Switcher: Log In / Register (Hidden in Reset Mode) -->
+            
             <div id="authTabSwitcher" class="flex p-1 bg-[#090a0e] rounded-lg mb-6 border border-[#1e222d]">
                 <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-white bg-[#181b24] shadow-sm">
                     Log in
@@ -86,7 +104,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </button>
             </div>
 
-            <!-- TAB A: SIGN IN FORM (EMAIL & PASSWORD ONLY, NO '?') -->
+            
             <form id="signInForm" onsubmit="handleSignIn(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1.5">Email address</label>
@@ -115,7 +133,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
             </form>
 
-            <!-- TAB B: REGISTER STEP 1 (Email, Discord User ID, Password, License Key) -->
+            
             <form id="registerStep1Form" onsubmit="handleRequestOtp(event)" class="hidden space-y-3.5">
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1">Email address</label>
@@ -152,7 +170,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </button>
             </form>
 
-            <!-- TAB B: REGISTER STEP 2 (Enter OTP Code) -->
+            
             <form id="registerStep2Form" onsubmit="handleVerifyOtp(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
                     <h3 class="text-xs font-semibold text-white">Verification Code Sent</h3>
@@ -175,7 +193,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
             </form>
 
-            <!-- TAB C: RESET PASSWORD STEP 1 (Enter Email) -->
+            
             <form id="resetStep1Form" onsubmit="handleRequestResetCode(event)" class="hidden space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1.5">Your account email</label>
@@ -193,7 +211,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
             </form>
 
-            <!-- TAB C: RESET PASSWORD STEP 2 (Code & New Password) -->
+            
             <form id="resetStep2Form" onsubmit="handleVerifyResetCode(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
                     <h3 class="text-xs font-semibold text-white">Reset Code Sent</h3>
@@ -230,13 +248,13 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- 2. EXPIRED LICENSE VIEW (PROMPT FOR NEW KEY)                 -->
-    <!-- ============================================================ -->
+    
+    
+    
     <div id="expiredView" class="hidden min-h-screen bg-[#07080a] flex items-center justify-center p-4">
         <div class="card-dark w-full max-w-sm p-8 shadow-2xl relative bg-[#0f1117] border border-[#1e222d] rounded-2xl space-y-6">
             
-            <!-- Brand / Header -->
+            
             <div class="text-center space-y-2.5">
                 <div class="flex justify-center mb-1">
                     <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-9 h-9 object-contain">
@@ -245,7 +263,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 <p class="text-xs text-neutral-400 max-w-xs mx-auto">Your old subscription license has expired. Put in your new license key below to regain access.</p>
             </div>
 
-            <!-- Old Expired License Details Box -->
+            
             <div class="p-4 rounded-xl bg-[#090a0e] border border-[#1e222d] space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider font-mono">OLD LICENSE</span>
@@ -257,7 +275,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- New License Input Form -->
+            
             <form id="renewLicenseForm" onsubmit="handleRenewLicense(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1.5">New License Key</label>
@@ -271,7 +289,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </button>
             </form>
 
-            <!-- Bottom Actions -->
+            
             <div class="flex items-center justify-between text-xs text-neutral-400 pt-2 border-t border-[#1a1c24]">
                 <button type="button" onclick="handleLogout()" class="hover:text-white transition flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
@@ -283,15 +301,15 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- 3. CUSTOMER DASHBOARD (COMPLETELY BLACK & WHITE THEMED)      -->
-    <!-- ============================================================ -->
+    
+    
+    
     <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#07080a]">
 
-        <!-- BLACK THEMED LEFT SIDEBAR -->
+        
         <aside class="w-full md:w-60 bg-[#0b0c10] border-r border-[#1a1c24] flex flex-col justify-between shrink-0 text-white">
             <div>
-                <!-- Brand Header with Witch Hat Logo -->
+                
                 <div class="h-16 px-5 border-b border-[#1a1c24] flex items-center">
                     <div class="flex items-center gap-2.5">
                         <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-7 h-7 object-contain">
@@ -299,11 +317,11 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- Navigation Section -->
+                
                 <div class="p-3 space-y-1">
                     <div class="px-3 pt-3 pb-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Main</div>
 
-                    <!-- DASHBOARD BUTTON -->
+                    
                     <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -312,25 +330,25 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         <span>Dashboard</span>
                     </button>
 
-                    <!-- STATUS BUTTON -->
+                    
                     <button onclick="switchPortalTab('status')" id="pTabStatus" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span>Status</span>
                     </button>
 
-                    <!-- CLIENT DOWNLOADS BUTTON -->
+                    
                     <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span>Client Downloads</span>
                     </button>
 
-                    <!-- HWID RESET BUTTON -->
+                    
                     <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         <span>HWID Reset</span>
                     </button>
 
-                    <!-- SETUP GUIDE BUTTON -->
+                    
                     <button onclick="switchPortalTab('guide')" id="pTabGuide" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         <span>Setup Guide</span>
@@ -338,7 +356,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- Black Sidebar Profile Bottom -->
+            
             <div class="p-3 border-t border-[#1a1c24]">
                 <div class="p-2.5 rounded-lg bg-[#0e1017] border border-[#1e222d] flex items-center justify-between">
                     <div class="flex items-center gap-2 min-w-0 pr-2">
@@ -355,10 +373,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA (COMPLETELY BLACK & WHITE THEMED) -->
+        
         <div class="flex-1 min-h-screen flex flex-col bg-[#07080a]">
 
-            <!-- Top Header (Removed Active Badge as requested) -->
+            
             <header class="h-16 bg-[#0b0c10] border-b border-[#1a1c24] px-6 sm:px-8 flex items-center justify-between shrink-0">
                 <div>
                     <h2 id="topBarTitle" class="text-base font-bold text-white">Dashboard</h2>
@@ -371,12 +389,12 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
             </header>
 
-            <!-- Dynamic Content Area -->
+            
             <main class="flex-1 w-full flex flex-col min-h-0 overflow-y-auto">
 
-                <!-- 1. TAB: DASHBOARD (EXPANDED WITH MORE INFO) -->
+                
                 <div id="contentDashboard" class="p-6 sm:p-8 max-w-5xl w-full space-y-6">
-                    <!-- 1. Primary License Card -->
+                    
                     <div class="card-dark p-6 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
                         <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
@@ -389,7 +407,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </span>
                         </div>
 
-                        <!-- Masked Key Box -->
+                        
                         <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex items-center justify-between">
                             <div>
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1">LICENSE KEY</span>
@@ -405,7 +423,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </div>
                         </div>
 
-                        <!-- Stat Cards Grid -->
+                        
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DURATION</span>
@@ -426,7 +444,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         </div>
                     </div>
 
-                    <!-- 2. User Information Card -->
+                    
                     <div class="card-dark p-6 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
                         <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
@@ -438,9 +456,9 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </span>
                         </div>
 
-                        <!-- User Info 4 Stats Grid -->
+                        
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
-                            <!-- 1. Registered Email (IN A SPOILER) -->
+                            
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex flex-col justify-between">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT EMAIL</span>
                                 <div class="flex items-center justify-between gap-1.5">
@@ -451,19 +469,19 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 </div>
                             </div>
 
-                            <!-- 2. Account Created / Member Since -->
+                            
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">ACCOUNT CREATED</span>
                                 <span id="dashAccountCreated" class="text-sm font-semibold text-white">Oct 31, 2026</span>
                             </div>
 
-                            <!-- 3. Linked Discord Account -->
+                            
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DISCORD ACCOUNT</span>
                                 <span id="dashDiscordAccount" class="text-sm font-mono font-semibold text-white truncate block">Linked</span>
                             </div>
 
-                            <!-- 4. Security & Authentication Status -->
+                            
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
                                 <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">AUTHENTICATION</span>
                                 <span class="text-xs font-semibold text-white flex items-center gap-1.5 mt-0.5">
@@ -475,10 +493,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 2. TAB: STATUS (SERVICE UPTIME & COMPONENT STATUS) -->
+                
                 <div id="contentStatus" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="card-dark p-6 sm:p-7 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl relative shadow-xl">
-                        <!-- Header: Service Name on Left, Status on Right (Dot removed) -->
+                        
                         <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
                                 <h3 class="text-sm font-bold text-white tracking-tight">Fortnite External</h3>
@@ -489,22 +507,22 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </div>
                         </div>
 
-                        <!-- 90 Red Uptime Bars Container (Interactive Tooltip like Discord Status) -->
+                        
                         <div class="relative py-2" id="statusBarsWrapper">
-                            <!-- Floating Tooltip Box (Centered with pointer arrow) -->
+                            
                             <div id="statusTooltip" class="pointer-events-none absolute z-50 hidden -translate-x-1/2 -translate-y-full mb-3 bg-[#11131a] border border-[#2b3042] text-white text-xs rounded-xl px-3.5 py-2.5 shadow-2xl transition-all duration-75 whitespace-nowrap">
                                 <div class="font-bold text-white text-xs tracking-tight" id="tooltipDate">31 Oct 2026</div>
                                 <div class="text-[11px] text-neutral-400 mt-0.5" id="tooltipDesc">Major outage recorded on this day.</div>
-                                <!-- Arrow pointing down -->
+                                
                                 <div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-[#2b3042]"></div>
                             </div>
 
                             <div class="flex items-center gap-[2.5px] h-9 w-full" id="statusBarList">
-                                <!-- Populated dynamically by initStatusBarTooltips -->
+                                
                             </div>
                         </div>
 
-                        <!-- Footer: 90 days ago ... divider with uptime ... Today -->
+                        
                         <div class="flex items-center justify-between text-[11px] text-neutral-500 pt-1 font-mono">
                             <span>90 days ago</span>
                             <div class="flex items-center gap-2 flex-1 px-4">
@@ -517,17 +535,17 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 3. TAB: DOWNLOADS (DOWNLOAD CARD AT TOP-LEFT WITH BANNER ICON & BOTTOM BUTTON) -->
+                
                 <div id="contentDownloads" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="flex flex-col sm:flex-row items-start gap-6">
-                        <!-- Top-Left Download Product Card -->
+                        
                         <div class="w-full sm:w-80 bg-[#0f1117] border border-[#1e222d] rounded-2xl overflow-hidden shadow-2xl transition hover:border-[#2d3242]">
-                            <!-- Cover Banner / Image Icon -->
+                            
                             <div class="relative w-full aspect-[16/9] bg-[#090a0e] overflow-hidden border-b border-[#1e222d]">
                                 <img src="/assets/download_icon.png" onerror="this.src='https://cdn.discordapp.com/attachments/1526175746169503854/1566122431121195059/images.png?ex=6ae764ac&is=6ae6132c&hm=587594191f3f458c9c07934dccfee736fd8af38d42e30a19156a7533e4bcd958&'" alt="Client Cover" class="w-full h-full object-cover">
                             </div>
 
-                            <!-- Card Body with Info & Bottom Download Button -->
+                            
                             <div class="p-5 space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
@@ -545,17 +563,17 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 4. TAB: HWID RESET (SINGLE LIVE COOLDOWN TIMER) -->
+                
                 <div id="contentHwid" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="flex flex-col sm:flex-row items-start gap-6">
-                        <!-- HWID Product Card at Top-Left -->
+                        
                         <div class="w-full sm:w-80 bg-[#0f1117] border border-[#1e222d] rounded-2xl overflow-hidden shadow-2xl transition hover:border-[#2d3242]">
-                            <!-- Cover Banner (No duplicate badge on image) -->
+                            
                             <div class="relative w-full aspect-[16/9] bg-[#090a0e] overflow-hidden border-b border-[#1e222d]">
                                 <img src="/assets/download_icon.png" onerror="this.src='https://cdn.discordapp.com/attachments/1526175746169503854/1566122431121195059/images.png?ex=6ae764ac&is=6ae6132c&hm=587594191f3f458c9c07934dccfee736fd8af38d42e30a19156a7533e4bcd958&'" alt="HWID Lock" class="w-full h-full object-cover">
                             </div>
 
-                            <!-- Card Body with Live Countdown Timer (Only Once) -->
+                            
                             <div class="p-5 space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
@@ -577,7 +595,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 5. TAB: SETUP GUIDE (FULLSCREEN ON WHOLE RIGHT SIDE) -->
+                
                 <div id="contentGuide" class="hidden flex-1 w-full h-full flex flex-col min-h-0">
                     <iframe 
                         id="guideIframe"
@@ -593,8 +611,90 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- CLIENT SCRIPT -->
+    
     <script>
+        // Anti-Inspect / DevTools Protection Shield
+        (function() {
+            // 1. Prevent Right Click context menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // 2. Prevent DevTools keyboard shortcuts (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S)
+            document.addEventListener('keydown', function(e) {
+                if (e.keyCode === 123 || e.key === 'F12') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67 || e.key === 'I' || e.key === 'J' || e.key === 'C' || e.key === 'i' || e.key === 'j' || e.key === 'c')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.keyCode === 85 || e.keyCode === 83 || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+
+            // 3. Mute and clear console to prevent data inspection
+            try {
+                console.log = console.info = console.warn = console.error = console.debug = function() {};
+                console.clear();
+            } catch (_) {}
+
+            let devtoolsBlocked = false;
+
+            // 4. Wipe body when DevTools is opened so Elements tab shows nothing
+            function triggerDevToolsBlocked() {
+                if (devtoolsBlocked) return;
+                devtoolsBlocked = true;
+                if (document.body) {
+                    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;width:100vw;background:#07080a;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.01em;text-align:center;padding:20px;">Inspect Element is disabled on this portal for security reasons.</div>';
+                }
+            }
+
+            // 5. Dimension detection for docked DevTools
+            function checkDevToolsDimensions() {
+                const threshold = 160;
+                const widthDiff = window.outerWidth - window.innerWidth;
+                const heightDiff = window.outerHeight - window.innerHeight;
+                const widthThreshold = widthDiff > threshold;
+                const heightThreshold = heightDiff > threshold;
+                if (!(heightThreshold && widthThreshold) && (widthThreshold || heightThreshold)) {
+                    triggerDevToolsBlocked();
+                } else if (devtoolsBlocked && !widthThreshold && !heightThreshold) {
+                    window.location.reload();
+                }
+            }
+
+            window.addEventListener('resize', checkDevToolsDimensions);
+            setInterval(checkDevToolsDimensions, 500);
+
+            // 6. Object getter trigger for undocked DevTools console
+            const dtDetector = new Image();
+            Object.defineProperty(dtDetector, 'id', {
+                get: function() {
+                    triggerDevToolsBlocked();
+                }
+            });
+            setInterval(function() {
+                try {
+                    console.dir(dtDetector);
+                    console.clear();
+                } catch (_) {}
+            }, 1000);
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkDevToolsDimensions);
+            } else {
+                checkDevToolsDimensions();
+            }
+        })();
+
         let currentCustomer = null;
         let currentLicense = null;
         let isKeyVisible = false;
