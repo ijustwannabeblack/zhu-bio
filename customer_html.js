@@ -611,40 +611,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <span class="text-[11px] text-neutral-500 mt-1 block">Total client startup cycles</span>
                         </div>
                     </div>
-
-                    <div class="card-dark p-6 sm:p-7 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl relative shadow-xl">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#1a1c24]">
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-base">🏆</span>
-                                    <h3 class="text-sm font-bold text-white tracking-tight">UDvengers Playtime Leaderboard</h3>
-                                </div>
-                                <p class="text-xs text-neutral-400 mt-0.5">Top active players • The user who uses UDvengers the most receives a free Lifetime key!</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Free Key Contest</span>
-                            </div>
-                        </div>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
-                                <thead>
-                                    <tr class="text-neutral-500 border-b border-[#1a1c24]">
-                                        <th class="pb-3 font-semibold w-14">RANK</th>
-                                        <th class="pb-3 font-semibold">PLAYER / ACCOUNT</th>
-                                        <th class="pb-3 font-semibold">OVERALL TIME USED</th>
-                                        <th class="pb-3 font-semibold">SESSIONS</th>
-                                        <th class="pb-3 font-semibold text-right">CONTEST REWARD</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="leaderboardTableBody" class="divide-y divide-[#161822] text-neutral-300">
-                                    <tr>
-                                        <td colspan="5" class="py-6 text-center text-neutral-500">Loading leaderboard rankings...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
 
             </main>
