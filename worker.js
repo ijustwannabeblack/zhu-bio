@@ -415,7 +415,71 @@ async function sendOtpEmail(env, toEmail, code) {
     </div>
     `;
 
-    // 1. Try MailChannels (Standard free Cloudflare Worker email dispatch)
+    // Read API keys from Environment or KV config
+    const kv = await getKv(env);
+    const resendKey = (env && env.RESEND_API_KEY) || (kv ? await kv.get('config:resend_api_key') : null);
+    const brevoKey = (env && env.BREVO_API_KEY) || (kv ? await kv.get('config:brevo_api_key') : null);
+
+    // 1. Try Resend API (https://resend.com)
+    if (resendKey) {
+        try {
+            const customFrom = kv ? await kv.get('config:email_from') : null;
+            // Use onboarding@resend.dev as reliable fallback if domain not yet verified in Resend dashboard
+            const fromAddress = customFrom || 'UDvengers <onboarding@resend.dev>';
+            const resendRes = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + resendKey.trim(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from: fromAddress,
+                    to: [toEmail],
+                    subject,
+                    html
+                })
+            });
+            if (resendRes.ok) {
+                console.log(`[Resend] Successfully sent OTP to ${toEmail}`);
+                return true;
+            } else {
+                const errText = await resendRes.text();
+                console.error(`[Resend Send Failed] Status ${resendRes.status}:`, errText);
+            }
+        } catch (err) {
+            console.error('[Resend Error]', err.message);
+        }
+    }
+
+    // 2. Try Brevo API (https://brevo.com)
+    if (brevoKey) {
+        try {
+            const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'api-key': brevoKey.trim(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: { name: 'UDvengers Customer Hub', email: 'auth@larpifyy.asia' },
+                    to: [{ email: toEmail }],
+                    subject,
+                    htmlContent: html
+                })
+            });
+            if (brevoRes.ok) {
+                console.log(`[Brevo] Successfully sent OTP to ${toEmail}`);
+                return true;
+            } else {
+                const errText = await brevoRes.text();
+                console.error(`[Brevo Send Failed] Status ${brevoRes.status}:`, errText);
+            }
+        } catch (err) {
+            console.error('[Brevo Error]', err.message);
+        }
+    }
+
+    // 3. Fallback: MailChannels
     try {
         const mailRes = await fetch('https://api.mailchannels.net/tx/v1/send', {
             method: 'POST',
@@ -428,32 +492,7 @@ async function sendOtpEmail(env, toEmail, code) {
             })
         });
         if (mailRes.ok) return true;
-    } catch (err) {
-        console.warn('[MailChannels Dispatch Warn]', err.message);
-    }
-
-    // 2. Try Resend if configured in env
-    try {
-        const resendKey = env && env.RESEND_API_KEY;
-        if (resendKey) {
-            const resendRes = await fetch('https://api.resend.com/emails', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + resendKey,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    from: 'UDvengers <auth@larpifyy.asia>',
-                    to: [toEmail],
-                    subject,
-                    html
-                })
-            });
-            if (resendRes.ok) return true;
-        }
-    } catch (err) {
-        console.warn('[Resend Dispatch Warn]', err.message);
-    }
+    } catch (_) {}
 
     return false;
 }
@@ -2001,6 +2040,27 @@ export default {
                 await clearCrackingAttempts(env);
                 await addAuditLog(env, 'CRACKING_LOGS_CLEARED', ip, '', 'Cracking attempts feed cleared by Discord Owner');
                 return jsonResponse({ success: true });
+            }
+
+            if (path === '/api/admin/set-email-key' && method === 'POST') {
+                const body = (await request.json().catch(() => ({}))) || {};
+                const kv = await getKv(env);
+                if (kv) {
+                    if (body.resend_key !== undefined) {
+                        if (body.resend_key) await kv.put('config:resend_api_key', body.resend_key.trim());
+                        else await kv.delete('config:resend_api_key');
+                    }
+                    if (body.brevo_key !== undefined) {
+                        if (body.brevo_key) await kv.put('config:brevo_api_key', body.brevo_key.trim());
+                        else await kv.delete('config:brevo_api_key');
+                    }
+                    if (body.from_email !== undefined) {
+                        if (body.from_email) await kv.put('config:email_from', body.from_email.trim());
+                        else await kv.delete('config:email_from');
+                    }
+                }
+                await addAuditLog(env, 'EMAIL_CONFIG_UPDATED', ip, '', 'Transactional email credentials updated by Owner');
+                return jsonResponse({ success: true, message: 'Email configuration saved successfully.' });
             }
 
             if (path === '/api/admin/toggle-loader' && method === 'POST') {
