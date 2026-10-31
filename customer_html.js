@@ -374,14 +374,19 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             <!-- Dynamic Content Area -->
             <main class="flex-1 w-full flex flex-col min-h-0 overflow-y-auto">
 
-                <!-- 1. TAB: DASHBOARD -->
+                <!-- 1. TAB: DASHBOARD (EXPANDED WITH MORE INFO) -->
                 <div id="contentDashboard" class="p-6 sm:p-8 max-w-5xl w-full space-y-6">
+                    <!-- 1. Primary License Card -->
                     <div class="card-dark p-6 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
                         <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
                                 <h3 class="text-sm font-bold text-white tracking-tight">Subscription License</h3>
                                 <p class="text-xs text-neutral-400">Cryptographic authorization key linked to your account.</p>
                             </div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                Active
+                            </span>
                         </div>
 
                         <!-- Masked Key Box -->
@@ -420,6 +425,105 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 2. Two-Column Detailed Information Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Product Specifications Card -->
+                        <div class="card-dark p-6 space-y-4 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
+                            <div class="pb-3 border-b border-[#1a1c24]">
+                                <h3 class="text-sm font-bold text-white tracking-tight">Product Specifications</h3>
+                                <p class="text-xs text-neutral-400">Software build parameters & kernel status</p>
+                            </div>
+                            <div class="space-y-3 text-xs">
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Software Title</span>
+                                    <span class="font-semibold text-white">Fortnite External</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Current Version</span>
+                                    <span class="text-neutral-300">v2.4.1 (Stable Release)</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Supported OS</span>
+                                    <span class="text-neutral-300">Windows 10 / 11 (64-bit)</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Loader Stub Engine</span>
+                                    <span class="text-neutral-300">Polymorphic Ring0</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5">
+                                    <span class="text-neutral-400">Anti-Cheat Status</span>
+                                    <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        Undetected
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account & Security Overview Card -->
+                        <div class="card-dark p-6 space-y-4 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
+                            <div class="pb-3 border-b border-[#1a1c24]">
+                                <h3 class="text-sm font-bold text-white tracking-tight">Account & Security</h3>
+                                <p class="text-xs text-neutral-400">Profile identity and hardware reset policies</p>
+                            </div>
+                            <div class="space-y-3 text-xs">
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Account Email</span>
+                                    <span id="dashAccountEmail" class="text-neutral-300 truncate max-w-[200px]">user@email.com</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Member Since</span>
+                                    <span id="dashMemberSince" class="text-neutral-300">Oct 31, 2026</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">HWID Reset Policy</span>
+                                    <span class="text-neutral-300">1 Reset / 24 Hours</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5 border-b border-[#141620]">
+                                    <span class="text-neutral-400">Authentication</span>
+                                    <span class="text-neutral-300">Verified Email & Password</span>
+                                </div>
+                                <div class="flex items-center justify-between py-1.5">
+                                    <span class="text-neutral-400">Account Access</span>
+                                    <span class="text-white font-semibold">Authorized Customer</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Quick Action Hub -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                        <button onclick="switchPortalTab('downloads')" class="card-dark p-4 bg-[#0f1117] border border-[#1e222d] hover:border-[#2d3242] rounded-xl flex items-center gap-3.5 transition group text-left">
+                            <div class="w-10 h-10 rounded-lg bg-[#141620] border border-[#232735] flex items-center justify-center text-neutral-400 group-hover:text-white transition shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white group-hover:underline">Download Loader</div>
+                                <div class="text-[11px] text-neutral-400">Build your custom client binary</div>
+                            </div>
+                        </button>
+
+                        <button onclick="switchPortalTab('hwid')" class="card-dark p-4 bg-[#0f1117] border border-[#1e222d] hover:border-[#2d3242] rounded-xl flex items-center gap-3.5 transition group text-left">
+                            <div class="w-10 h-10 rounded-lg bg-[#141620] border border-[#232735] flex items-center justify-center text-neutral-400 group-hover:text-white transition shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white group-hover:underline">HWID Manager</div>
+                                <div class="text-[11px] text-neutral-400">Check and reset hardware link</div>
+                            </div>
+                        </button>
+
+                        <button onclick="switchPortalTab('guide')" class="card-dark p-4 bg-[#0f1117] border border-[#1e222d] hover:border-[#2d3242] rounded-xl flex items-center gap-3.5 transition group text-left">
+                            <div class="w-10 h-10 rounded-lg bg-[#141620] border border-[#232735] flex items-center justify-center text-neutral-400 group-hover:text-white transition shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-white group-hover:underline">Setup Guide</div>
+                                <div class="text-[11px] text-neutral-400">Official step-by-step setup</div>
+                            </div>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 2. TAB: STATUS (SERVICE UPTIME & COMPONENT STATUS) -->
@@ -433,7 +537,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></span>
-                                <span class="text-xs font-semibold text-red-500 font-mono">Offline</span>
+                                <span class="text-xs font-semibold text-red-500">Offline</span>
                             </div>
                         </div>
 
@@ -479,7 +583,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <div class="p-5 space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-bold text-white font-mono">Fortnite External</span>
+                                        <span class="text-sm font-bold text-white">Fortnite External</span>
                                         <span class="text-xs text-neutral-400 font-sans">8.2 MB</span>
                                     </div>
                                 </div>
@@ -507,7 +611,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <div class="p-5 space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-bold text-white font-mono">Fortnite External</span>
+                                        <span class="text-sm font-bold text-white">Fortnite External</span>
                                         <span id="hwidLiveTimer" class="text-xs font-mono font-semibold text-neutral-300">Available</span>
                                     </div>
                                     <div class="mt-2 text-[11px] text-neutral-400">
@@ -1220,6 +1324,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 const discordEl = document.getElementById('dashDiscordId');
                 if (discordEl) {
                     discordEl.textContent = currentCustomer.discord_id || (currentLicense && currentLicense.discord_id) || 'Linked';
+                }
+
+                // Account & Security Info
+                const accEmailEl = document.getElementById('dashAccountEmail');
+                if (accEmailEl) accEmailEl.textContent = currentCustomer.email || 'N/A';
+                const memSinceEl = document.getElementById('dashMemberSince');
+                if (memSinceEl && currentCustomer.created_at) {
+                    memSinceEl.textContent = new Date(currentCustomer.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 }
 
                 // HWID Live Cooldown calculation (24h)
