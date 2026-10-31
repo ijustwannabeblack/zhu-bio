@@ -467,7 +467,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 <p class="text-xs text-neutral-400">Live operational telemetry and component uptime</p>
                             </div>
                             <div>
-                                <span class="text-xs font-semibold text-red-500">Offline</span>
+                                <span class="text-xs font-semibold text-emerald-400">Operational</span>
                             </div>
                         </div>
 
@@ -476,7 +476,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             
                             <div id="statusTooltip" class="pointer-events-none absolute z-50 hidden -translate-x-1/2 -translate-y-full mb-3 bg-[#11131a] border border-[#2b3042] text-white text-xs rounded-xl px-3.5 py-2.5 shadow-2xl transition-all duration-75 whitespace-nowrap">
                                 <div class="font-bold text-white text-xs tracking-tight" id="tooltipDate">31 Oct 2026</div>
-                                <div class="text-[11px] text-neutral-400 mt-0.5" id="tooltipDesc">Major outage recorded on this day.</div>
+                                <div class="text-[11px] text-neutral-400 mt-0.5" id="tooltipDesc">Operational — Up since 1 hour ago.</div>
                                 
                                 <div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-[#2b3042]"></div>
                             </div>
@@ -491,7 +491,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <span>90 days ago</span>
                             <div class="flex items-center gap-2 flex-1 px-4">
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
-                                <span class="text-red-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans">0% uptime</span>
+                                <span class="text-emerald-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans">99.9% uptime</span>
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
                             </div>
                             <span>Today</span>
@@ -987,13 +987,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 const monthName = d.toLocaleDateString('en-GB', { month: 'short' });
                 const year = d.getFullYear();
                 const formattedDate = dayNum + ' ' + monthName + ' ' + year;
+                const isToday = (daysAgo === 0);
 
                 const bar = document.createElement('div');
-                bar.className = 'flex-1 h-full rounded-[2px] bg-red-500 hover:bg-neutral-200 hover:scale-y-110 transition-all cursor-pointer';
+                bar.className = 'flex-1 h-full rounded-[2px] bg-emerald-500 hover:bg-emerald-300 hover:scale-y-110 transition-all cursor-pointer';
 
                 bar.addEventListener('mouseenter', () => {
                     tooltipDate.textContent = formattedDate;
-                    tooltipDesc.textContent = 'Major outage recorded on this day.';
+                    tooltipDesc.textContent = isToday ? 'Operational — Up since 1 hour ago.' : 'Operational — No downtime recorded on this day.';
                     tooltip.classList.remove('hidden');
 
                     const barRect = bar.getBoundingClientRect();
