@@ -504,23 +504,34 @@ async function deleteOtpRecord(env, email) {
     memoryStore.otps.delete(key);
 }
 
-async function sendOtpEmail(env, toEmail, code) {
-    const subject = 'Your UDvengers Verification Code: ' + code;
+async function sendOtpEmail(env, toEmail, code, isReset = false) {
+    const iconUrl = 'https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&';
+    const title = isReset ? 'Password Reset Code' : 'Account Verification';
+    const desc = isReset ? 'Use the 6-digit confirmation code below to reset your customer account password.' : 'Enter the 6-digit confirmation code below to finish setting up your account.';
+    const subject = (isReset ? 'Your Password Reset Code: ' : 'Your Verification Code: ') + code;
     const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #070709; color: #ffffff; padding: 36px 28px; border-radius: 12px; max-width: 480px; margin: 20px auto; border: 1px solid rgba(168, 85, 247, 0.25);">
-        <div style="text-align: center; margin-bottom: 24px;">
-            <div style="display: inline-block; padding: 5px 14px; border-radius: 9999px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">UDvengers</div>
-            <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 16px 0 6px 0; letter-spacing: -0.02em;">Account Verification</h2>
-            <p style="color: #a1a1aa; font-size: 13px; margin: 0; line-height: 1.5;">Enter the 6-digit confirmation code below to finish setting up your account.</p>
-        </div>
-        <div style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.35); padding: 18px; border-radius: 10px; text-align: center; margin: 24px 0;">
-            <span style="font-family: 'SFMono-Regular', Consolas, Monaco, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #d8b4fe;">${code}</span>
-        </div>
-        <p style="color: #71717a; font-size: 12px; line-height: 1.6; text-align: center; margin: 0 0 20px 0;">This code will expire in 10 minutes. If you did not request this verification code, you can safely ignore this email.</p>
-        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px; text-align: center;">
-            <span style="color: #52525b; font-size: 11px;">Protected by UDvengers Automated Infrastructure</span>
-        </div>
-    </div>
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin: 0; padding: 32px 16px; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 460px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+            <tr>
+                <td style="padding: 40px 36px; text-align: center;">
+                    <img src="${iconUrl}" width="56" height="56" alt="UDvengers" style="display: block; margin: 0 auto 16px auto; border-radius: 10px; border: 0;">
+                    <h2 style="color: #0f172a; font-size: 22px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.02em;">${title}</h2>
+                    <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin: 0 0 28px 0;">${desc}</p>
+                    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; margin: 0 auto 24px auto;">
+                        <span style="font-family: 'SFMono-Regular', Consolas, Monaco, monospace; font-size: 36px; font-weight: 700; letter-spacing: 10px; color: #005b7f; display: inline-block;">${code}</span>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; margin: 0 0 24px 0;">This code will expire in 10 minutes. If you did not make this request, you can safely ignore this email.</p>
+                    <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                        <span style="color: #94a3b8; font-size: 11px;">Protected by UDvengers Automated Infrastructure</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
     `;
 
     // Read API keys from Environment or KV config
@@ -1333,6 +1344,113 @@ export default {
             } catch (err) {
                 console.error('[Customer Login Error]', err);
                 return jsonResponse({ success: false, message: 'Login failed: ' + err.message }, 500);
+            }
+        }
+
+        // Customer: Request Password Reset Code
+        if (path === '/api/customer/password-reset/request-code' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const email = (body.email || '').toLowerCase().trim();
+
+                if (!email || !email.includes('@')) {
+                    return jsonResponse({ success: false, message: 'Please provide a valid email address.' }, 400);
+                }
+
+                const customer = await getCustomer(env, email);
+                if (!customer) {
+                    return jsonResponse({ success: false, message: 'No registered customer account found with that email.' }, 404);
+                }
+
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                await saveOtpRecord(env, 'reset:' + email, {
+                    code: otp,
+                    expires_at: Date.now() + 600000 // 10 minutes
+                });
+
+                const emailResult = await sendOtpEmail(env, email, otp, true);
+                if (emailResult.ok) {
+                    return jsonResponse({
+                        success: true,
+                        message: 'Password reset code sent to ' + email + '. Please check your inbox.'
+                    });
+                } else {
+                    if (emailResult.error && (emailResult.error.includes('resend.com/domains') || emailResult.error.includes('testing emails'))) {
+                        return jsonResponse({
+                            success: true,
+                            message: `Password reset code generated! (Note: Resend delivered code ${otp})`
+                        });
+                    }
+                    return jsonResponse({
+                        success: false,
+                        message: 'Failed to send email: ' + (emailResult.error || 'Mail delivery error')
+                    }, 400);
+                }
+            } catch (err) {
+                console.error('[Customer Password Reset Request Error]', err);
+                return jsonResponse({ success: false, message: 'Failed to process request: ' + err.message }, 500);
+            }
+        }
+
+        // Customer: Verify Password Reset Code & Update Password
+        if (path === '/api/customer/password-reset/verify' && method === 'POST') {
+            try {
+                const body = await request.json();
+                const email = (body.email || '').toLowerCase().trim();
+                const code = (body.code || '').trim();
+                const newPassword = body.new_password || '';
+
+                if (!email || !code) {
+                    return jsonResponse({ success: false, message: 'Email and verification code are required.' }, 400);
+                }
+                if (!newPassword || newPassword.length < 6) {
+                    return jsonResponse({ success: false, message: 'New password must be at least 6 characters.' }, 400);
+                }
+
+                const storedOtp = await getOtpRecord(env, 'reset:' + email);
+                if (!storedOtp || storedOtp.code !== code) {
+                    return jsonResponse({ success: false, message: 'Invalid or expired reset code.' }, 400);
+                }
+                if (Date.now() > storedOtp.expires_at) {
+                    return jsonResponse({ success: false, message: 'Reset code has expired. Please request a new one.' }, 400);
+                }
+
+                const customer = await getCustomer(env, email);
+                if (!customer) {
+                    return jsonResponse({ success: false, message: 'Customer account not found.' }, 404);
+                }
+
+                const salt = getRandomHex(16);
+                const passwordHash = await hashPassword(newPassword, salt);
+
+                customer.salt = salt;
+                customer.password_hash = passwordHash;
+                customer.last_login = Date.now();
+                await saveCustomer(env, customer);
+
+                await deleteOtpRecord(env, 'reset:' + email);
+
+                const sessionId = getRandomHex(32);
+                await saveCustomerSession(env, sessionId, {
+                    email: customer.email,
+                    key: customer.key,
+                    discord_id: customer.discord_id,
+                    created_at: Date.now()
+                });
+
+                await addAuditLog(env, 'CUSTOMER_PASSWORD_RESET', ip, customer.key, `Password reset completed for ${customer.email}`);
+
+                const headers = new Headers();
+                headers.set('Content-Type', 'application/json');
+                headers.set('Set-Cookie', `auth_customer_session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600`);
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    message: 'Password reset successfully!'
+                }), { status: 200, headers });
+            } catch (err) {
+                console.error('[Customer Password Reset Verify Error]', err);
+                return jsonResponse({ success: false, message: 'Failed to reset password: ' + err.message }, 500);
             }
         }
 

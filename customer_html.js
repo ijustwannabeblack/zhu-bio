@@ -11,7 +11,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f8fafc;
+            background-color: #eaedf2;
             color: #0f172a;
             letter-spacing: -0.01em;
             -webkit-font-smoothing: antialiased;
@@ -22,9 +22,9 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
         .card-white {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #dce2ea;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         .input-box {
             background: #ffffff;
@@ -62,21 +62,21 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     <!-- ============================================================ -->
     <!-- 1. AUTH MODAL VIEW (MATCHING IMAGE 2 "Welcome back!")         -->
     <!-- ============================================================ -->
-    <div id="authView" class="hidden min-h-screen bg-[#f1f5f9] flex items-center justify-center p-4">
+    <div id="authView" class="hidden min-h-screen bg-[#eaedf2] flex items-center justify-center p-4">
         <div class="card-white w-full max-w-sm p-8 shadow-xl relative bg-white">
 
-            <!-- Title & Welcome Header matching Image 2 -->
+            <!-- Title & Logo Header with Witch Hat Icon -->
             <div class="text-center mb-6">
                 <div class="inline-flex items-center gap-2 mb-2">
-                    <div class="w-6 h-6 rounded-md bg-[#005b7f] text-white flex items-center justify-center font-bold text-xs">U</div>
-                    <span class="font-bold text-base tracking-tight text-gray-900">UDvengers</span>
+                    <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-8 h-8 object-contain">
+                    <span class="font-bold text-lg tracking-tight text-gray-900">UDvengers</span>
                 </div>
-                <h1 class="text-2xl font-bold text-[#0f172a] tracking-tight">Welcome back!</h1>
-                <p class="text-xs text-gray-500 mt-1">Sign in to your customer dashboard</p>
+                <h1 id="authTitle" class="text-2xl font-bold text-[#0f172a] tracking-tight">Welcome back!</h1>
+                <p id="authSubtitle" class="text-xs text-gray-500 mt-1">Sign in to your customer dashboard</p>
             </div>
 
-            <!-- Tab Switcher: Log In / Register Key -->
-            <div class="flex p-1 bg-gray-100 rounded-lg mb-6 border border-gray-200">
+            <!-- Tab Switcher: Log In / Register Key (Hidden in Reset Mode) -->
+            <div id="authTabSwitcher" class="flex p-1 bg-gray-100 rounded-lg mb-6 border border-gray-200">
                 <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm">
                     Log in
                 </button>
@@ -85,12 +85,12 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </button>
             </div>
 
-            <!-- TAB A: SIGN IN FORM (EXACT INPUT & EYE DESIGN FROM IMAGE 2) -->
+            <!-- TAB A: SIGN IN FORM -->
             <form id="signInForm" onsubmit="handleSignIn(event)" class="space-y-4">
                 <div>
                     <div class="flex items-center gap-1.5 mb-1.5">
                         <label class="text-xs font-medium text-gray-700">Customer email or license</label>
-                        <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#005b7f] text-white text-[9px] font-bold cursor-help" title="Enter your account email">?</span>
+                        <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#005b7f] text-white text-[9px] font-bold cursor-help" title="Enter your registered account email">?</span>
                     </div>
                     <input type="email" id="loginEmail" required placeholder="Customer email or license" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
                 </div>
@@ -113,7 +113,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <div class="text-center pt-2">
                     <span class="text-xs text-gray-500">Forgot password? </span>
-                    <a href="javascript:void(0)" onclick="showToast('Please open a ticket in Discord for password reset.')" class="text-xs text-[#005b7f] font-semibold hover:underline">Reset</a>
+                    <button type="button" onclick="showResetPasswordFlow()" class="text-xs text-[#005b7f] font-semibold hover:underline">Reset</button>
                 </div>
             </form>
 
@@ -176,63 +176,116 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-[#005b7f] hover:underline font-semibold transition">Resend code</button>
                 </div>
             </form>
+
+            <!-- TAB C: RESET PASSWORD STEP 1 (Enter Email) -->
+            <form id="resetStep1Form" onsubmit="handleRequestResetCode(event)" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Your account email</label>
+                    <input type="email" id="resetEmail" required placeholder="you@domain.com" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
+                </div>
+
+                <div id="resetStep1Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5"></div>
+
+                <button type="submit" id="btnRequestReset" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
+                    <span>Send Reset Code</span>
+                </button>
+
+                <div class="text-center pt-2">
+                    <button type="button" onclick="cancelResetFlow()" class="text-xs text-gray-500 hover:text-gray-900 transition">← Back to Log in</button>
+                </div>
+            </form>
+
+            <!-- TAB C: RESET PASSWORD STEP 2 (Code & New Password) -->
+            <form id="resetStep2Form" onsubmit="handleVerifyResetCode(event)" class="hidden space-y-4">
+                <div class="text-center py-1">
+                    <h3 class="text-xs font-semibold text-gray-900">Reset Code Sent</h3>
+                    <p class="text-[11px] text-gray-500 mt-1">We sent a 6-digit code to <span id="displayResetEmail" class="text-[#005b7f] font-semibold"></span></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">6-digit code</label>
+                    <input type="text" id="resetOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-box w-full px-4 py-2.5 rounded-lg text-center text-lg font-mono tracking-[0.3em] placeholder-gray-300">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">New password</label>
+                    <div class="flex items-stretch rounded-lg border border-gray-300 focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-white transition overflow-hidden">
+                        <input type="password" id="resetNewPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-gray-900 bg-transparent outline-none placeholder-gray-400">
+                        <button type="button" onclick="toggleInputPassword('resetNewPassword', this)" class="px-3 border-l border-gray-200 text-gray-400 hover:text-gray-600 bg-gray-50 flex items-center justify-center transition">
+                            <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resetStep2Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5 text-center"></div>
+
+                <button type="submit" id="btnVerifyReset" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5">
+                    <span>Update Password & Enter</span>
+                </button>
+
+                <div class="flex items-center justify-between text-[11px] pt-1">
+                    <button type="button" onclick="showResetPasswordFlow()" class="text-gray-500 hover:text-gray-900 transition">← Change email</button>
+                    <button type="button" id="btnResendResetOtp" onclick="resendResetCode()" class="text-[#005b7f] hover:underline font-semibold transition">Resend code</button>
+                </div>
+            </form>
+
         </div>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 2. CUSTOMER DASHBOARD (MATCHING IMAGE 1 - VALYN SAAS WITH LEFT TABS) -->
+    <!-- 2. CUSTOMER DASHBOARD (BLACK THEMED LEFT SIDEBAR + DARKER CONTRAST BG) -->
     <!-- ============================================================ -->
-    <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#f8fafc]">
+    <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#eaedf2]">
 
-        <!-- LEFT SIDEBAR -->
-        <aside class="w-full md:w-60 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+        <!-- BLACK THEMED LEFT SIDEBAR -->
+        <aside class="w-full md:w-60 bg-[#0b0c10] border-r border-[#1e222d] flex flex-col justify-between shrink-0 text-white">
             <div>
-                <!-- Brand Header matching Valyn -->
-                <div class="h-16 px-5 border-b border-gray-200 flex items-center justify-between">
+                <!-- Brand Header with Witch Hat Logo -->
+                <div class="h-16 px-5 border-b border-[#1e222d] flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-[#005b7f] text-white flex items-center justify-center font-bold text-xs shadow-sm">U</div>
-                        <span class="font-bold text-base tracking-tight text-gray-900">UDvengers</span>
+                        <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-7 h-7 object-contain">
+                        <span class="font-bold text-base tracking-tight text-white">UDvengers</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-[#005b7f] bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full">Customer</span>
+                    <span class="text-[10px] font-semibold text-purple-300 bg-purple-500/15 border border-purple-500/25 px-2 py-0.5 rounded-full">Customer</span>
                 </div>
 
                 <!-- Navigation Section -->
                 <div class="p-3 space-y-1">
-                    <div class="px-3 pt-3 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Main</div>
+                    <div class="px-3 pt-3 pb-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Main</div>
 
-                    <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#005b7f] bg-sky-50 border border-sky-100 transition text-left">
-                        <svg class="w-4 h-4 text-[#005b7f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left">
+                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                         <span>Dashboard</span>
                     </button>
 
-                    <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span>Client Downloads</span>
                     </button>
 
-                    <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         <span>HWID Reset</span>
                     </button>
 
-                    <button onclick="switchPortalTab('guide')" id="pTabGuide" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition text-left">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <button onclick="switchPortalTab('guide')" id="pTabGuide" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         <span>Setup Guide</span>
                     </button>
                 </div>
             </div>
 
-            <!-- User Profile in Sidebar Bottom -->
-            <div class="p-3 border-t border-gray-200">
-                <div class="p-2.5 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-between">
+            <!-- Black Sidebar Profile Bottom -->
+            <div class="p-3 border-t border-[#1e222d]">
+                <div class="p-2.5 rounded-lg bg-[#14161f] border border-[#232734] flex items-center justify-between">
                     <div class="flex items-center gap-2 min-w-0 pr-2">
-                        <div class="w-7 h-7 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-xs shrink-0" id="userAvatar">U</div>
+                        <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-xs shrink-0" id="userAvatar">U</div>
                         <div class="min-w-0">
-                            <div id="headerUserEmail" class="text-xs font-semibold text-gray-900 truncate">user@email.com</div>
-                            <div class="text-[10px] text-gray-500 font-medium">Verified Customer</div>
+                            <div id="headerUserEmail" class="text-xs font-semibold text-white truncate">user@email.com</div>
+                            <div class="text-[10px] text-neutral-400 font-medium">Verified Customer</div>
                         </div>
                     </div>
-                    <button onclick="handleLogout()" class="p-1.5 text-gray-400 hover:text-rose-600 transition" title="Log Out">
+                    <button onclick="handleLogout()" class="p-1.5 text-neutral-400 hover:text-rose-400 transition" title="Log Out">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     </button>
                 </div>
@@ -240,10 +293,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         </aside>
 
         <!-- MAIN CONTENT AREA -->
-        <div class="flex-1 min-h-screen flex flex-col bg-[#f8fafc]">
+        <div class="flex-1 min-h-screen flex flex-col bg-[#eaedf2]">
 
-            <!-- Top Header matching Valyn -->
-            <header class="h-16 bg-white border-b border-gray-200 px-6 sm:px-8 flex items-center justify-between">
+            <!-- Top Header -->
+            <header class="h-16 bg-white border-b border-[#dce2ea] px-6 sm:px-8 flex items-center justify-between">
                 <div>
                     <h2 id="topBarTitle" class="text-base font-bold text-gray-900">Dashboard</h2>
                     <p class="text-xs text-gray-500">Manage your subscription and client access</p>
@@ -415,6 +468,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         let currentLicense = null;
         let isKeyVisible = false;
         let pendingRegData = null;
+        let pendingResetEmail = null;
 
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
@@ -447,11 +501,20 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
 
         function switchAuthTab(tab) {
+            document.getElementById('authTabSwitcher').classList.remove('hidden');
+            document.getElementById('authTitle').textContent = 'Welcome back!';
+            document.getElementById('authSubtitle').textContent = 'Sign in to your customer dashboard';
+
             const btnIn = document.getElementById('tabSignInBtn');
             const btnReg = document.getElementById('tabRegisterBtn');
             const formIn = document.getElementById('signInForm');
             const formReg1 = document.getElementById('registerStep1Form');
             const formReg2 = document.getElementById('registerStep2Form');
+            const formReset1 = document.getElementById('resetStep1Form');
+            const formReset2 = document.getElementById('resetStep2Form');
+
+            formReset1.classList.add('hidden');
+            formReset2.classList.add('hidden');
 
             if (tab === 'signin') {
                 btnIn.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm';
@@ -465,6 +528,133 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 formIn.classList.add('hidden');
                 formReg1.classList.remove('hidden');
                 formReg2.classList.add('hidden');
+            }
+        }
+
+        function showResetPasswordFlow() {
+            document.getElementById('authTabSwitcher').classList.add('hidden');
+            document.getElementById('authTitle').textContent = 'Reset Password';
+            document.getElementById('authSubtitle').textContent = 'Enter your customer email to receive a code';
+
+            document.getElementById('signInForm').classList.add('hidden');
+            document.getElementById('registerStep1Form').classList.add('hidden');
+            document.getElementById('registerStep2Form').classList.add('hidden');
+            document.getElementById('resetStep2Form').classList.add('hidden');
+            document.getElementById('resetStep1Form').classList.remove('hidden');
+            document.getElementById('resetEmail').focus();
+        }
+
+        function cancelResetFlow() {
+            switchAuthTab('signin');
+        }
+
+        async function handleRequestResetCode(e) {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value.trim();
+            const errBox = document.getElementById('resetStep1Error');
+            const btn = document.getElementById('btnRequestReset');
+
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin mr-1.5">●</span> Sending code...';
+
+            try {
+                const res = await fetch('/api/customer/password-reset/request-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    errBox.textContent = data.message || 'Account not found.';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                pendingResetEmail = email;
+                document.getElementById('displayResetEmail').textContent = email;
+                document.getElementById('resetStep1Form').classList.add('hidden');
+                document.getElementById('resetStep2Form').classList.remove('hidden');
+                document.getElementById('resetOtpInput').focus();
+
+                showToast(data.message || 'Reset code sent to your email.');
+            } catch (err) {
+                errBox.textContent = 'Network error: ' + err.message;
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Send Reset Code</span>';
+            }
+        }
+
+        async function handleVerifyResetCode(e) {
+            e.preventDefault();
+            const code = document.getElementById('resetOtpInput').value.trim();
+            const newPassword = document.getElementById('resetNewPassword').value;
+            const errBox = document.getElementById('resetStep2Error');
+            const btn = document.getElementById('btnVerifyReset');
+
+            if (!pendingResetEmail || !code || !newPassword) return;
+
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin mr-1.5">●</span> Updating...';
+
+            try {
+                const res = await fetch('/api/customer/password-reset/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: pendingResetEmail,
+                        code,
+                        new_password: newPassword
+                    })
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    errBox.textContent = data.message || 'Failed to reset password.';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                showToast('Password updated! Logging you in...');
+                await loadCustomerPortal();
+            } catch (err) {
+                errBox.textContent = 'Network error: ' + err.message;
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Update Password & Enter</span>';
+            }
+        }
+
+        async function resendResetCode() {
+            if (!pendingResetEmail) return;
+            const btn = document.getElementById('btnResendResetOtp');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            try {
+                const res = await fetch('/api/customer/password-reset/request-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingResetEmail })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('New reset code sent to your email.');
+                } else {
+                    showToast(data.message || 'Failed to resend code', true);
+                }
+            } catch (e) {
+                showToast('Failed to resend: ' + e.message, true);
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'Resend code';
+                }, 10000);
             }
         }
 
@@ -645,10 +835,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 const btn = document.getElementById('pTab' + t.charAt(0).toUpperCase() + t.slice(1));
                 const content = document.getElementById('content' + t.charAt(0).toUpperCase() + t.slice(1));
                 if (t === tab) {
-                    btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#005b7f] bg-sky-50 border border-sky-100 transition text-left';
+                    btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left';
+                    const svg = btn.querySelector('svg');
+                    if (svg) svg.className = 'w-4 h-4 text-purple-400';
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-transparent transition text-left';
+                    btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent transition text-left';
+                    const svg = btn.querySelector('svg');
+                    if (svg) svg.className = 'w-4 h-4 text-neutral-400';
                     content.classList.add('hidden');
                 }
             });
