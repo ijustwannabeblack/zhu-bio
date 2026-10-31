@@ -475,23 +475,23 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         <div class="relative py-2" id="statusBarsWrapper">
                             
                             <div id="statusTooltip" class="pointer-events-none absolute z-50 hidden -translate-x-1/2 -translate-y-full mb-3 bg-[#11131a] border border-[#2b3042] text-white text-xs rounded-xl px-3.5 py-2.5 shadow-2xl transition-all duration-75 whitespace-nowrap">
-                                <div class="font-bold text-white text-xs tracking-tight" id="tooltipDate">31 Oct 2026</div>
+                                <div class="font-bold text-white text-xs tracking-tight" id="tooltipDate">31 Oct 2026, 20:00</div>
                                 <div class="text-[11px] text-neutral-400 mt-0.5" id="tooltipDesc">Operational — Up since 1 hour ago.</div>
                                 
                                 <div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-[#2b3042]"></div>
                             </div>
 
-                            <div class="flex items-center gap-[2.5px] h-9 w-full" id="statusBarList">
+                            <div class="flex items-center gap-1.5 h-9 w-full" id="statusBarList">
                                 
                             </div>
                         </div>
 
                         
                         <div class="flex items-center justify-between text-[11px] text-neutral-500 pt-1 font-mono">
-                            <span>90 days ago</span>
+                            <span>1 day ago</span>
                             <div class="flex items-center gap-2 flex-1 px-4">
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
-                                <span class="text-emerald-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans">99.9% uptime</span>
+                                <span class="text-emerald-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans">100% uptime</span>
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
                             </div>
                             <span>Today</span>
@@ -975,26 +975,27 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             const tooltipDesc = document.getElementById('tooltipDesc');
             const wrapper = document.getElementById('statusBarsWrapper');
 
-            if (!container || container.children.length > 0) return;
+            if (!container) return;
+            container.innerHTML = '';
 
             const now = Date.now();
-            const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+            const ONE_HOUR_MS = 60 * 60 * 1000;
 
-            for (let i = 0; i < 90; i++) {
-                const daysAgo = 89 - i;
-                const d = new Date(now - daysAgo * ONE_DAY_MS);
+            for (let i = 0; i < 24; i++) {
+                const hoursAgo = 23 - i;
+                const d = new Date(now - hoursAgo * ONE_HOUR_MS);
                 const dayNum = d.getDate();
                 const monthName = d.toLocaleDateString('en-GB', { month: 'short' });
-                const year = d.getFullYear();
-                const formattedDate = dayNum + ' ' + monthName + ' ' + year;
-                const isToday = (daysAgo === 0);
+                const hourFormatted = String(d.getHours()).padStart(2, '0') + ':00';
+                const formattedDate = dayNum + ' ' + monthName + ', ' + hourFormatted;
+                const isLatest = (hoursAgo === 0);
 
                 const bar = document.createElement('div');
-                bar.className = 'flex-1 h-full rounded-[2px] bg-emerald-500 hover:bg-emerald-300 hover:scale-y-110 transition-all cursor-pointer';
+                bar.className = 'flex-1 h-full rounded-[3px] bg-emerald-500 hover:bg-emerald-300 hover:scale-y-110 transition-all cursor-pointer';
 
                 bar.addEventListener('mouseenter', () => {
                     tooltipDate.textContent = formattedDate;
-                    tooltipDesc.textContent = isToday ? 'Operational — Up since 1 hour ago.' : 'Operational — No downtime recorded on this day.';
+                    tooltipDesc.textContent = isLatest ? 'Operational — Up since 1 hour ago.' : 'Operational — 100% uptime (No downtime recorded).';
                     tooltip.classList.remove('hidden');
 
                     const barRect = bar.getBoundingClientRect();
