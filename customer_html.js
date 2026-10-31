@@ -305,7 +305,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                     <!-- DASHBOARD BUTTON -->
                     <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
@@ -424,44 +424,43 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <!-- 2. TAB: STATUS (SERVICE UPTIME & COMPONENT STATUS) -->
                 <div id="contentStatus" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
-                    <div class="card-dark p-6 sm:p-7 space-y-6 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
-                        <div class="border-b border-[#1a1c24] pb-4 flex items-center justify-between">
+                    <div class="card-dark p-6 sm:p-7 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl relative shadow-xl">
+                        <!-- Header: Service Name on Left, Status on Right (Outage badge removed) -->
+                        <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
-                                <h3 class="text-sm font-bold text-white tracking-tight">System Status</h3>
-                                <p class="text-xs text-neutral-400">Live operational telemetry and component uptime.</p>
+                                <h3 class="text-sm font-bold text-white tracking-tight">Fortnite External</h3>
+                                <p class="text-xs text-neutral-400">Live operational telemetry and component uptime</p>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/25">
-                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                                Major Outage
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></span>
+                                <span class="text-xs font-semibold text-red-500 font-mono">Offline</span>
+                            </div>
                         </div>
 
-                        <!-- System Status Component Card (All Red Uptime Bars) -->
-                        <div class="p-5 sm:p-6 rounded-xl bg-[#090a0e] border border-[#1e222d] space-y-4">
-                            <!-- Header: Service Name on Left, Status on Right -->
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-bold text-white tracking-tight">Fortnite External</span>
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
-                                    <span class="text-xs font-semibold text-red-500">Offline</span>
-                                </div>
+                        <!-- 90 Red Uptime Bars Container (Interactive Tooltip like Discord Status) -->
+                        <div class="relative py-2" id="statusBarsWrapper">
+                            <!-- Floating Tooltip Box (Centered with pointer arrow) -->
+                            <div id="statusTooltip" class="pointer-events-none absolute z-50 hidden -translate-x-1/2 -translate-y-full mb-3 bg-[#11131a] border border-[#2b3042] text-white text-xs rounded-xl px-3.5 py-2.5 shadow-2xl transition-all duration-75 whitespace-nowrap">
+                                <div class="font-bold text-white text-xs tracking-tight" id="tooltipDate">31 Oct 2026</div>
+                                <div class="text-[11px] text-neutral-400 mt-0.5" id="tooltipDesc">Major outage recorded on this day.</div>
+                                <!-- Arrow pointing down -->
+                                <div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-[#2b3042]"></div>
                             </div>
 
-                            <!-- 90 Red Uptime Bars -->
-                            <div class="flex items-center gap-[2.5px] h-8 sm:h-9 w-full">
-                                ${Array.from({ length: 90 }, () => '<div class="flex-1 h-full rounded-[2px] bg-red-500 hover:bg-red-400 hover:scale-y-110 transition-all cursor-pointer" title="Offline (0% uptime)"></div>').join('')}
+                            <div class="flex items-center gap-[2.5px] h-9 w-full" id="statusBarList">
+                                <!-- Populated dynamically by initStatusBarTooltips -->
                             </div>
+                        </div>
 
-                            <!-- Footer: 90 days ago ... divider with uptime ... Today -->
-                            <div class="flex items-center justify-between text-[11px] text-neutral-400 pt-1 font-mono">
-                                <span>90 days ago</span>
-                                <div class="flex items-center gap-2 flex-1 px-4">
-                                    <div class="h-px bg-[#1e222d] flex-1"></div>
-                                    <span class="text-red-400 text-[10px] font-semibold uppercase tracking-wider font-sans">0% uptime</span>
-                                    <div class="h-px bg-[#1e222d] flex-1"></div>
-                                </div>
-                                <span>Today</span>
+                        <!-- Footer: 90 days ago ... divider with uptime ... Today -->
+                        <div class="flex items-center justify-between text-[11px] text-neutral-500 pt-1 font-mono">
+                            <span>90 days ago</span>
+                            <div class="flex items-center gap-2 flex-1 px-4">
+                                <div class="h-px bg-[#1e222d] flex-1"></div>
+                                <span class="text-red-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans">0% uptime</span>
+                                <div class="h-px bg-[#1e222d] flex-1"></div>
                             </div>
+                            <span>Today</span>
                         </div>
                     </div>
                 </div>
@@ -901,6 +900,49 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             window.location.reload();
         }
 
+        function initStatusBarTooltips() {
+            const container = document.getElementById('statusBarList');
+            const tooltip = document.getElementById('statusTooltip');
+            const tooltipDate = document.getElementById('tooltipDate');
+            const tooltipDesc = document.getElementById('tooltipDesc');
+            const wrapper = document.getElementById('statusBarsWrapper');
+
+            if (!container || container.children.length > 0) return;
+
+            const now = Date.now();
+            const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+            for (let i = 0; i < 90; i++) {
+                const daysAgo = 89 - i;
+                const d = new Date(now - daysAgo * ONE_DAY_MS);
+                const dayNum = d.getDate();
+                const monthName = d.toLocaleDateString('en-GB', { month: 'short' });
+                const year = d.getFullYear();
+                const formattedDate = dayNum + ' ' + monthName + ' ' + year;
+
+                const bar = document.createElement('div');
+                bar.className = 'flex-1 h-full rounded-[2px] bg-red-500 hover:bg-neutral-200 hover:scale-y-110 transition-all cursor-pointer';
+
+                bar.addEventListener('mouseenter', () => {
+                    tooltipDate.textContent = formattedDate;
+                    tooltipDesc.textContent = 'Major outage recorded on this day.';
+                    tooltip.classList.remove('hidden');
+
+                    const barRect = bar.getBoundingClientRect();
+                    const wrapperRect = wrapper.getBoundingClientRect();
+                    const leftPos = (barRect.left - wrapperRect.left) + (barRect.width / 2);
+                    tooltip.style.left = leftPos + 'px';
+                    tooltip.style.top = '0px';
+                });
+
+                bar.addEventListener('mouseleave', () => {
+                    tooltip.classList.add('hidden');
+                });
+
+                container.appendChild(bar);
+            }
+        }
+
         function switchPortalTab(tab) {
             const tabs = ['dashboard', 'status', 'downloads', 'hwid', 'guide'];
             const titles = {
@@ -931,9 +973,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 if (t === tab) {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left';
-                    if (svg) svg.className = 'w-4 h-4 text-white';
+                    if (svg) svg.className = 'w-4 h-4 text-neutral-400';
                     content.classList.remove('hidden');
                     if (t === 'guide') content.classList.add('flex');
+                    if (t === 'status') initStatusBarTooltips();
                 } else {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent transition text-left';
                     if (svg) svg.className = 'w-4 h-4 text-neutral-400';
@@ -1186,6 +1229,9 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 }
                 updateLiveHwidTimer();
                 hwidTimerInterval = setInterval(updateLiveHwidTimer, 1000);
+
+                // Initialize Status Tooltips
+                initStatusBarTooltips();
 
                 // Show Portal, Hide Auth
                 document.getElementById('authView').classList.add('hidden');
