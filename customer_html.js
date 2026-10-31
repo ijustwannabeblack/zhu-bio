@@ -34,19 +34,20 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
         .input-dark:focus {
             outline: none;
-            border-color: #005b7f;
-            box-shadow: 0 0 0 3px rgba(0, 91, 127, 0.25);
+            border-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
         }
         .btn-saas {
-            background-color: #005b7f;
-            color: #ffffff;
+            background-color: #ffffff;
+            color: #000000;
+            font-weight: 600;
             transition: all 0.15s ease;
         }
         .btn-saas:hover {
-            background-color: #004763;
+            background-color: #e5e5e5;
         }
         .btn-saas:disabled {
-            opacity: 0.55;
+            opacity: 0.5;
             cursor: not-allowed;
         }
     </style>
@@ -316,26 +317,28 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <!-- 1. TAB: DASHBOARD -->
                 <div id="contentDashboard" class="p-6 sm:p-8 max-w-5xl w-full space-y-6">
-                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
+                    <div class="card-dark p-6 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
                         <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
-                                <h3 class="text-sm font-bold text-white">Subscription License</h3>
-                                <p class="text-xs text-neutral-400">Your unique cryptographic key for loader authentication.</p>
+                                <h3 class="text-sm font-bold text-white tracking-tight">Subscription License</h3>
+                                <p class="text-xs text-neutral-400">Cryptographic authorization key linked to your account.</p>
                             </div>
-                            <span class="text-xs font-semibold text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20">Registered</span>
+                            <span class="text-xs font-semibold text-neutral-200 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
+                            </span>
                         </div>
 
                         <!-- Masked Key Box -->
                         <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">LICENSE KEY</span>
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1">LICENSE KEY</span>
                                 <span id="dashKeyText" class="text-sm font-mono font-medium text-white tracking-wider">••••••••••••••••••••••••</span>
                             </div>
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex items-center gap-2">
                                 <button onclick="toggleKeyVisibility()" class="px-3 py-1.5 rounded-lg bg-[#14161f] border border-[#232735] text-neutral-300 hover:text-white text-xs font-medium transition shadow-sm" title="Show/Hide">
                                     <span id="eyeText">Show</span>
                                 </button>
-                                <button onclick="copyLicenseKey()" class="px-3 py-1.5 rounded-lg btn-saas text-white text-xs font-semibold transition shadow-sm" title="Copy Key">
+                                <button onclick="copyLicenseKey()" class="px-3.5 py-1.5 rounded-lg btn-saas text-xs font-semibold transition shadow-sm" title="Copy Key">
                                     Copy Key
                                 </button>
                             </div>
@@ -344,19 +347,19 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         <!-- Stat Cards Grid -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">DURATION</span>
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DURATION</span>
                                 <span id="dashDuration" class="text-sm font-bold text-white">Lifetime</span>
                             </div>
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">EXPIRATION</span>
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">EXPIRATION</span>
                                 <span id="dashExpires" class="text-sm font-bold text-white">Never</span>
                             </div>
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">DISCORD ID</span>
-                                <span id="dashDiscordId" class="text-sm font-mono font-semibold text-sky-400 truncate block">Linked</span>
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">DISCORD ID</span>
+                                <span id="dashDiscordId" class="text-sm font-mono font-semibold text-white truncate block">Linked</span>
                             </div>
                             <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
-                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">BOUND HWID</span>
+                                <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block mb-1.5">BOUND HWID</span>
                                 <span id="dashHwid" class="text-sm font-mono font-medium text-neutral-300 truncate block">Unbound</span>
                             </div>
                         </div>
@@ -886,14 +889,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
             for (let i = 0; i < steps.length; i++) {
                 btn.innerHTML = \`
-                    <span class="inline-block w-3.5 h-3.5 border-2 border-white/25 border-t-white rounded-full animate-spin shrink-0"></span>
+                    <span class="inline-block w-3.5 h-3.5 border-2 border-black/25 border-t-black rounded-full animate-spin shrink-0"></span>
                     <span>\${steps[i]}</span>
                 \`;
                 await new Promise(r => setTimeout(r, 750));
             }
 
             btn.innerHTML = \`
-                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 <span>Build Complete! Downloading...</span>
             \`;
 
