@@ -467,7 +467,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 <p class="text-xs text-neutral-400">Live operational telemetry and component uptime</p>
                             </div>
                             <div>
-                                <span class="text-xs font-semibold text-emerald-400">Operational</span>
+                                <span class="text-xs font-semibold text-emerald-400" id="statusBadge">Operational</span>
                             </div>
                         </div>
 
@@ -491,7 +491,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <span>1 day ago</span>
                             <div class="flex items-center gap-2 flex-1 px-4">
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
-                                <span class="text-emerald-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans">100% uptime</span>
+                                <span class="text-emerald-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans" id="statusUptimePercent">100% uptime</span>
                                 <div class="h-px bg-[#1e222d] flex-1"></div>
                             </div>
                             <span>Today</span>
@@ -522,7 +522,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     <span>Download Loader</span>
                                 </button>
-                                <a href="/download" class="block text-center text-[11px] text-neutral-400 hover:text-white transition pt-0.5">Direct Download (Mirror)</a>
+                                <a href="/download" id="linkDirectDownload" class="block text-center text-[11px] text-neutral-400 hover:text-white transition pt-0.5">Direct Download (Mirror)</a>
+                                <div id="downloadDisabledNotice" class="hidden p-2.5 rounded-xl bg-red-950/40 border border-red-500/30 text-center text-[11px] text-red-300">
+                                    Loader is currently offline for maintenance.<br>Downloads are temporarily disabled.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -969,34 +972,152 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             window.location.reload();
         }
 
-        function initStatusBarTooltips() {
+        let currentLoaderData = null;
+
+        function updateLoaderDownloadUI(loader) {
+            const btn = document.getElementById('btnDownloadLoader');
+            const directLink = document.getElementById('linkDirectDownload');
+            const notice = document.getElementById('downloadDisabledNotice');
+
+            const isEnabled = loader ? Boolean(loader.enabled) : true;
+            if (!isEnabled) {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.className = 'w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-neutral-800 text-neutral-400 border border-neutral-700 cursor-not-allowed opacity-80';
+                    btn.innerHTML = '<svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span>Download Unavailable (Loader Offline)</span>';
+                }
+                if (directLink) directLink.classList.add('pointer-events-none', 'opacity-30');
+                if (notice) notice.classList.remove('hidden');
+            } else {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.className = 'btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition';
+                    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>Download Loader</span>';
+                }
+                if (directLink) directLink.classList.remove('pointer-events-none', 'opacity-30');
+                if (notice) notice.classList.add('hidden');
+            }
+        }
+
+        async function initStatusBarTooltips(statusData) {
             const container = document.getElementById('statusBarList');
             const tooltip = document.getElementById('statusTooltip');
             const tooltipDate = document.getElementById('tooltipDate');
             const tooltipDesc = document.getElementById('tooltipDesc');
             const wrapper = document.getElementById('statusBarsWrapper');
+            const statusBadge = document.getElementById('statusBadge');
+            const statusUptimePercent = document.getElementById('statusUptimePercent');
 
             if (!container) return;
+
+            let telemetry = statusData || currentLoaderData;
+            if (!telemetry || typeof telemetry.enabled === 'undefined') {
+                try {
+                    const res = await fetch('/api/status');
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json && json.success) {
+                            telemetry = {
+                                enabled: json.loader_enabled,
+                                disabled_at: json.loader_disabled_at,
+                                disable_reason: json.loader_disable_reason,
+                                downtime_history: json.downtime_history,
+                                server_time: json.server_time
+                            };
+                            currentLoaderData = telemetry;
+                            updateLoaderDownloadUI(telemetry);
+                        }
+                    }
+                } catch (_) {}
+            }
+
             container.innerHTML = '';
 
-            const now = Date.now();
+            const now = (telemetry && telemetry.server_time) ? telemetry.server_time : Date.now();
             const ONE_HOUR_MS = 60 * 60 * 1000;
+
+            const isCurrentlyEnabled = telemetry ? Boolean(telemetry.enabled) : true;
+            const disabledAt = (telemetry && telemetry.disabled_at) ? Number(telemetry.disabled_at) : 0;
+            const disableReason = (telemetry && telemetry.disable_reason) ? telemetry.disable_reason : 'Maintenance';
+            const downtimeHistory = (telemetry && Array.isArray(telemetry.downtime_history)) ? telemetry.downtime_history : [];
+
+            const intervals = downtimeHistory.map(item => ({
+                start: Number(item.start),
+                end: Number(item.end),
+                reason: item.reason || 'Maintenance'
+            }));
+
+            if (!isCurrentlyEnabled && disabledAt > 0) {
+                intervals.push({
+                    start: disabledAt,
+                    end: now,
+                    reason: disableReason,
+                    active: true
+                });
+            }
+
+            if (statusBadge) {
+                if (isCurrentlyEnabled) {
+                    statusBadge.className = 'text-xs font-semibold text-emerald-400';
+                    statusBadge.textContent = 'Operational';
+                } else {
+                    statusBadge.className = 'text-xs font-semibold text-red-500';
+                    statusBadge.textContent = 'Offline';
+                }
+            }
+
+            let downCount = 0;
 
             for (let i = 0; i < 24; i++) {
                 const hoursAgo = 23 - i;
-                const d = new Date(now - hoursAgo * ONE_HOUR_MS);
+                const barStart = now - (hoursAgo + 1) * ONE_HOUR_MS;
+                const barEnd = now - hoursAgo * ONE_HOUR_MS;
+
+                const d = new Date(barEnd);
                 const dayNum = d.getDate();
                 const monthName = d.toLocaleDateString('en-GB', { month: 'short' });
                 const hourFormatted = String(d.getHours()).padStart(2, '0') + ':00';
                 const formattedDate = dayNum + ' ' + monthName + ', ' + hourFormatted;
                 const isLatest = (hoursAgo === 0);
 
+                let isHourDown = false;
+                let hourReason = '';
+
+                if (isLatest && !isCurrentlyEnabled) {
+                    isHourDown = true;
+                    hourReason = disableReason;
+                } else {
+                    for (const iv of intervals) {
+                        const ivStart = iv.start;
+                        const ivEnd = iv.end || now;
+                        if (Math.max(barStart, ivStart) < Math.min(barEnd, ivEnd)) {
+                            isHourDown = true;
+                            hourReason = iv.reason || disableReason;
+                            break;
+                        }
+                    }
+                }
+
+                if (isHourDown) downCount++;
+
                 const bar = document.createElement('div');
-                bar.className = 'flex-1 h-full rounded-[3px] bg-emerald-500 hover:bg-emerald-300 hover:scale-y-110 transition-all cursor-pointer';
+                if (isHourDown) {
+                    bar.className = 'flex-1 h-full rounded-[3px] bg-red-500 hover:bg-red-300 hover:scale-y-110 transition-all cursor-pointer';
+                } else {
+                    bar.className = 'flex-1 h-full rounded-[3px] bg-emerald-500 hover:bg-emerald-300 hover:scale-y-110 transition-all cursor-pointer';
+                }
 
                 bar.addEventListener('mouseenter', () => {
                     tooltipDate.textContent = formattedDate;
-                    tooltipDesc.textContent = isLatest ? 'Operational — Up since 1 hour ago.' : 'Operational — 100% uptime (No downtime recorded).';
+                    if (isHourDown) {
+                        if (isLatest && !isCurrentlyEnabled) {
+                            tooltipDesc.textContent = 'Offline — ' + (hourReason ? hourReason : 'Loader is currently disabled.');
+                        } else {
+                            tooltipDesc.textContent = 'Offline — Downtime recorded (' + (hourReason ? hourReason : 'Maintenance') + ').';
+                        }
+                    } else {
+                        tooltipDesc.textContent = isLatest ? 'Operational — Up since 1 hour ago.' : 'Operational — 100% uptime (No downtime recorded).';
+                    }
                     tooltip.classList.remove('hidden');
 
                     const barRect = bar.getBoundingClientRect();
@@ -1011,6 +1132,18 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 });
 
                 container.appendChild(bar);
+            }
+
+            if (statusUptimePercent) {
+                const upHours = 24 - downCount;
+                const pct = ((upHours / 24) * 100).toFixed(1);
+                if (downCount === 0) {
+                    statusUptimePercent.textContent = '100% uptime';
+                    statusUptimePercent.className = 'text-emerald-400/90 text-[10px] font-semibold uppercase tracking-wider font-sans';
+                } else {
+                    statusUptimePercent.textContent = pct + '% uptime';
+                    statusUptimePercent.className = (downCount >= 12 ? 'text-red-400/90' : 'text-amber-400/90') + ' text-[10px] font-semibold uppercase tracking-wider font-sans';
+                }
             }
         }
 
@@ -1048,6 +1181,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     content.classList.remove('hidden');
                     if (t === 'guide') content.classList.add('flex');
                     if (t === 'status') initStatusBarTooltips();
+                    if (t === 'downloads') updateLoaderDownloadUI(currentLoaderData);
                 } else {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent transition text-left';
                     if (svg) svg.className = 'w-4 h-4 text-neutral-400';
@@ -1097,6 +1231,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         let isBuildingLoader = false;
 
         async function handleBuildAndDownloadLoader(btn) {
+            if (currentLoaderData && currentLoaderData.enabled === false) {
+                showToast('Downloads are unavailable while the loader is disabled.');
+                return;
+            }
             if (isBuildingLoader) return;
             isBuildingLoader = true;
 
@@ -1334,8 +1472,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 updateLiveHwidTimer();
                 hwidTimerInterval = setInterval(updateLiveHwidTimer, 1000);
 
-                // Initialize Status Tooltips
-                initStatusBarTooltips();
+                // Initialize Status Tooltips & Download Lock
+                currentLoaderData = data.loader || null;
+                updateLoaderDownloadUI(currentLoaderData);
+                initStatusBarTooltips(currentLoaderData);
 
                 // Show Portal, Hide Auth
                 document.getElementById('authView').classList.add('hidden');

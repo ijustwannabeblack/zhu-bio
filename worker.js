@@ -1027,6 +1027,38 @@ async function setLoaderDisabledAt(env, timestamp) {
     memoryStore.loaderDisabledAt = timestamp || 0;
 }
 
+async function getLoaderDowntimeHistory(env) {
+    const kv = await getKv(env);
+    if (kv) {
+        try {
+            const data = await kv.get('config:loader_downtime_history');
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return memoryStore.loaderDowntimeHistory || [];
+}
+
+async function addLoaderDowntimeInterval(env, start, end, reason) {
+    if (!start || !end || end <= start) return;
+    const history = await getLoaderDowntimeHistory(env);
+    history.push({
+        start: Number(start),
+        end: Number(end),
+        reason: reason || 'Updating for new game patch'
+    });
+    // Keep last 14 days of telemetry
+    const cutoff = Date.now() - (14 * 24 * 60 * 60 * 1000);
+    const trimmed = history.filter(h => (Number(h.end) || Number(h.start)) >= cutoff);
+    const kv = await getKv(env);
+    if (kv) {
+        await kv.put('config:loader_downtime_history', JSON.stringify(trimmed));
+        return;
+    }
+    memoryStore.loaderDowntimeHistory = trimmed;
+}
+
 async function addCrackingAttempt(env, data) {
     const logItem = {
         id: getRandomHex(8),
@@ -1153,9 +1185,18 @@ export default {
         }
 
         // -------------------------------------------------------------
-        // CUSTOMER PORTAL: /customer & /api/customer/*
+        // CLIENT LOADER DOWNLOAD & STATUS TELEMETRY
         // -------------------------------------------------------------
         if (path === '/download' || path === '/download/' || path === '/api/client/download') {
+            const enabled = await isLoaderEnabled(env);
+            if (!enabled) {
+                const reason = await getLoaderDisableReason(env);
+                return new Response(
+                    `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Download Unavailable</title></head><body style="background:#07080a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><div style="text-align:center;padding:32px;border:1px solid #1e222d;border-radius:16px;background:#0f1117;max-width:440px;box-shadow:0 20px 40px rgba(0,0,0,0.6);"><h2 style="color:#ef4444;margin:0 0 10px;font-size:18px;">Loader Download Unavailable</h2><p style="color:#a3a3a3;font-size:13px;line-height:1.5;margin:0 0 16px;">The client loader is currently offline for maintenance.<br><span style="color:#f59e0b;font-weight:600;">Reason: ${reason || 'Updating for new game patch'}</span></p><p style="color:#737373;font-size:12px;margin:0 0 20px;">Downloads will automatically re-enable once the loader is operational.</p><a href="/customer" style="display:inline-block;padding:8px 18px;border-radius:8px;background:#fff;color:#000;font-size:12px;font-weight:600;text-decoration:none;">&larr; Return to Dashboard</a></div></body></html>`,
+                    { status: 503, headers: { 'Content-Type': 'text/html; charset=UTF-8', ...corsHeaders } }
+                );
+            }
+
             if (env.ASSETS) {
                 try {
                     const assetReq = new Request(new URL('/assets/Loader.exe', request.url), request);
@@ -1169,6 +1210,35 @@ export default {
                 } catch (e) {}
             }
             return Response.redirect('https://cdn.discordapp.com/attachments/1566180865896357888/1566180880400121996/Loader.exe?ex=6ae79b1c&is=6ae6499c&hm=160ed7e4ed63536c5b036181a2a3bdb7bfec726556ece196d0772922cd17900a&', 302);
+        }
+
+        if (path === '/assets/Loader.exe') {
+            const enabled = await isLoaderEnabled(env);
+            if (!enabled) {
+                const reason = await getLoaderDisableReason(env);
+                return jsonResponse({
+                    success: false,
+                    loader_enabled: false,
+                    message: `Loader download disabled: ${reason}`
+                }, 503);
+            }
+        }
+
+        // Public Status Telemetry (hourly downtime tracking)
+        if (path === '/api/status' && method === 'GET') {
+            const loaderEnabled = await isLoaderEnabled(env);
+            const loaderDisabledAt = await getLoaderDisabledAt(env);
+            const loaderReason = await getLoaderDisableReason(env);
+            const downtimeHistory = await getLoaderDowntimeHistory(env);
+
+            return jsonResponse({
+                success: true,
+                loader_enabled: loaderEnabled,
+                loader_disabled_at: loaderDisabledAt,
+                loader_disable_reason: loaderReason,
+                downtime_history: downtimeHistory,
+                server_time: Date.now()
+            });
         }
 
         if (path === '/customer' || path === '/customer/') {
@@ -1514,6 +1584,9 @@ export default {
 
             const lic = await getLicense(env, currentCustomer.key);
             const loaderEnabled = await isLoaderEnabled(env);
+            const loaderDisabledAt = await getLoaderDisabledAt(env);
+            const loaderReason = await getLoaderDisableReason(env);
+            const downtimeHistory = await getLoaderDowntimeHistory(env);
             const now = Date.now();
             const isExpired = lic ? (Boolean(lic.expires_at && lic.expires_at <= now) || lic.status === 'expired') : true;
 
@@ -1536,8 +1609,12 @@ export default {
                 } : { key: currentCustomer.key, status: 'expired', duration_days: 0, is_expired: true },
                 loader: {
                     enabled: loaderEnabled,
-                    status: loaderEnabled ? 'Undetected' : 'Updating'
-                }
+                    status: loaderEnabled ? 'Undetected' : 'Updating',
+                    disabled_at: loaderDisabledAt,
+                    disable_reason: loaderReason,
+                    downtime_history: downtimeHistory
+                },
+                server_time: now
             });
         }
 
@@ -2560,6 +2637,11 @@ export default {
                     // Transition: DISABLED -> ENABLED (Resume timers & compensate missed time)
                     const disabledAt = await getLoaderDisabledAt(env);
                     const delta = (disabledAt > 0 && now > disabledAt) ? (now - disabledAt) : 0;
+
+                    if (disabledAt > 0 && now > disabledAt) {
+                        const reason = await getLoaderDisableReason(env);
+                        await addLoaderDowntimeInterval(env, disabledAt, now, reason);
+                    }
 
                     if (delta > 0) {
                         const allLicenses = await getAllLicenses(env);
