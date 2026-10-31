@@ -52,7 +52,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
     </style>
 </head>
-<body class="selection:bg-sky-500/30 selection:text-white">
+<body class="selection:bg-white/20 selection:text-white">
 
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#14161f] border border-[#262a38] text-white text-xs shadow-2xl">
@@ -61,7 +61,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 1. AUTH MODAL VIEW (COMPLETELY BLACK THEMED)                 -->
+    <!-- 1. AUTH MODAL VIEW (PURE BLACK & WHITE MONOCHROME)           -->
     <!-- ============================================================ -->
     <div id="authView" class="hidden min-h-screen bg-[#07080a] flex items-center justify-center p-4">
         <div class="card-dark w-full max-w-sm p-8 shadow-2xl relative bg-[#0f1117]">
@@ -86,19 +86,16 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </button>
             </div>
 
-            <!-- TAB A: SIGN IN FORM -->
+            <!-- TAB A: SIGN IN FORM (EMAIL & PASSWORD ONLY, NO '?') -->
             <form id="signInForm" onsubmit="handleSignIn(event)" class="space-y-4">
                 <div>
-                    <div class="flex items-center gap-1.5 mb-1.5">
-                        <label class="text-xs font-medium text-neutral-300">Customer email or license</label>
-                        <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#005b7f] text-white text-[9px] font-bold cursor-help" title="Enter your registered account email">?</span>
-                    </div>
-                    <input type="email" id="loginEmail" required placeholder="Customer email or license" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-neutral-500">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1.5">Email address</label>
+                    <input type="email" id="loginEmail" required placeholder="you@domain.com" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-neutral-500">
                 </div>
 
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1.5">Password</label>
-                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-[#090a0e] transition overflow-hidden">
+                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-white focus-within:ring-2 focus-within:ring-white/15 bg-[#090a0e] transition overflow-hidden">
                         <input type="password" id="loginPassword" required placeholder="Password" class="w-full px-3.5 py-2.5 text-xs text-white bg-transparent outline-none placeholder-neutral-500">
                         <button type="button" onclick="toggleInputPassword('loginPassword', this)" class="px-3 border-l border-[#232735] text-neutral-400 hover:text-white bg-[#11131a] flex items-center justify-center transition" title="Show/Hide Password">
                             <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -114,7 +111,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <div class="text-center pt-2">
                     <span class="text-xs text-neutral-400">Forgot password? </span>
-                    <button type="button" onclick="showResetPasswordFlow()" class="text-xs text-sky-400 font-semibold hover:underline">Reset</button>
+                    <button type="button" onclick="showResetPasswordFlow()" class="text-xs text-white font-medium hover:underline">Reset</button>
                 </div>
             </form>
 
@@ -135,7 +132,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1">Password</label>
-                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-[#090a0e] transition overflow-hidden">
+                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-white focus-within:ring-2 focus-within:ring-white/15 bg-[#090a0e] transition overflow-hidden">
                         <input type="password" id="regPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-white bg-transparent outline-none placeholder-neutral-500">
                         <button type="button" onclick="toggleInputPassword('regPassword', this)" class="px-3 border-l border-[#232735] text-neutral-400 hover:text-white bg-[#11131a] flex items-center justify-center transition">
                             <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -159,7 +156,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             <form id="registerStep2Form" onsubmit="handleVerifyOtp(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
                     <h3 class="text-xs font-semibold text-white">Verification Code Sent</h3>
-                    <p class="text-[11px] text-neutral-400 mt-1">Check your inbox at <span id="displayOtpEmail" class="text-sky-400 font-semibold"></span></p>
+                    <p class="text-[11px] text-neutral-400 mt-1">Check your inbox at <span id="displayOtpEmail" class="text-white font-semibold"></span></p>
                 </div>
 
                 <div>
@@ -174,7 +171,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <div class="flex items-center justify-between text-[11px] pt-1">
                     <button type="button" onclick="backToStep1()" class="text-neutral-400 hover:text-white transition">← Change details</button>
-                    <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-sky-400 hover:underline font-semibold transition">Resend code</button>
+                    <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-neutral-300 hover:text-white underline font-semibold transition">Resend code</button>
                 </div>
             </form>
 
@@ -200,7 +197,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             <form id="resetStep2Form" onsubmit="handleVerifyResetCode(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
                     <h3 class="text-xs font-semibold text-white">Reset Code Sent</h3>
-                    <p class="text-[11px] text-neutral-400 mt-1">We sent a 6-digit code to <span id="displayResetEmail" class="text-sky-400 font-semibold"></span></p>
+                    <p class="text-[11px] text-neutral-400 mt-1">We sent a 6-digit code to <span id="displayResetEmail" class="text-white font-semibold"></span></p>
                 </div>
 
                 <div>
@@ -210,7 +207,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <div>
                     <label class="block text-xs font-medium text-neutral-300 mb-1">New password</label>
-                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-[#090a0e] transition overflow-hidden">
+                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-white focus-within:ring-2 focus-within:ring-white/15 bg-[#090a0e] transition overflow-hidden">
                         <input type="password" id="resetNewPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-white bg-transparent outline-none placeholder-neutral-500">
                         <button type="button" onclick="toggleInputPassword('resetNewPassword', this)" class="px-3 border-l border-[#232735] text-neutral-400 hover:text-white bg-[#11131a] flex items-center justify-center transition">
                             <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -226,7 +223,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <div class="flex items-center justify-between text-[11px] pt-1">
                     <button type="button" onclick="showResetPasswordFlow()" class="text-neutral-400 hover:text-white transition">← Change email</button>
-                    <button type="button" id="btnResendResetOtp" onclick="resendResetCode()" class="text-sky-400 hover:underline font-semibold transition">Resend code</button>
+                    <button type="button" id="btnResendResetOtp" onclick="resendResetCode()" class="text-neutral-300 hover:text-white underline font-semibold transition">Resend code</button>
                 </div>
             </form>
 
@@ -234,7 +231,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 2. CUSTOMER DASHBOARD (COMPLETELY BLACK THEMED THROUGHOUT)   -->
+    <!-- 2. CUSTOMER DASHBOARD (COMPLETELY BLACK & WHITE THEMED)      -->
     <!-- ============================================================ -->
     <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#07080a]">
 
@@ -253,22 +250,31 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 <div class="p-3 space-y-1">
                     <div class="px-3 pt-3 pb-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Main</div>
 
-                    <!-- DASHBOARD BUTTON (NO PURPLE HOUSE ICON - CLEAN WHITE/NEUTRAL) -->
+                    <!-- DASHBOARD BUTTON -->
                     <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                         <span>Dashboard</span>
                     </button>
 
+                    <!-- STATUS BUTTON -->
+                    <button onclick="switchPortalTab('status')" id="pTabStatus" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Status</span>
+                    </button>
+
+                    <!-- CLIENT DOWNLOADS BUTTON -->
                     <button onclick="switchPortalTab('downloads')" id="pTabDownloads" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         <span>Client Downloads</span>
                     </button>
 
+                    <!-- HWID RESET BUTTON -->
                     <button onclick="switchPortalTab('hwid')" id="pTabHwid" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         <span>HWID Reset</span>
                     </button>
 
+                    <!-- SETUP GUIDE BUTTON -->
                     <button onclick="switchPortalTab('guide')" id="pTabGuide" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         <span>Setup Guide</span>
@@ -293,10 +299,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA (COMPLETELY BLACK THEMED) -->
+        <!-- MAIN CONTENT AREA (COMPLETELY BLACK & WHITE THEMED) -->
         <div class="flex-1 min-h-screen flex flex-col bg-[#07080a]">
 
-            <!-- Top Header -->
+            <!-- Top Header (Removed Active Badge as requested) -->
             <header class="h-16 bg-[#0b0c10] border-b border-[#1a1c24] px-6 sm:px-8 flex items-center justify-between shrink-0">
                 <div>
                     <h2 id="topBarTitle" class="text-base font-bold text-white">Dashboard</h2>
@@ -306,9 +312,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     <a id="guideOpenExternal" href="https://udvengers.gitbook.io/udvengers-docs/" target="_blank" rel="noopener noreferrer" class="hidden px-3 py-1.5 rounded-lg bg-[#141620] border border-[#232735] text-neutral-300 hover:text-white text-xs font-medium transition items-center gap-1.5 shadow-sm">
                         <span>Open Docs ↗</span>
                     </a>
-                    <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
-                    </span>
                 </div>
             </header>
 
@@ -323,9 +326,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                 <h3 class="text-sm font-bold text-white tracking-tight">Subscription License</h3>
                                 <p class="text-xs text-neutral-400">Cryptographic authorization key linked to your account.</p>
                             </div>
-                            <span class="text-xs font-semibold text-neutral-200 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
-                            </span>
                         </div>
 
                         <!-- Masked Key Box -->
@@ -366,7 +366,20 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 2. TAB: DOWNLOADS (DOWNLOAD CARD AT TOP-LEFT WITH BANNER ICON & BOTTOM BUTTON) -->
+                <!-- 2. TAB: STATUS (REQUESTED TAB - EMPTY PLACEHOLDER) -->
+                <div id="contentStatus" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
+                    <div class="card-dark p-6 space-y-4 bg-[#0f1117] border border-[#1e222d] rounded-2xl">
+                        <div class="border-b border-[#1a1c24] pb-4">
+                            <h3 class="text-sm font-bold text-white tracking-tight">System Status</h3>
+                            <p class="text-xs text-neutral-400">Live operational telemetry and component status.</p>
+                        </div>
+                        <div class="py-12 text-center text-xs text-neutral-500">
+                            No status reports at this time.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. TAB: DOWNLOADS (DOWNLOAD CARD AT TOP-LEFT WITH BANNER ICON & BOTTOM BUTTON) -->
                 <div id="contentDownloads" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="flex flex-col sm:flex-row items-start gap-6">
                         <!-- Top-Left Download Product Card -->
@@ -374,9 +387,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <!-- Cover Banner / Image Icon -->
                             <div class="relative w-full aspect-[16/9] bg-[#090a0e] overflow-hidden border-b border-[#1e222d]">
                                 <img src="/assets/download_icon.png" onerror="this.src='https://cdn.discordapp.com/attachments/1526175746169503854/1566122431121195059/images.png?ex=6ae764ac&is=6ae6132c&hm=587594191f3f458c9c07934dccfee736fd8af38d42e30a19156a7533e4bcd958&'" alt="Client Cover" class="w-full h-full object-cover">
-                                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
-                                    Latest
-                                </span>
                             </div>
 
                             <!-- Card Body with Info & Bottom Download Button -->
@@ -397,25 +407,22 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 3. TAB: HWID RESET (MATCHES DOWNLOAD CARD STYLE) -->
+                <!-- 4. TAB: HWID RESET (SINGLE LIVE COOLDOWN TIMER) -->
                 <div id="contentHwid" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="flex flex-col sm:flex-row items-start gap-6">
                         <!-- HWID Product Card at Top-Left -->
                         <div class="w-full sm:w-80 bg-[#0f1117] border border-[#1e222d] rounded-2xl overflow-hidden shadow-2xl transition hover:border-[#2d3242]">
-                            <!-- Cover Banner / Image Icon -->
+                            <!-- Cover Banner (No duplicate badge on image) -->
                             <div class="relative w-full aspect-[16/9] bg-[#090a0e] overflow-hidden border-b border-[#1e222d]">
                                 <img src="/assets/download_icon.png" onerror="this.src='https://cdn.discordapp.com/attachments/1526175746169503854/1566122431121195059/images.png?ex=6ae764ac&is=6ae6132c&hm=587594191f3f458c9c07934dccfee736fd8af38d42e30a19156a7533e4bcd958&'" alt="HWID Lock" class="w-full h-full object-cover">
-                                <span id="hwidCooldownBadge" class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
-                                    Available
-                                </span>
                             </div>
 
-                            <!-- Card Body with Info & Reset Button -->
+                            <!-- Card Body with Live Countdown Timer (Only Once) -->
                             <div class="p-5 space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
                                         <span class="text-sm font-bold text-white font-mono">Fortnite External</span>
-                                        <span id="hwidCooldownDisplay" class="text-xs text-neutral-400 font-sans">1 reset / 24h</span>
+                                        <span id="hwidLiveTimer" class="text-xs font-mono font-semibold text-neutral-300">Available</span>
                                     </div>
                                     <div class="mt-2 text-[11px] text-neutral-400">
                                         <span>Linked HWID: </span>
@@ -432,7 +439,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 4. TAB: SETUP GUIDE (FULLSCREEN ON WHOLE RIGHT SIDE) -->
+                <!-- 5. TAB: SETUP GUIDE (FULLSCREEN ON WHOLE RIGHT SIDE) -->
                 <div id="contentGuide" class="hidden flex-1 w-full h-full flex flex-col min-h-0">
                     <iframe 
                         id="guideIframe"
@@ -455,6 +462,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         let isKeyVisible = false;
         let pendingRegData = null;
         let pendingResetEmail = null;
+        let hwidTimerInterval = null;
 
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
@@ -807,9 +815,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
 
         function switchPortalTab(tab) {
-            const tabs = ['dashboard', 'downloads', 'hwid', 'guide'];
+            const tabs = ['dashboard', 'status', 'downloads', 'hwid', 'guide'];
             const titles = {
                 dashboard: 'Dashboard',
+                status: 'System Status',
                 downloads: 'Client Downloads',
                 hwid: 'HWID Management',
                 guide: 'Setup Guide'
@@ -918,6 +927,45 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             }, 2500);
         }
 
+        function updateLiveHwidTimer() {
+            if (!currentLicense) return;
+            const lastReset = currentLicense.hwid_last_reset || 0;
+            const now = Date.now();
+            const cooldownMs = 24 * 60 * 60 * 1000;
+            const remainingMs = cooldownMs - (now - lastReset);
+            const timerEl = document.getElementById('hwidLiveTimer');
+            const resetBtn = document.getElementById('btnResetHwid');
+
+            if (remainingMs > 0) {
+                const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+                const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((remainingMs % (1000 * 60)) / 1000);
+                const formatted = \`\${hours}h \${mins.toString().padStart(2, '0')}m \${secs.toString().padStart(2, '0')}s remaining\`;
+
+                if (timerEl) {
+                    timerEl.textContent = formatted;
+                    timerEl.className = 'text-xs font-mono font-semibold text-neutral-300';
+                }
+                if (resetBtn) {
+                    resetBtn.disabled = true;
+                    resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            } else {
+                if (timerEl) {
+                    timerEl.textContent = 'Available';
+                    timerEl.className = 'text-xs font-mono font-semibold text-emerald-400';
+                }
+                if (resetBtn) {
+                    resetBtn.disabled = false;
+                    resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (hwidTimerInterval) {
+                    clearInterval(hwidTimerInterval);
+                    hwidTimerInterval = null;
+                }
+            }
+        }
+
         async function requestHwidReset() {
             const btn = document.getElementById('btnResetHwid');
             if (!confirm('Are you sure you want to reset your HWID?')) return;
@@ -986,32 +1034,13 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     discordEl.textContent = currentCustomer.discord_id || (currentLicense && currentLicense.discord_id) || 'Linked';
                 }
 
-                // HWID Cooldown calculation (24h)
-                const lastReset = currentLicense.hwid_last_reset || 0;
-                const now = Date.now();
-                const cooldownMs = 24 * 60 * 60 * 1000;
-                const cooldownEl = document.getElementById('hwidCooldownDisplay');
-                const cooldownBadge = document.getElementById('hwidCooldownBadge');
-                const resetBtn = document.getElementById('btnResetHwid');
-
-                if (now - lastReset < cooldownMs) {
-                    const remainingHours = Math.ceil((cooldownMs - (now - lastReset)) / (60 * 60 * 1000));
-                    if (cooldownEl) cooldownEl.textContent = remainingHours + 'h remaining';
-                    if (cooldownBadge) {
-                        cooldownBadge.textContent = 'Cooldown (' + remainingHours + 'h)';
-                        cooldownBadge.className = 'absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 backdrop-blur-md';
-                    }
-                    resetBtn.disabled = true;
-                    resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    if (cooldownEl) cooldownEl.textContent = '1 reset / 24h';
-                    if (cooldownBadge) {
-                        cooldownBadge.textContent = 'Available';
-                        cooldownBadge.className = 'absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 backdrop-blur-md';
-                    }
-                    resetBtn.disabled = false;
-                    resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                // HWID Live Cooldown calculation (24h)
+                if (hwidTimerInterval) {
+                    clearInterval(hwidTimerInterval);
+                    hwidTimerInterval = null;
                 }
+                updateLiveHwidTimer();
+                hwidTimerInterval = setInterval(updateLiveHwidTimer, 1000);
 
                 // Show Portal, Hide Auth
                 document.getElementById('authView').classList.add('hidden');
