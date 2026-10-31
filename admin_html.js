@@ -480,6 +480,16 @@ export const ADMIN_HTML = `<!DOCTYPE html>
         let gLoaderEnabled = true;
         let gLoaderDisabledAt = 0;
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function toggleSidebar(open) {
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
@@ -674,47 +684,52 @@ export const ADMIN_HTML = `<!DOCTYPE html>
                     badge.classList.add('hidden');
                 }
             }
+
+            fetchAuthorizedMembers();
         }
 
         async function fetchAuthorizedMembers() {
+            const tbody = document.getElementById('membersTableBody');
             try {
-                const res = await fetch('/api/admin/members');
-                if (!res.ok) return;
-                const data = await res.json();
-                const total = data.total || 0;
+                const data = await api('/api/admin/members');
+                if (!data || !data.success) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-xs text-neutral-500 font-sans">No authorized members recorded yet. Once users verify, they appear here.</td></tr>';
+                    return;
+                }
+                const total = data.total || (data.members ? data.members.length : 0);
                 const badge = document.getElementById('sidebarMemberCount');
                 if (badge) badge.textContent = total;
                 const totalEl = document.getElementById('totalAuthorizedMembers');
                 if (totalEl) totalEl.textContent = total;
 
-                const tbody = document.getElementById('membersTableBody');
                 if (!tbody) return;
                 if (!data.members || data.members.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-xs text-neutral-500 font-sans">No authorized members recorded yet. Once users verify, they appear here.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = data.members.map(m => {
-                    const avatar = m.avatar ? \`https://cdn.discordapp.com/avatars/\${m.user_id}/\${m.avatar}.png?size=32\` : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                    const dateStr = m.verified_at ? new Date(m.verified_at).toLocaleString() : 'N/A';
-                    return \`
-                    <tr class="hover:bg-neutral-900/50 transition">
-                        <td class="py-2.5 px-4 text-xs font-sans flex items-center space-x-2.5">
-                            <img src="\${avatar}" class="w-6 h-6 rounded-full border border-neutral-700 object-cover" />
-                            <span class="text-neutral-200 font-medium">\${escapeHtml(m.username || 'User')}</span>
-                        </td>
-                        <td class="py-2.5 px-4 text-xs text-neutral-400 font-mono">\${m.user_id}</td>
-                        <td class="py-2.5 px-4 text-xs text-neutral-400 font-mono">\${dateStr}</td>
-                        <td class="py-2.5 px-4 text-xs text-right">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono \${m.expired ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
-                                \${m.expired ? 'Refreshable' : 'Ready'}
-                            </span>
-                        </td>
-                    </tr>
-                    \`;
+                tbody.innerHTML = data.members.map(function(m) {
+                    var avatar = m.avatar ? ('https://cdn.discordapp.com/avatars/' + m.user_id + '/' + m.avatar + '.png?size=32') : 'https://cdn.discordapp.com/embed/avatars/0.png';
+                    var dateStr = m.verified_at ? new Date(m.verified_at).toLocaleString() : 'N/A';
+                    var statusClass = m.expired ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                    var statusText = m.expired ? 'Refreshable' : 'Ready';
+                    return '<tr class="hover:bg-neutral-900/50 transition">' +
+                        '<td class="py-2.5 px-4 text-xs font-sans flex items-center space-x-2.5">' +
+                            '<img src="' + avatar + '" class="w-6 h-6 rounded-full border border-neutral-700 object-cover" />' +
+                            '<span class="text-neutral-200 font-medium">' + escapeHtml(m.username || 'User') + '</span>' +
+                        '</td>' +
+                        '<td class="py-2.5 px-4 text-xs text-neutral-400 font-mono">' + m.user_id + '</td>' +
+                        '<td class="py-2.5 px-4 text-xs text-neutral-400 font-mono">' + dateStr + '</td>' +
+                        '<td class="py-2.5 px-4 text-xs text-right">' +
+                            '<span class="px-2 py-0.5 rounded text-[10px] font-mono ' + statusClass + '">' +
+                                statusText +
+                            '</span>' +
+                        '</td>' +
+                    '</tr>';
                 }).join('');
             } catch (e) {
                 console.error('Fetch members error:', e);
+                if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-xs text-neutral-500 font-sans">No authorized members recorded yet. Once users verify, they appear here.</td></tr>';
             }
         }
 

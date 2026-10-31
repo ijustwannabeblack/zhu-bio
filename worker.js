@@ -685,54 +685,90 @@ function escapeHtml(str) {
 
 async function saveOAuthMember(env, member) {
     const kv = await getKv(env);
+    const userId = String(member.user_id);
     if (kv) {
-        await kv.put('oauth_member:' + member.user_id, JSON.stringify(member));
+        await kv.put('oauth_member:' + userId, JSON.stringify(member));
         let allIds = [];
         try {
-            allIds = (await kv.get('index:oauth_members', 'json')) || [];
+            const raw = await kv.get('index:oauth_members', 'text');
+            if (raw) {
+                try { allIds = JSON.parse(raw); } catch (_) { allIds = []; }
+            }
+            if (!Array.isArray(allIds)) allIds = [];
         } catch (e) {
             allIds = [];
         }
-        if (!allIds.includes(member.user_id)) {
-            allIds.push(member.user_id);
-            await kv.put('index:oauth_members', JSON.stringify(allIds));
+        if (!allIds.includes(userId)) {
+            allIds.push(userId);
+            try {
+                await kv.put('index:oauth_members', JSON.stringify(allIds));
+            } catch (e) {
+                console.error('Failed to update index:oauth_members:', e);
+            }
         }
         return;
     }
     if (!memoryStore.oauthMembers) memoryStore.oauthMembers = new Map();
-    memoryStore.oauthMembers.set(member.user_id, member);
+    memoryStore.oauthMembers.set(userId, member);
 }
 
 async function getOAuthMember(env, userId) {
     const kv = await getKv(env);
+    const uid = String(userId);
     if (kv) {
         try {
-            return await kv.get('oauth_member:' + userId, 'json');
+            return await kv.get('oauth_member:' + uid, 'json');
         } catch (e) {
             return null;
         }
     }
     if (!memoryStore.oauthMembers) memoryStore.oauthMembers = new Map();
-    return memoryStore.oauthMembers.get(userId) || null;
+    return memoryStore.oauthMembers.get(uid) || null;
 }
 
 async function getAllOAuthMembers(env) {
     const kv = await getKv(env);
     if (kv) {
-        let allIds = [];
+        const memberMap = new Map();
+
+        // 1. Native KV prefix listing
         try {
-            allIds = (await kv.get('index:oauth_members', 'json')) || [];
+            const listRes = await kv.list({ prefix: 'oauth_member:' });
+            if (listRes && Array.isArray(listRes.keys)) {
+                for (const k of listRes.keys) {
+                    try {
+                        const m = await kv.get(k.name, 'json');
+                        if (m && m.user_id) memberMap.set(String(m.user_id), m);
+                    } catch (_) {}
+                }
+            }
         } catch (e) {
-            allIds = [];
+            console.error('KV list error:', e);
         }
-        const members = [];
-        for (const id of allIds) {
-            try {
-                const m = await kv.get('oauth_member:' + id, 'json');
-                if (m && m.user_id) members.push(m);
-            } catch (e) {}
+
+        // 2. Fallback index:oauth_members
+        try {
+            const raw = await kv.get('index:oauth_members', 'text');
+            if (raw) {
+                let allIds = [];
+                try { allIds = JSON.parse(raw); } catch (_) { allIds = []; }
+                if (Array.isArray(allIds)) {
+                    for (const id of allIds) {
+                        const uid = String(id);
+                        if (!memberMap.has(uid)) {
+                            try {
+                                const m = await kv.get('oauth_member:' + uid, 'json');
+                                if (m && m.user_id) memberMap.set(uid, m);
+                            } catch (_) {}
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Index oauth members error:', e);
         }
-        return members.sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
+
+        return Array.from(memberMap.values()).sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
     }
     if (!memoryStore.oauthMembers) memoryStore.oauthMembers = new Map();
     return Array.from(memoryStore.oauthMembers.values()).sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
