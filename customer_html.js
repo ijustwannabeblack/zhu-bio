@@ -3,7 +3,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UDvengers • Customer Portal</title>
+    <title>Customer Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -246,7 +246,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-7 h-7 object-contain">
                         <span class="font-bold text-base tracking-tight text-white">UDvengers</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-neutral-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Customer</span>
+                    <span class="text-[10px] font-semibold text-neutral-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Customer Panel</span>
                 </div>
 
                 <!-- Navigation Section -->
@@ -378,10 +378,9 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             <div class="p-5 space-y-4">
                                 <div>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm font-bold text-white font-mono">Loader.exe</span>
+                                        <span class="text-sm font-bold text-white font-mono">Fortnite External</span>
                                         <span class="text-xs text-neutral-400 font-sans">8.2 MB</span>
                                     </div>
-                                    <p class="text-xs text-neutral-400 mt-1">Windows 10 / 11 64-bit • Run as Administrator</p>
                                 </div>
 
                                 <button onclick="handleBuildAndDownloadLoader(this)" id="btnDownloadLoader" class="btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition">
