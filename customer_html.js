@@ -296,23 +296,26 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         <div class="flex-1 min-h-screen flex flex-col bg-[#07080a]">
 
             <!-- Top Header -->
-            <header class="h-16 bg-[#0b0c10] border-b border-[#1a1c24] px-6 sm:px-8 flex items-center justify-between">
+            <header class="h-16 bg-[#0b0c10] border-b border-[#1a1c24] px-6 sm:px-8 flex items-center justify-between shrink-0">
                 <div>
                     <h2 id="topBarTitle" class="text-base font-bold text-white">Dashboard</h2>
-                    <p class="text-xs text-neutral-400">Manage your subscription and client access</p>
+                    <p id="topBarSubtitle" class="text-xs text-neutral-400">Manage your subscription and client access</p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <a id="guideOpenExternal" href="https://udvengers.gitbook.io/udvengers-docs/" target="_blank" rel="noopener noreferrer" class="hidden px-3 py-1.5 rounded-lg bg-[#141620] border border-[#232735] text-neutral-300 hover:text-white text-xs font-medium transition items-center gap-1.5 shadow-sm">
+                        <span>Open Docs ↗</span>
+                    </a>
                     <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
                     </span>
                 </div>
             </header>
 
-            <!-- Dynamic Content -->
-            <main class="flex-1 p-6 sm:p-8 max-w-5xl space-y-6">
+            <!-- Dynamic Content Area -->
+            <main class="flex-1 w-full flex flex-col min-h-0 overflow-y-auto">
 
                 <!-- 1. TAB: DASHBOARD -->
-                <div id="contentDashboard" class="space-y-6">
+                <div id="contentDashboard" class="p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
                         <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
@@ -361,7 +364,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
 
                 <!-- 2. TAB: DOWNLOADS (DOWNLOAD CARD AT TOP-LEFT WITH BANNER ICON & BOTTOM BUTTON) -->
-                <div id="contentDownloads" class="hidden space-y-6">
+                <div id="contentDownloads" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="flex flex-col sm:flex-row items-start gap-6">
                         <!-- Top-Left Download Product Card -->
                         <div class="w-full sm:w-80 bg-[#0f1117] border border-[#1e222d] rounded-2xl overflow-hidden shadow-2xl transition hover:border-[#2d3242]">
@@ -392,7 +395,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 </div>
 
                 <!-- 3. TAB: HWID RESET -->
-                <div id="contentHwid" class="hidden space-y-6">
+                <div id="contentHwid" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
                     <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
                         <div class="border-b border-[#1a1c24] pb-4">
                             <h3 class="text-sm font-bold text-white">Hardware ID Management</h3>
@@ -424,28 +427,16 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 4. TAB: SETUP GUIDE (GITBOOK EMBED) -->
-                <div id="contentGuide" class="hidden space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-sm font-bold text-white">Setup Guide & Documentation</h3>
-                            <p class="text-xs text-neutral-400">Official step-by-step setup and troubleshooting documentation.</p>
-                        </div>
-                        <a href="https://udvengers.gitbook.io/udvengers-docs/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-[#141620] border border-[#232735] text-neutral-300 hover:text-white text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
-                            <span>Open in new tab</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                        </a>
-                    </div>
-
-                    <div class="card-dark overflow-hidden bg-[#0f1117] border border-[#1e222d] rounded-2xl shadow-2xl relative w-full h-[calc(100vh-190px)] min-h-[620px]">
-                        <iframe 
-                            id="guideIframe"
-                            src="https://udvengers.gitbook.io/udvengers-docs/" 
-                            class="w-full h-full border-0 rounded-2xl bg-[#0f1117]" 
-                            title="UDvengers Setup Guide"
-                            allow="clipboard-write">
-                        </iframe>
-                    </div>
+                <!-- 4. TAB: SETUP GUIDE (FULLSCREEN ON WHOLE RIGHT SIDE) -->
+                <div id="contentGuide" class="hidden flex-1 w-full h-full flex flex-col min-h-0">
+                    <iframe 
+                        id="guideIframe"
+                        src="https://udvengers.gitbook.io/udvengers-docs/" 
+                        class="w-full flex-1 border-0 bg-[#0f1117]" 
+                        style="height: calc(100vh - 64px); min-height: calc(100vh - 64px);"
+                        title="UDvengers Setup Guide"
+                        allow="clipboard-write">
+                    </iframe>
                 </div>
 
             </main>
@@ -821,6 +812,17 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
             document.getElementById('topBarTitle').textContent = titles[tab] || 'Dashboard';
 
+            const extLink = document.getElementById('guideOpenExternal');
+            if (extLink) {
+                if (tab === 'guide') {
+                    extLink.classList.remove('hidden');
+                    extLink.classList.add('flex');
+                } else {
+                    extLink.classList.add('hidden');
+                    extLink.classList.remove('flex');
+                }
+            }
+
             tabs.forEach(t => {
                 const btn = document.getElementById('pTab' + t.charAt(0).toUpperCase() + t.slice(1));
                 const content = document.getElementById('content' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -830,10 +832,12 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left';
                     if (svg) svg.className = 'w-4 h-4 text-white';
                     content.classList.remove('hidden');
+                    if (t === 'guide') content.classList.add('flex');
                 } else {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent transition text-left';
                     if (svg) svg.className = 'w-4 h-4 text-neutral-400';
                     content.classList.add('hidden');
+                    if (t === 'guide') content.classList.remove('flex');
                 }
             });
         }
