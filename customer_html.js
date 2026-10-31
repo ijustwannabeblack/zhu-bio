@@ -335,6 +335,11 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         <span>Setup Guide</span>
                     </button>
+
+                    <button onclick="switchPortalTab('settings')" id="pTabSettings" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 transition text-left">
+                        <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span>Settings</span>
+                    </button>
                 </div>
             </div>
 
@@ -573,6 +578,81 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                         title="UDvengers Setup Guide"
                         allow="clipboard-write">
                     </iframe>
+                </div>
+
+                <div id="contentSettings" class="hidden p-6 sm:p-8 max-w-5xl w-full space-y-6">
+                    <div id="sessionBannerCard" class="card-dark p-6 sm:p-7 bg-[#0f1117] border border-[#1e222d] rounded-2xl relative shadow-xl overflow-hidden">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span id="sessionStatusDot" class="w-2.5 h-2.5 rounded-full bg-neutral-500"></span>
+                                    <span id="sessionStatusHeader" class="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">External Client Status</span>
+                                </div>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white tracking-tight" id="usageMessageDisplay">
+                                    You used UDvengers for: <span class="text-emerald-400 font-mono" id="sessionTimeDuration">0m</span>
+                                </h3>
+                                <p class="text-xs text-neutral-400" id="sessionStatusSubtext">External closed • Playtime synchronized with your license key</p>
+                            </div>
+                            <div class="shrink-0">
+                                <button onclick="fetchLeaderboardAndUsage()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 transition flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Refresh Stats</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="card-dark p-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl shadow-xl">
+                            <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">TOTAL TIME USED</span>
+                            <div class="text-xl font-bold text-white mt-1 font-sans" id="statTotalUsage">0h 0m</div>
+                            <span class="text-[11px] text-neutral-500 mt-1 block">Lifetime active runtime</span>
+                        </div>
+                        <div class="card-dark p-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl shadow-xl">
+                            <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">LAST SESSION DURATION</span>
+                            <div class="text-xl font-bold text-emerald-400 mt-1 font-sans" id="statLastSession">0m</div>
+                            <span class="text-[11px] text-neutral-500 mt-1 block">Most recent execution time</span>
+                        </div>
+                        <div class="card-dark p-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl shadow-xl">
+                            <span class="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider block">SESSIONS LAUNCHED</span>
+                            <div class="text-xl font-bold text-white mt-1 font-sans" id="statSessionCount">0</div>
+                            <span class="text-[11px] text-neutral-500 mt-1 block">Total client startup cycles</span>
+                        </div>
+                    </div>
+
+                    <div class="card-dark p-6 sm:p-7 space-y-5 bg-[#0f1117] border border-[#1e222d] rounded-2xl relative shadow-xl">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#1a1c24]">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base">🏆</span>
+                                    <h3 class="text-sm font-bold text-white tracking-tight">UDvengers Playtime Leaderboard</h3>
+                                </div>
+                                <p class="text-xs text-neutral-400 mt-0.5">Top active players • The user who uses UDvengers the most receives a free Lifetime key!</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Free Key Contest</span>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="text-neutral-500 border-b border-[#1a1c24]">
+                                        <th class="pb-3 font-semibold w-14">RANK</th>
+                                        <th class="pb-3 font-semibold">PLAYER / ACCOUNT</th>
+                                        <th class="pb-3 font-semibold">SESSIONS</th>
+                                        <th class="pb-3 font-semibold">TOTAL USAGE TIME</th>
+                                        <th class="pb-3 font-semibold text-right">CONTEST REWARD</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboardTableBody" class="divide-y divide-[#161822] text-neutral-300">
+                                    <tr>
+                                        <td colspan="5" class="py-6 text-center text-neutral-500">Loading leaderboard rankings...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
             </main>
@@ -1148,13 +1228,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
 
         function switchPortalTab(tab) {
-            const tabs = ['dashboard', 'status', 'downloads', 'hwid', 'guide'];
+            const tabs = ['dashboard', 'status', 'downloads', 'hwid', 'guide', 'settings'];
             const titles = {
                 dashboard: 'Dashboard',
                 status: 'System Status',
                 downloads: 'Client Downloads',
                 hwid: 'HWID Management',
-                guide: 'Setup Guide'
+                guide: 'Setup Guide',
+                settings: 'Settings'
             };
 
             document.getElementById('topBarTitle').textContent = titles[tab] || 'Dashboard';
@@ -1182,6 +1263,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     if (t === 'guide') content.classList.add('flex');
                     if (t === 'status') initStatusBarTooltips();
                     if (t === 'downloads') updateLoaderDownloadUI(currentLoaderData);
+                    if (t === 'settings') fetchLeaderboardAndUsage();
                 } else {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent transition text-left';
                     if (svg) svg.className = 'w-4 h-4 text-neutral-400';
@@ -1477,6 +1559,11 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 updateLoaderDownloadUI(currentLoaderData);
                 initStatusBarTooltips(currentLoaderData);
 
+                // Initialize Usage Statistics & Leaderboard
+                if (data.usage) {
+                    renderUsageStats(data.usage);
+                }
+
                 // Show Portal, Hide Auth
                 document.getElementById('authView').classList.add('hidden');
                 document.getElementById('portalView').classList.remove('hidden');
@@ -1485,6 +1572,120 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 console.error('Failed to load customer portal:', err);
                 document.getElementById('authView').classList.remove('hidden');
                 document.getElementById('portalView').classList.add('hidden');
+            }
+        }
+
+        let currentUsageData = null;
+
+        function formatUsageTime(totalSec) {
+            const sec = Number(totalSec) || 0;
+            if (sec <= 0) return '0m';
+            const hrs = Math.floor(sec / 3600);
+            const mins = Math.floor((sec % 3600) / 60);
+            const remainderSecs = sec % 60;
+            if (hrs > 0) return hrs + 'h ' + mins + 'm';
+            if (mins > 0) return mins + 'm';
+            return remainderSecs + 's';
+        }
+
+        function renderUsageStats(usage) {
+            if (!usage) return;
+            currentUsageData = usage;
+
+            const isActive = Boolean(usage.is_active);
+            const totalSec = Number(usage.total_seconds) || 0;
+            const lastSec = Number(usage.last_session_seconds) || 0;
+            const curSec = Number(usage.current_session_seconds) || 0;
+            const sessCount = Number(usage.session_count) || (totalSec > 0 ? 1 : 0);
+
+            const dot = document.getElementById('sessionStatusDot');
+            const header = document.getElementById('sessionStatusHeader');
+            const msgDisplay = document.getElementById('usageMessageDisplay');
+            const subtext = document.getElementById('sessionStatusSubtext');
+
+            if (isActive) {
+                if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+                if (header) header.textContent = 'External Client Active';
+                if (msgDisplay) {
+                    msgDisplay.innerHTML = 'Active Session: <span class="text-emerald-400 font-mono">' + formatUsageTime(curSec || 60) + '</span>';
+                }
+                if (subtext) subtext.textContent = 'UDvengers is running • Live heartbeat recording session time';
+            } else {
+                if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-neutral-500';
+                if (header) header.textContent = 'External Client Closed';
+                if (msgDisplay) {
+                    msgDisplay.innerHTML = 'You used UDvengers for: <span class="text-emerald-400 font-mono">' + formatUsageTime(lastSec || totalSec) + '</span>';
+                }
+                if (subtext) subtext.textContent = 'External closed • Playtime saved to your account';
+            }
+
+            const statTotal = document.getElementById('statTotalUsage');
+            if (statTotal) statTotal.textContent = formatUsageTime(totalSec);
+
+            const statLast = document.getElementById('statLastSession');
+            if (statLast) statLast.textContent = formatUsageTime(lastSec);
+
+            const statCount = document.getElementById('statSessionCount');
+            if (statCount) statCount.textContent = sessCount;
+        }
+
+        async function fetchLeaderboardAndUsage() {
+            try {
+                const res = await fetch('/api/customer/leaderboard');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data || !data.success) return;
+
+                if (data.current_user) {
+                    renderUsageStats(data.current_user);
+                }
+
+                const tbody = document.getElementById('leaderboardTableBody');
+                if (tbody && Array.isArray(data.leaderboard)) {
+                    if (data.leaderboard.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-neutral-500">No active playtime records yet.</td></tr>';
+                    } else {
+                        let html = '';
+                        data.leaderboard.forEach(function(item) {
+                            const isMe = Boolean(item.is_current_user);
+                            const rank = item.rank;
+                            let rankBadge = rank;
+                            if (rank === 1) rankBadge = '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">1</span>';
+                            else if (rank === 2) rankBadge = '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-400/20 text-slate-300 font-bold border border-slate-400/40">2</span>';
+                            else if (rank === 3) rankBadge = '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700/20 text-amber-500 font-bold border border-amber-700/40">3</span>';
+                            else rankBadge = '<span class="text-neutral-500 font-semibold pl-2">' + rank + '</span>';
+
+                            let rewardBadge = '';
+                            if (rank === 1) {
+                                rewardBadge = '<span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-semibold">Free Lifetime Key</span>';
+                            } else if (rank <= 3) {
+                                rewardBadge = '<span class="px-2 py-0.5 rounded-md bg-white/5 text-neutral-300 border border-white/10 text-[10px] font-medium">Contender</span>';
+                            } else {
+                                rewardBadge = '<span class="text-neutral-500 text-[11px]">-</span>';
+                            }
+
+                            const displayName = item.discord_id ? ('Discord ' + item.discord_id) : (item.masked_key || 'Player');
+                            const rowClass = isMe ? 'bg-emerald-500/10 text-white font-medium border-l-2 border-emerald-400' : 'hover:bg-white/[0.02]';
+
+                            html += '<tr class="' + rowClass + ' transition">' +
+                                '<td class="py-3.5 pr-2 font-mono">' + rankBadge + '</td>' +
+                                '<td class="py-3.5">' +
+                                    '<div class="flex items-center gap-2">' +
+                                        '<span class="font-semibold text-white">' + displayName + '</span>' +
+                                        (isMe ? '<span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-500 text-black uppercase">YOU</span>' : '') +
+                                        (item.is_active ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Currently Playing"></span>' : '') +
+                                    '</div>' +
+                                '</td>' +
+                                '<td class="py-3.5 text-neutral-400">' + (item.sessions || 1) + ' sessions</td>' +
+                                '<td class="py-3.5 font-mono text-emerald-400 font-semibold">' + formatUsageTime(item.total_seconds) + '</td>' +
+                                '<td class="py-3.5 text-right">' + rewardBadge + '</td>' +
+                            '</tr>';
+                        });
+                        tbody.innerHTML = html;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching leaderboard:', err);
             }
         }
 
