@@ -48,6 +48,26 @@ async function revokeDiscordRole(env, guildId, userId, roleId) {
     }
 }
 
+async function assignDiscordRole(env, guildId, userId, roleId) {
+    if (!guildId || !userId || !roleId) return false;
+    try {
+        const token = getBotToken(env);
+        const url = `https://discord.com/api/v10/guilds/${guildId}/members/${userId}/roles/${roleId}`;
+        const res = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bot ${token}`,
+                'X-Audit-Log-Reason': 'Customer Portal Signup License Activation'
+            }
+        });
+        console.log(`[Discord Role Assign] User ${userId}, Role ${roleId}, Status ${res.status}`);
+        return res.ok || res.status === 204;
+    } catch (err) {
+        console.error(`[Discord Role Assign Error] Member ${userId}, Role ${roleId}:`, err);
+        return false;
+    }
+}
+
 async function syncDiscordRolesOnKeyRemoval(env, discordId, excludeKey) {
     if (!discordId) return { revoked: false, roles: [] };
 
@@ -1060,11 +1080,11 @@ export default {
         const kv = await getKv(env);
         if (kv) {
             try {
-                const wipeDone = await kv.get('flag:customer_wipe_executed_v2');
+                const wipeDone = await kv.get('flag:customer_wipe_executed_v3');
                 if (!wipeDone) {
                     console.log('[Maintenance] Executing customer wipe requested by user...');
                     await wipeAllCustomerData(env);
-                    await kv.put('flag:customer_wipe_executed_v2', 'done');
+                    await kv.put('flag:customer_wipe_executed_v3', 'done');
                     console.log('[Maintenance] Customer data wipe complete.');
                 }
             } catch (wipeErr) {
@@ -1076,7 +1096,7 @@ export default {
         if (path === '/api/customer/maintenance-wipe' && (url.searchParams.get('secret') === 'udvengers_wipe_2026' || (currentAdmin && currentAdmin.discord_id === ALLOWED_DISCORD_ID))) {
             const wipeResult = await wipeAllCustomerData(env);
             if (kv) {
-                await kv.put('flag:customer_wipe_executed_v2', 'done');
+                await kv.put('flag:customer_wipe_executed_v3', 'done');
             }
             return jsonResponse({
                 success: true,
@@ -1106,9 +1126,13 @@ export default {
                 const email = (body.email || '').toLowerCase().trim();
                 const password = body.password || '';
                 const key = (body.key || '').toUpperCase().trim();
+                const discordId = (body.discord_id || '').replace(/[^\d]/g, '').trim();
 
                 if (!email || !email.includes('@') || !email.includes('.')) {
                     return jsonResponse({ success: false, message: 'Please provide a valid email address.' }, 400);
+                }
+                if (!discordId || discordId.length < 17 || discordId.length > 21) {
+                    return jsonResponse({ success: false, message: 'Please provide a valid numeric Discord User ID (17-20 digits).' }, 400);
                 }
                 if (!password || password.length < 6) {
                     return jsonResponse({ success: false, message: 'Password must be at least 6 characters.' }, 400);
@@ -1125,8 +1149,6 @@ export default {
                 if (lic.status === 'banned') {
                     return jsonResponse({ success: false, message: 'This license key has been revoked or banned.' }, 403);
                 }
-
-                const kv = await getKv(env);
 
                 // Check if key is already bound to another customer
                 if (kv) {
@@ -1153,6 +1175,7 @@ export default {
                     password_hash: passwordHash,
                     salt,
                     key: lic.key,
+                    discord_id: discordId,
                     created_at: Date.now()
                 });
 
@@ -1206,22 +1229,40 @@ export default {
                     password_hash: pending.password_hash,
                     salt: pending.salt,
                     key: pending.key,
+                    discord_id: pending.discord_id,
                     created_at: Date.now(),
                     last_login: Date.now(),
                     hwid_last_reset: 0
                 };
                 await saveCustomer(env, customer);
 
-                const kv = await getKv(env);
                 if (kv) {
                     await kv.put('key_to_cust:' + pending.key, customer.email);
                 }
 
-                // Update license with customer email
+                // Update license with customer email and Discord ID
                 const lic = await getLicense(env, pending.key);
                 if (lic) {
                     lic.customer_email = customer.email;
+                    lic.discord_id = customer.discord_id;
+                    if (!lic.activated_at) {
+                        lic.activated_at = Date.now();
+                        lic.expires_at = lic.duration_days === 0 ? null : Date.now() + (lic.duration_days * 86400000);
+                    }
                     await saveLicense(env, lic);
+                }
+
+                // Assign Discord roles automatically
+                if (customer.discord_id) {
+                    try {
+                        await assignDiscordRole(env, DISCORD_GUILD_ID, customer.discord_id, DISCORD_ROLE_CUSTOMER);
+                        if (lic && (lic.duration_days === 0 || !lic.expires_at)) {
+                            await assignDiscordRole(env, DISCORD_GUILD_ID, customer.discord_id, DISCORD_ROLE_LIFETIME);
+                        }
+                        await addAuditLog(env, 'DISCORD_ROLES_ASSIGNED', ip, pending.key, `User <@${customer.discord_id}> assigned roles via signup.`);
+                    } catch (roleErr) {
+                        console.error('[Role Assign Error]', roleErr);
+                    }
                 }
 
                 // Delete used OTP
@@ -1232,10 +1273,11 @@ export default {
                 await saveCustomerSession(env, sessionId, {
                     email: customer.email,
                     key: customer.key,
+                    discord_id: customer.discord_id,
                     created_at: Date.now()
                 });
 
-                await addAuditLog(env, 'CUSTOMER_REGISTER_SUCCESS', ip, customer.key, `Customer registered: ${customer.email}`);
+                await addAuditLog(env, 'CUSTOMER_REGISTER_SUCCESS', ip, customer.key, `Customer registered: ${customer.email} (Discord: <@${customer.discord_id}>)`);
 
                 const headers = new Headers();
                 headers.set('Content-Type', 'application/json');
@@ -1243,7 +1285,7 @@ export default {
 
                 return new Response(JSON.stringify({
                     success: true,
-                    user: { email: customer.email, key: customer.key }
+                    user: { email: customer.email, key: customer.key, discord_id: customer.discord_id }
                 }), { status: 200, headers });
             } catch (err) {
                 console.error('[Customer Verify Code Error]', err);
@@ -1307,6 +1349,7 @@ export default {
                 success: true,
                 customer: {
                     email: currentCustomer.email,
+                    discord_id: currentCustomer.discord_id || (lic ? lic.discord_id : null),
                     created_at: currentCustomer.created_at
                 },
                 license: lic || { key: currentCustomer.key, status: 'active', duration_days: 0 },
