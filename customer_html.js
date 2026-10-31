@@ -11,8 +11,8 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #eaedf2;
-            color: #0f172a;
+            background-color: #07080a;
+            color: #f8fafc;
             letter-spacing: -0.01em;
             -webkit-font-smoothing: antialiased;
             min-height: 100vh;
@@ -20,22 +20,22 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
-        .card-white {
-            background: #ffffff;
-            border: 1px solid #dce2ea;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        .card-dark {
+            background: #0f1117;
+            border: 1px solid #1e222d;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
-        .input-box {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            color: #0f172a;
+        .input-dark {
+            background: #090a0e;
+            border: 1px solid #232735;
+            color: #ffffff;
             transition: all 0.15s ease;
         }
-        .input-box:focus {
+        .input-dark:focus {
             outline: none;
             border-color: #005b7f;
-            box-shadow: 0 0 0 3px rgba(0, 91, 127, 0.12);
+            box-shadow: 0 0 0 3px rgba(0, 91, 127, 0.25);
         }
         .btn-saas {
             background-color: #005b7f;
@@ -51,36 +51,36 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
         }
     </style>
 </head>
-<body class="selection:bg-sky-100 selection:text-sky-900">
+<body class="selection:bg-sky-500/30 selection:text-white">
 
     <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs shadow-xl">
+    <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#14161f] border border-[#262a38] text-white text-xs shadow-2xl">
         <span id="toastDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span id="toastMsg" class="font-medium">Notification</span>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 1. AUTH MODAL VIEW (MATCHING IMAGE 2 "Welcome back!")         -->
+    <!-- 1. AUTH MODAL VIEW (COMPLETELY BLACK THEMED)                 -->
     <!-- ============================================================ -->
-    <div id="authView" class="hidden min-h-screen bg-[#eaedf2] flex items-center justify-center p-4">
-        <div class="card-white w-full max-w-sm p-8 shadow-xl relative bg-white">
+    <div id="authView" class="hidden min-h-screen bg-[#07080a] flex items-center justify-center p-4">
+        <div class="card-dark w-full max-w-sm p-8 shadow-2xl relative bg-[#0f1117]">
 
             <!-- Title & Logo Header with Witch Hat Icon -->
             <div class="text-center mb-6">
                 <div class="inline-flex items-center gap-2 mb-2">
                     <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-8 h-8 object-contain">
-                    <span class="font-bold text-lg tracking-tight text-gray-900">UDvengers</span>
+                    <span class="font-bold text-lg tracking-tight text-white">UDvengers</span>
                 </div>
-                <h1 id="authTitle" class="text-2xl font-bold text-[#0f172a] tracking-tight">Welcome back!</h1>
-                <p id="authSubtitle" class="text-xs text-gray-500 mt-1">Sign in to your customer dashboard</p>
+                <h1 id="authTitle" class="text-2xl font-bold text-white tracking-tight">Welcome back!</h1>
+                <p id="authSubtitle" class="text-xs text-neutral-400 mt-1">Sign in to your customer dashboard</p>
             </div>
 
             <!-- Tab Switcher: Log In / Register Key (Hidden in Reset Mode) -->
-            <div id="authTabSwitcher" class="flex p-1 bg-gray-100 rounded-lg mb-6 border border-gray-200">
-                <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm">
+            <div id="authTabSwitcher" class="flex p-1 bg-[#090a0e] rounded-lg mb-6 border border-[#1e222d]">
+                <button type="button" id="tabSignInBtn" onclick="switchAuthTab('signin')" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-white bg-[#181b24] shadow-sm">
                     Log in
                 </button>
-                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-medium rounded-md transition text-gray-500 hover:text-gray-900">
+                <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white">
                     Register Key
                 </button>
             </div>
@@ -89,65 +89,65 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             <form id="signInForm" onsubmit="handleSignIn(event)" class="space-y-4">
                 <div>
                     <div class="flex items-center gap-1.5 mb-1.5">
-                        <label class="text-xs font-medium text-gray-700">Customer email or license</label>
+                        <label class="text-xs font-medium text-neutral-300">Customer email or license</label>
                         <span class="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-[#005b7f] text-white text-[9px] font-bold cursor-help" title="Enter your registered account email">?</span>
                     </div>
-                    <input type="email" id="loginEmail" required placeholder="Customer email or license" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
+                    <input type="email" id="loginEmail" required placeholder="Customer email or license" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-neutral-500">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Password</label>
-                    <div class="flex items-stretch rounded-lg border border-gray-300 focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-white transition overflow-hidden">
-                        <input type="password" id="loginPassword" required placeholder="Password" class="w-full px-3.5 py-2.5 text-xs text-gray-900 bg-transparent outline-none placeholder-gray-400">
-                        <button type="button" onclick="toggleInputPassword('loginPassword', this)" class="px-3 border-l border-gray-200 text-gray-400 hover:text-gray-600 bg-gray-50 flex items-center justify-center transition" title="Show/Hide Password">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1.5">Password</label>
+                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-[#090a0e] transition overflow-hidden">
+                        <input type="password" id="loginPassword" required placeholder="Password" class="w-full px-3.5 py-2.5 text-xs text-white bg-transparent outline-none placeholder-neutral-500">
+                        <button type="button" onclick="toggleInputPassword('loginPassword', this)" class="px-3 border-l border-[#232735] text-neutral-400 hover:text-white bg-[#11131a] flex items-center justify-center transition" title="Show/Hide Password">
                             <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </button>
                     </div>
                 </div>
 
-                <div id="loginError" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5"></div>
+                <div id="loginError" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5"></div>
 
                 <button type="submit" id="btnSignInSubmit" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
                     <span>Log in</span>
                 </button>
 
                 <div class="text-center pt-2">
-                    <span class="text-xs text-gray-500">Forgot password? </span>
-                    <button type="button" onclick="showResetPasswordFlow()" class="text-xs text-[#005b7f] font-semibold hover:underline">Reset</button>
+                    <span class="text-xs text-neutral-400">Forgot password? </span>
+                    <button type="button" onclick="showResetPasswordFlow()" class="text-xs text-sky-400 font-semibold hover:underline">Reset</button>
                 </div>
             </form>
 
             <!-- TAB B: REGISTER STEP 1 (Email, Discord User ID, Password, License Key) -->
             <form id="registerStep1Form" onsubmit="handleRequestOtp(event)" class="hidden space-y-3.5">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Email address</label>
-                    <input type="email" id="regEmail" required placeholder="you@domain.com" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1">Email address</label>
+                    <input type="email" id="regEmail" required placeholder="you@domain.com" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-neutral-500">
                 </div>
 
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="text-xs font-medium text-gray-700">Discord User ID</label>
-                        <span class="text-[10px] text-gray-400">For Discord roles</span>
+                        <label class="text-xs font-medium text-neutral-300">Discord User ID</label>
+                        <span class="text-[10px] text-neutral-400">For Discord roles</span>
                     </div>
-                    <input type="text" id="regDiscordId" required placeholder="e.g. 1415022792214052915" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs font-mono placeholder-gray-400">
+                    <input type="text" id="regDiscordId" required placeholder="e.g. 1415022792214052915" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs font-mono placeholder-neutral-500">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Password</label>
-                    <div class="flex items-stretch rounded-lg border border-gray-300 focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-white transition overflow-hidden">
-                        <input type="password" id="regPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-gray-900 bg-transparent outline-none placeholder-gray-400">
-                        <button type="button" onclick="toggleInputPassword('regPassword', this)" class="px-3 border-l border-gray-200 text-gray-400 hover:text-gray-600 bg-gray-50 flex items-center justify-center transition">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1">Password</label>
+                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-[#090a0e] transition overflow-hidden">
+                        <input type="password" id="regPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-white bg-transparent outline-none placeholder-neutral-500">
+                        <button type="button" onclick="toggleInputPassword('regPassword', this)" class="px-3 border-l border-[#232735] text-neutral-400 hover:text-white bg-[#11131a] flex items-center justify-center transition">
                             <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </button>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">License Key</label>
-                    <input type="text" id="regKey" required placeholder="LIFETIME-XXXX-XXXX-XXXX" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider placeholder-gray-400">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1">License Key</label>
+                    <input type="text" id="regKey" required placeholder="LIFETIME-XXXX-XXXX-XXXX" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs font-mono uppercase tracking-wider placeholder-neutral-500">
                 </div>
 
-                <div id="regStep1Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5"></div>
+                <div id="regStep1Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5"></div>
 
                 <button type="submit" id="btnRequestOtp" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
                     <span>Continue & Send Code</span>
@@ -157,75 +157,75 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             <!-- TAB B: REGISTER STEP 2 (Enter OTP Code) -->
             <form id="registerStep2Form" onsubmit="handleVerifyOtp(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
-                    <h3 class="text-xs font-semibold text-gray-900">Verification Code Sent</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">Check your inbox at <span id="displayOtpEmail" class="text-[#005b7f] font-semibold"></span></p>
+                    <h3 class="text-xs font-semibold text-white">Verification Code Sent</h3>
+                    <p class="text-[11px] text-neutral-400 mt-1">Check your inbox at <span id="displayOtpEmail" class="text-sky-400 font-semibold"></span></p>
                 </div>
 
                 <div>
-                    <input type="text" id="otpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-box w-full px-4 py-3 rounded-lg text-center text-lg font-mono tracking-[0.4em] placeholder-gray-300 focus:tracking-[0.4em]">
+                    <input type="text" id="otpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-dark w-full px-4 py-3 rounded-lg text-center text-lg font-mono tracking-[0.4em] placeholder-neutral-600 focus:tracking-[0.4em]">
                 </div>
 
-                <div id="regStep2Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5 text-center"></div>
+                <div id="regStep2Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5 text-center"></div>
 
                 <button type="submit" id="btnVerifyOtp" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5">
                     <span>Verify & Enter Dashboard</span>
                 </button>
 
                 <div class="flex items-center justify-between text-[11px] pt-1">
-                    <button type="button" onclick="backToStep1()" class="text-gray-500 hover:text-gray-900 transition">← Change details</button>
-                    <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-[#005b7f] hover:underline font-semibold transition">Resend code</button>
+                    <button type="button" onclick="backToStep1()" class="text-neutral-400 hover:text-white transition">← Change details</button>
+                    <button type="button" id="btnResendOtp" onclick="resendOtpCode()" class="text-sky-400 hover:underline font-semibold transition">Resend code</button>
                 </div>
             </form>
 
             <!-- TAB C: RESET PASSWORD STEP 1 (Enter Email) -->
             <form id="resetStep1Form" onsubmit="handleRequestResetCode(event)" class="hidden space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1.5">Your account email</label>
-                    <input type="email" id="resetEmail" required placeholder="you@domain.com" class="input-box w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-gray-400">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1.5">Your account email</label>
+                    <input type="email" id="resetEmail" required placeholder="you@domain.com" class="input-dark w-full px-3.5 py-2.5 rounded-lg text-xs placeholder-neutral-500">
                 </div>
 
-                <div id="resetStep1Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5"></div>
+                <div id="resetStep1Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5"></div>
 
                 <button type="submit" id="btnRequestReset" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5 mt-2">
                     <span>Send Reset Code</span>
                 </button>
 
                 <div class="text-center pt-2">
-                    <button type="button" onclick="cancelResetFlow()" class="text-xs text-gray-500 hover:text-gray-900 transition">← Back to Log in</button>
+                    <button type="button" onclick="cancelResetFlow()" class="text-xs text-neutral-400 hover:text-white transition">← Back to Log in</button>
                 </div>
             </form>
 
             <!-- TAB C: RESET PASSWORD STEP 2 (Code & New Password) -->
             <form id="resetStep2Form" onsubmit="handleVerifyResetCode(event)" class="hidden space-y-4">
                 <div class="text-center py-1">
-                    <h3 class="text-xs font-semibold text-gray-900">Reset Code Sent</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">We sent a 6-digit code to <span id="displayResetEmail" class="text-[#005b7f] font-semibold"></span></p>
+                    <h3 class="text-xs font-semibold text-white">Reset Code Sent</h3>
+                    <p class="text-[11px] text-neutral-400 mt-1">We sent a 6-digit code to <span id="displayResetEmail" class="text-sky-400 font-semibold"></span></p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">6-digit code</label>
-                    <input type="text" id="resetOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-box w-full px-4 py-2.5 rounded-lg text-center text-lg font-mono tracking-[0.3em] placeholder-gray-300">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1">6-digit code</label>
+                    <input type="text" id="resetOtpInput" required maxlength="6" pattern="[0-9]{6}" placeholder="123456" class="input-dark w-full px-4 py-2.5 rounded-lg text-center text-lg font-mono tracking-[0.3em] placeholder-neutral-600">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">New password</label>
-                    <div class="flex items-stretch rounded-lg border border-gray-300 focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-white transition overflow-hidden">
-                        <input type="password" id="resetNewPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-gray-900 bg-transparent outline-none placeholder-gray-400">
-                        <button type="button" onclick="toggleInputPassword('resetNewPassword', this)" class="px-3 border-l border-gray-200 text-gray-400 hover:text-gray-600 bg-gray-50 flex items-center justify-center transition">
+                    <label class="block text-xs font-medium text-neutral-300 mb-1">New password</label>
+                    <div class="flex items-stretch rounded-lg border border-[#232735] focus-within:border-[#005b7f] focus-within:ring-2 focus-within:ring-[#005b7f]/20 bg-[#090a0e] transition overflow-hidden">
+                        <input type="password" id="resetNewPassword" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-xs text-white bg-transparent outline-none placeholder-neutral-500">
+                        <button type="button" onclick="toggleInputPassword('resetNewPassword', this)" class="px-3 border-l border-[#232735] text-neutral-400 hover:text-white bg-[#11131a] flex items-center justify-center transition">
                             <svg class="w-4 h-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </button>
                     </div>
                 </div>
 
-                <div id="resetStep2Error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg p-2.5 text-center"></div>
+                <div id="resetStep2Error" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5 text-center"></div>
 
                 <button type="submit" id="btnVerifyReset" class="btn-saas w-full py-2.5 rounded-lg text-xs font-semibold tracking-wide shadow-sm flex items-center justify-center gap-1.5">
                     <span>Update Password & Enter</span>
                 </button>
 
                 <div class="flex items-center justify-between text-[11px] pt-1">
-                    <button type="button" onclick="showResetPasswordFlow()" class="text-gray-500 hover:text-gray-900 transition">← Change email</button>
-                    <button type="button" id="btnResendResetOtp" onclick="resendResetCode()" class="text-[#005b7f] hover:underline font-semibold transition">Resend code</button>
+                    <button type="button" onclick="showResetPasswordFlow()" class="text-neutral-400 hover:text-white transition">← Change email</button>
+                    <button type="button" id="btnResendResetOtp" onclick="resendResetCode()" class="text-sky-400 hover:underline font-semibold transition">Resend code</button>
                 </div>
             </form>
 
@@ -233,28 +233,29 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ============================================================ -->
-    <!-- 2. CUSTOMER DASHBOARD (BLACK THEMED LEFT SIDEBAR + DARKER CONTRAST BG) -->
+    <!-- 2. CUSTOMER DASHBOARD (COMPLETELY BLACK THEMED THROUGHOUT)   -->
     <!-- ============================================================ -->
-    <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#eaedf2]">
+    <div id="portalView" class="hidden min-h-screen flex flex-col md:flex-row bg-[#07080a]">
 
         <!-- BLACK THEMED LEFT SIDEBAR -->
-        <aside class="w-full md:w-60 bg-[#0b0c10] border-r border-[#1e222d] flex flex-col justify-between shrink-0 text-white">
+        <aside class="w-full md:w-60 bg-[#0b0c10] border-r border-[#1a1c24] flex flex-col justify-between shrink-0 text-white">
             <div>
                 <!-- Brand Header with Witch Hat Logo -->
-                <div class="h-16 px-5 border-b border-[#1e222d] flex items-center justify-between">
+                <div class="h-16 px-5 border-b border-[#1a1c24] flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
                         <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-7 h-7 object-contain">
                         <span class="font-bold text-base tracking-tight text-white">UDvengers</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-purple-300 bg-purple-500/15 border border-purple-500/25 px-2 py-0.5 rounded-full">Customer</span>
+                    <span class="text-[10px] font-semibold text-neutral-300 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Customer</span>
                 </div>
 
                 <!-- Navigation Section -->
                 <div class="p-3 space-y-1">
                     <div class="px-3 pt-3 pb-1 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">Main</div>
 
+                    <!-- DASHBOARD BUTTON (NO PURPLE HOUSE ICON - CLEAN WHITE/NEUTRAL) -->
                     <button onclick="switchPortalTab('dashboard')" id="pTabDashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left">
-                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                         <span>Dashboard</span>
                     </button>
 
@@ -276,10 +277,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             </div>
 
             <!-- Black Sidebar Profile Bottom -->
-            <div class="p-3 border-t border-[#1e222d]">
-                <div class="p-2.5 rounded-lg bg-[#14161f] border border-[#232734] flex items-center justify-between">
+            <div class="p-3 border-t border-[#1a1c24]">
+                <div class="p-2.5 rounded-lg bg-[#0e1017] border border-[#1e222d] flex items-center justify-between">
                     <div class="flex items-center gap-2 min-w-0 pr-2">
-                        <div class="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center font-bold text-xs shrink-0" id="userAvatar">U</div>
+                        <div class="w-7 h-7 rounded-full bg-white/10 text-white border border-white/15 flex items-center justify-center font-bold text-xs shrink-0" id="userAvatar">U</div>
                         <div class="min-w-0">
                             <div id="headerUserEmail" class="text-xs font-semibold text-white truncate">user@email.com</div>
                             <div class="text-[10px] text-neutral-400 font-medium">Verified Customer</div>
@@ -292,18 +293,18 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
-        <div class="flex-1 min-h-screen flex flex-col bg-[#eaedf2]">
+        <!-- MAIN CONTENT AREA (COMPLETELY BLACK THEMED) -->
+        <div class="flex-1 min-h-screen flex flex-col bg-[#07080a]">
 
             <!-- Top Header -->
-            <header class="h-16 bg-white border-b border-[#dce2ea] px-6 sm:px-8 flex items-center justify-between">
+            <header class="h-16 bg-[#0b0c10] border-b border-[#1a1c24] px-6 sm:px-8 flex items-center justify-between">
                 <div>
-                    <h2 id="topBarTitle" class="text-base font-bold text-gray-900">Dashboard</h2>
-                    <p class="text-xs text-gray-500">Manage your subscription and client access</p>
+                    <h2 id="topBarTitle" class="text-base font-bold text-white">Dashboard</h2>
+                    <p class="text-xs text-neutral-400">Manage your subscription and client access</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                    <span id="dashLicenseBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active
                     </span>
                 </div>
             </header>
@@ -313,23 +314,23 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <!-- 1. TAB: DASHBOARD -->
                 <div id="contentDashboard" class="space-y-6">
-                    <div class="card-white p-6 space-y-5">
-                        <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
+                        <div class="flex items-center justify-between pb-4 border-b border-[#1a1c24]">
                             <div>
-                                <h3 class="text-sm font-bold text-gray-900">Subscription License</h3>
-                                <p class="text-xs text-gray-500">Your unique cryptographic key for loader authentication.</p>
+                                <h3 class="text-sm font-bold text-white">Subscription License</h3>
+                                <p class="text-xs text-neutral-400">Your unique cryptographic key for loader authentication.</p>
                             </div>
-                            <span class="text-xs font-semibold text-[#005b7f] bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-100">Registered</span>
+                            <span class="text-xs font-semibold text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20">Registered</span>
                         </div>
 
                         <!-- Masked Key Box -->
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                        <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex items-center justify-between">
                             <div>
-                                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider block mb-0.5">LICENSE KEY</span>
-                                <span id="dashKeyText" class="text-sm font-mono font-medium text-gray-800 tracking-wider">••••••••••••••••••••••••</span>
+                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-0.5">LICENSE KEY</span>
+                                <span id="dashKeyText" class="text-sm font-mono font-medium text-white tracking-wider">••••••••••••••••••••••••</span>
                             </div>
                             <div class="flex items-center gap-1.5">
-                                <button onclick="toggleKeyVisibility()" class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-600 hover:text-gray-900 text-xs font-medium transition shadow-sm" title="Show/Hide">
+                                <button onclick="toggleKeyVisibility()" class="px-3 py-1.5 rounded-lg bg-[#14161f] border border-[#232735] text-neutral-300 hover:text-white text-xs font-medium transition shadow-sm" title="Show/Hide">
                                     <span id="eyeText">Show</span>
                                 </button>
                                 <button onclick="copyLicenseKey()" class="px-3 py-1.5 rounded-lg btn-saas text-white text-xs font-semibold transition shadow-sm" title="Copy Key">
@@ -340,21 +341,21 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                         <!-- Stat Cards Grid -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                            <div class="card-white p-4">
-                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">DURATION</span>
-                                <span id="dashDuration" class="text-sm font-bold text-gray-900">Lifetime</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">DURATION</span>
+                                <span id="dashDuration" class="text-sm font-bold text-white">Lifetime</span>
                             </div>
-                            <div class="card-white p-4">
-                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">EXPIRATION</span>
-                                <span id="dashExpires" class="text-sm font-bold text-gray-900">Never</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">EXPIRATION</span>
+                                <span id="dashExpires" class="text-sm font-bold text-white">Never</span>
                             </div>
-                            <div class="card-white p-4">
-                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">DISCORD ID</span>
-                                <span id="dashDiscordId" class="text-sm font-mono font-semibold text-[#005b7f] truncate block">Linked</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">DISCORD ID</span>
+                                <span id="dashDiscordId" class="text-sm font-mono font-semibold text-sky-400 truncate block">Linked</span>
                             </div>
-                            <div class="card-white p-4">
-                                <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">BOUND HWID</span>
-                                <span id="dashHwid" class="text-sm font-mono font-medium text-gray-700 truncate block">Unbound</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4">
+                                <span class="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider block mb-1">BOUND HWID</span>
+                                <span id="dashHwid" class="text-sm font-mono font-medium text-neutral-300 truncate block">Unbound</span>
                             </div>
                         </div>
                     </div>
@@ -362,23 +363,23 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <!-- 2. TAB: DOWNLOADS (DOWNLOAD IS ONLY HERE) -->
                 <div id="contentDownloads" class="hidden space-y-6">
-                    <div class="card-white p-6 space-y-5">
-                        <div class="border-b border-gray-100 pb-4">
-                            <h3 class="text-sm font-bold text-gray-900">Client Downloads</h3>
-                            <p class="text-xs text-gray-500">Download the official client binary. Always run as Administrator.</p>
+                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
+                        <div class="border-b border-[#1a1c24] pb-4">
+                            <h3 class="text-sm font-bold text-white">Client Downloads</h3>
+                            <p class="text-xs text-neutral-400">Download the official client binary. Always run as Administrator.</p>
                         </div>
 
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div class="flex items-center gap-3.5">
-                                <div class="w-10 h-10 rounded-xl bg-sky-100 text-[#005b7f] flex items-center justify-center shrink-0 font-bold font-mono text-sm">
+                                <div class="w-10 h-10 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0 font-bold font-mono text-sm border border-sky-500/20">
                                     EXE
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-bold text-gray-900 font-mono">Loader.exe</span>
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Latest</span>
+                                        <span class="text-sm font-bold text-white font-mono">Loader.exe</span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Latest</span>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-0.5">Windows 10 / 11 64-bit • File size: 8.2 MB</p>
+                                    <p class="text-xs text-neutral-400 mt-0.5">Windows 10 / 11 64-bit • File size: 8.2 MB</p>
                                 </div>
                             </div>
                             <a href="/assets/Loader.exe" download="Loader.exe" class="btn-saas px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 shrink-0 shadow-sm">
@@ -391,24 +392,24 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
                 <!-- 3. TAB: HWID RESET -->
                 <div id="contentHwid" class="hidden space-y-6">
-                    <div class="card-white p-6 space-y-5">
-                        <div class="border-b border-gray-100 pb-4">
-                            <h3 class="text-sm font-bold text-gray-900">Hardware ID Management</h3>
-                            <p class="text-xs text-gray-500">Reset your hardware link if you updated PC components or reinstalled Windows.</p>
+                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
+                        <div class="border-b border-[#1a1c24] pb-4">
+                            <h3 class="text-sm font-bold text-white">Hardware ID Management</h3>
+                            <p class="text-xs text-neutral-400">Reset your hardware link if you updated PC components or reinstalled Windows.</p>
                         </div>
 
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-3.5 text-xs">
+                        <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-5 space-y-3.5 text-xs">
                             <div class="flex items-center justify-between">
-                                <span class="text-gray-500 font-medium">Currently Linked Hardware:</span>
-                                <span id="hwidCurrentDisplay" class="font-mono font-semibold text-gray-800">Unbound</span>
+                                <span class="text-neutral-400 font-medium">Currently Linked Hardware:</span>
+                                <span id="hwidCurrentDisplay" class="font-mono font-semibold text-white">Unbound</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="text-gray-500 font-medium">Reset Cooldown Policy:</span>
-                                <span class="text-gray-700 font-medium">1 reset per 24 hours</span>
+                                <span class="text-neutral-400 font-medium">Reset Cooldown Policy:</span>
+                                <span class="text-neutral-300 font-medium">1 reset per 24 hours</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="text-gray-500 font-medium">Cooldown Status:</span>
-                                <span id="hwidCooldownDisplay" class="text-emerald-700 font-semibold font-mono bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Available</span>
+                                <span class="text-neutral-400 font-medium">Cooldown Status:</span>
+                                <span id="hwidCooldownDisplay" class="text-emerald-400 font-semibold font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Available</span>
                             </div>
 
                             <div class="pt-2">
@@ -418,40 +419,40 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                             </div>
                         </div>
 
-                        <p class="text-xs text-gray-400">Launching Loader.exe on your new system will automatically link your new hardware signature.</p>
+                        <p class="text-xs text-neutral-500">Launching Loader.exe on your new system will automatically link your new hardware signature.</p>
                     </div>
                 </div>
 
                 <!-- 4. TAB: SETUP GUIDE -->
                 <div id="contentGuide" class="hidden space-y-6">
-                    <div class="card-white p-6 space-y-5">
-                        <div class="border-b border-gray-100 pb-4">
-                            <h3 class="text-sm font-bold text-gray-900">Setup Instructions</h3>
-                            <p class="text-xs text-gray-500">Quick 3-step guide to run the client.</p>
+                    <div class="card-dark p-6 space-y-5 bg-[#0f1117]">
+                        <div class="border-b border-[#1a1c24] pb-4">
+                            <h3 class="text-sm font-bold text-white">Setup Instructions</h3>
+                            <p class="text-xs text-neutral-400">Quick 3-step guide to run the client.</p>
                         </div>
 
                         <div class="space-y-3">
-                            <div class="card-white p-4 flex items-start gap-3.5">
-                                <span class="w-6 h-6 rounded-lg bg-sky-50 text-[#005b7f] text-xs font-bold flex items-center justify-center shrink-0 border border-sky-100">1</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex items-start gap-3.5">
+                                <span class="w-6 h-6 rounded-lg bg-sky-500/15 text-sky-400 text-xs font-bold flex items-center justify-center shrink-0 border border-sky-500/25">1</span>
                                 <div>
-                                    <div class="text-xs font-bold text-gray-900">Extract & Exclude</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Download Loader.exe and place it in a designated folder or USB drive. Add the folder to your antivirus exclusions.</div>
+                                    <div class="text-xs font-bold text-white">Extract & Exclude</div>
+                                    <div class="text-xs text-neutral-400 mt-0.5">Download Loader.exe and place it in a designated folder or USB drive. Add the folder to your antivirus exclusions.</div>
                                 </div>
                             </div>
 
-                            <div class="card-white p-4 flex items-start gap-3.5">
-                                <span class="w-6 h-6 rounded-lg bg-sky-50 text-[#005b7f] text-xs font-bold flex items-center justify-center shrink-0 border border-sky-100">2</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex items-start gap-3.5">
+                                <span class="w-6 h-6 rounded-lg bg-sky-500/15 text-sky-400 text-xs font-bold flex items-center justify-center shrink-0 border border-sky-500/25">2</span>
                                 <div>
-                                    <div class="text-xs font-bold text-gray-900">Run as Administrator</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Right-click <span class="text-[#005b7f] font-mono font-semibold">Loader.exe</span> and select <strong>Run as administrator</strong>.</div>
+                                    <div class="text-xs font-bold text-white">Run as Administrator</div>
+                                    <div class="text-xs text-neutral-400 mt-0.5">Right-click <span class="text-sky-400 font-mono font-semibold">Loader.exe</span> and select <strong>Run as administrator</strong>.</div>
                                 </div>
                             </div>
 
-                            <div class="card-white p-4 flex items-start gap-3.5">
-                                <span class="w-6 h-6 rounded-lg bg-sky-50 text-[#005b7f] text-xs font-bold flex items-center justify-center shrink-0 border border-sky-100">3</span>
+                            <div class="bg-[#090a0e] border border-[#1e222d] rounded-xl p-4 flex items-start gap-3.5">
+                                <span class="w-6 h-6 rounded-lg bg-sky-500/15 text-sky-400 text-xs font-bold flex items-center justify-center shrink-0 border border-sky-500/25">3</span>
                                 <div>
-                                    <div class="text-xs font-bold text-gray-900">Activate & Launch Game</div>
-                                    <div class="text-xs text-gray-500 mt-0.5">Paste your license key. Once the loader prompts, start Fortnite and press <kbd class="px-1.5 py-0.5 rounded bg-gray-100 border border-gray-300 text-gray-800 font-mono text-[11px]">INSERT</kbd> in-game.</div>
+                                    <div class="text-xs font-bold text-white">Activate & Launch Game</div>
+                                    <div class="text-xs text-neutral-400 mt-0.5">Paste your license key. Once the loader prompts, start Fortnite and press <kbd class="px-1.5 py-0.5 rounded bg-[#161822] border border-[#2a2e3d] text-neutral-200 font-mono text-[11px]">INSERT</kbd> in-game.</div>
                                 </div>
                             </div>
                         </div>
@@ -478,10 +479,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
             txt.textContent = msg;
             dot.className = isError ? 'w-2 h-2 rounded-full bg-rose-500 shrink-0' : 'w-2 h-2 rounded-full bg-emerald-500 shrink-0';
-            toast.className = 'fixed top-5 right-5 z-50 transform translate-y-0 opacity-100 pointer-events-auto transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border ' + (isError ? 'border-rose-200 text-rose-800' : 'border-gray-200 text-gray-800') + ' text-xs shadow-xl';
+            toast.className = 'fixed top-5 right-5 z-50 transform translate-y-0 opacity-100 pointer-events-auto transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#14161f] border ' + (isError ? 'border-rose-500/30 text-rose-300' : 'border-[#262a38] text-white') + ' text-xs shadow-2xl';
 
             setTimeout(() => {
-                toast.className = 'fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-800 text-xs shadow-xl';
+                toast.className = 'fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#14161f] border border-[#262a38] text-white text-xs shadow-2xl';
             }, 3000);
         }
 
@@ -517,14 +518,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             formReset2.classList.add('hidden');
 
             if (tab === 'signin') {
-                btnIn.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm';
-                btnReg.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-gray-500 hover:text-gray-900';
+                btnIn.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-white bg-[#181b24] shadow-sm';
+                btnReg.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white';
                 formIn.classList.remove('hidden');
                 formReg1.classList.add('hidden');
                 formReg2.classList.add('hidden');
             } else {
-                btnReg.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-gray-900 bg-white shadow-sm';
-                btnIn.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-gray-500 hover:text-gray-900';
+                btnReg.className = 'flex-1 py-1.5 text-xs font-semibold rounded-md transition text-white bg-[#181b24] shadow-sm';
+                btnIn.className = 'flex-1 py-1.5 text-xs font-medium rounded-md transition text-neutral-400 hover:text-white';
                 formIn.classList.add('hidden');
                 formReg1.classList.remove('hidden');
                 formReg2.classList.add('hidden');
@@ -834,14 +835,14 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             tabs.forEach(t => {
                 const btn = document.getElementById('pTab' + t.charAt(0).toUpperCase() + t.slice(1));
                 const content = document.getElementById('content' + t.charAt(0).toUpperCase() + t.slice(1));
+                const svg = btn ? btn.querySelector('svg') : null;
+
                 if (t === tab) {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-white/10 border border-white/10 transition text-left';
-                    const svg = btn.querySelector('svg');
-                    if (svg) svg.className = 'w-4 h-4 text-purple-400';
+                    if (svg) svg.className = 'w-4 h-4 text-white';
                     content.classList.remove('hidden');
                 } else {
                     btn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent transition text-left';
-                    const svg = btn.querySelector('svg');
                     if (svg) svg.className = 'w-4 h-4 text-neutral-400';
                     content.classList.add('hidden');
                 }
@@ -949,12 +950,12 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 if (now - lastReset < cooldownMs) {
                     const remainingHours = Math.ceil((cooldownMs - (now - lastReset)) / (60 * 60 * 1000));
                     cooldownEl.textContent = 'Cooldown (' + remainingHours + 'h remaining)';
-                    cooldownEl.className = 'text-amber-700 font-semibold font-mono bg-amber-50 px-2 py-0.5 rounded border border-amber-200';
+                    cooldownEl.className = 'text-amber-400 font-semibold font-mono bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20';
                     resetBtn.disabled = true;
                     resetBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
                     cooldownEl.textContent = 'Available';
-                    cooldownEl.className = 'text-emerald-700 font-semibold font-mono bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200';
+                    cooldownEl.className = 'text-emerald-400 font-semibold font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20';
                     resetBtn.disabled = false;
                     resetBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
