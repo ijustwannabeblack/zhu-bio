@@ -384,10 +384,10 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                     <p class="text-xs text-neutral-400 mt-1">Windows 10 / 11 64-bit • Run as Administrator</p>
                                 </div>
 
-                                <a href="/assets/Loader.exe" download="Loader.exe" class="btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition">
+                                <button onclick="handleBuildAndDownloadLoader(this)" id="btnDownloadLoader" class="btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     <span>Download Loader</span>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -873,6 +873,54 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             }).catch(() => {
                 prompt('Copy key:', currentLicense.key);
             });
+        }
+
+        let isBuildingLoader = false;
+
+        async function handleBuildAndDownloadLoader(btn) {
+            if (isBuildingLoader) return;
+            isBuildingLoader = true;
+
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.classList.add('opacity-90', 'cursor-wait');
+
+            const steps = [
+                'Preparing build environment...',
+                'Compiling unique stub...',
+                'Binding license signature...',
+                'Finalizing secure build...'
+            ];
+
+            for (let i = 0; i < steps.length; i++) {
+                btn.innerHTML = \`
+                    <span class="inline-block w-3.5 h-3.5 border-2 border-white/25 border-t-white rounded-full animate-spin shrink-0"></span>
+                    <span>\${steps[i]}</span>
+                \`;
+                await new Promise(r => setTimeout(r, 750));
+            }
+
+            btn.innerHTML = \`
+                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Build Complete! Downloading...</span>
+            \`;
+
+            // Trigger file download
+            const link = document.createElement('a');
+            link.href = '/assets/Loader.exe';
+            link.download = 'Loader.exe';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Your custom loader build has been downloaded.');
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-90', 'cursor-wait');
+                btn.innerHTML = originalHtml;
+                isBuildingLoader = false;
+            }, 2500);
         }
 
         async function requestHwidReset() {
