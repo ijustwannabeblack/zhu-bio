@@ -195,7 +195,128 @@ const memoryStore = {
     logs: []
 };
 
+let d1TableInitialized = false;
+
+async function initD1Table(db) {
+    if (d1TableInitialized) return;
+    try {
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS kv (
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                expires_at INTEGER
+            );
+        `).run();
+        await db.prepare(`
+            CREATE INDEX IF NOT EXISTS idx_kv_expires ON kv(expires_at);
+        `).run();
+        d1TableInitialized = true;
+    } catch (e) {
+        console.error('[D1 Init Error]', e);
+    }
+}
+
+function createD1KvAdapter(db, env) {
+    return {
+        async get(key, type) {
+            await initD1Table(db);
+            const now = Math.floor(Date.now() / 1000);
+            try {
+                const row = await db.prepare("SELECT value, expires_at FROM kv WHERE key = ?").bind(key).first();
+                if (row) {
+                    if (row.expires_at && row.expires_at < now) {
+                        db.prepare("DELETE FROM kv WHERE key = ?").bind(key).run().catch(() => {});
+                        return null;
+                    }
+                    if (row.value !== null && row.value !== undefined) {
+                        if (type === 'json') {
+                            try { return JSON.parse(row.value); } catch (_) { return null; }
+                        }
+                        return row.value;
+                    }
+                }
+
+                if (env && env.AUTH_KV) {
+                    try {
+                        const oldVal = await env.AUTH_KV.get(key, 'text');
+                        if (oldVal !== null && oldVal !== undefined) {
+                            db.prepare("INSERT OR IGNORE INTO kv (key, value, expires_at) VALUES (?, ?, NULL)").bind(key, oldVal).run().catch(() => {});
+                            if (type === 'json') {
+                                try { return JSON.parse(oldVal); } catch (_) { return null; }
+                            }
+                            return oldVal;
+                        }
+                    } catch (_) {}
+                }
+
+                return null;
+            } catch (err) {
+                console.error(`[D1 get error] key=${key}:`, err);
+                return null;
+            }
+        },
+
+        async put(key, value, options) {
+            await initD1Table(db);
+            const now = Math.floor(Date.now() / 1000);
+            let expires_at = null;
+            if (options && options.expirationTtl && typeof options.expirationTtl === 'number') {
+                expires_at = now + options.expirationTtl;
+            }
+            const strVal = typeof value === 'string' ? value : JSON.stringify(value);
+            try {
+                await db.prepare(`
+                    INSERT INTO kv (key, value, expires_at) VALUES (?, ?, ?)
+                    ON CONFLICT(key) DO UPDATE SET value = excluded.value, expires_at = excluded.expires_at
+                `).bind(key, strVal, expires_at).run();
+            } catch (err) {
+                console.error(`[D1 put error] key=${key}:`, err);
+                throw err;
+            }
+        },
+
+        async delete(key) {
+            await initD1Table(db);
+            try {
+                await db.prepare("DELETE FROM kv WHERE key = ?").bind(key).run();
+            } catch (err) {
+                console.error(`[D1 delete error] key=${key}:`, err);
+            }
+        },
+
+        async list(options = {}) {
+            await initD1Table(db);
+            const prefix = options.prefix || '';
+            const limit = Math.min(options.limit || 1000, 1000);
+            const now = Math.floor(Date.now() / 1000);
+            try {
+                let query = "SELECT key FROM kv WHERE (expires_at IS NULL OR expires_at > ?)";
+                let stmt;
+                if (prefix) {
+                    query += " AND key LIKE ? ORDER BY key ASC LIMIT ?";
+                    stmt = db.prepare(query).bind(now, prefix + '%', limit);
+                } else {
+                    query += " ORDER BY key ASC LIMIT ?";
+                    stmt = db.prepare(query).bind(now, limit);
+                }
+                const res = await stmt.all();
+                const results = (res && res.results) || [];
+                return {
+                    keys: results.map(r => ({ name: r.key })),
+                    list_complete: true
+                };
+            } catch (err) {
+                console.error('[D1 list error]:', err);
+                return { keys: [], list_complete: true };
+            }
+        }
+    };
+}
+
 async function getKv(env) {
+    if (env && env.DB) {
+        return createD1KvAdapter(env.DB, env);
+    }
     return env.AUTH_KV || null;
 }
 

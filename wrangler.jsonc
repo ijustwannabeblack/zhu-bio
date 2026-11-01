@@ -16,6 +16,13 @@
       "custom_domain": true
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "larpifyy-db",
+      "database_id": "e184eac8-4e11-49f2-899d-91daaa7971ff"
+    }
+  ],
   "kv_namespaces": [
     {
       "binding": "AUTH_KV",
