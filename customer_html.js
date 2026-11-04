@@ -69,7 +69,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             
             <div class="text-center mb-6">
                 <div class="inline-flex items-center gap-2 mb-2">
-                    <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-8 h-8 object-contain">
+                    <img src="https://media.discordapp.net/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6aeca6f5&is=6aeb5575&hm=04f03803522d79c2a4dd94e3d3d97ba921be956b8998b94efb01d94d3691d035&=&format=webp&quality=lossless&width=350&height=350" alt="UDvengers" class="w-8 h-8 object-contain">
                     <span class="font-bold text-lg tracking-tight text-white">UDvengers</span>
                 </div>
                 <h1 id="authTitle" class="text-2xl font-bold text-white tracking-tight">Welcome back!</h1>
@@ -239,7 +239,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
             
             <div class="text-center space-y-2.5">
                 <div class="flex justify-center mb-1">
-                    <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-9 h-9 object-contain">
+                    <img src="https://media.discordapp.net/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6aeca6f5&is=6aeb5575&hm=04f03803522d79c2a4dd94e3d3d97ba921be956b8998b94efb01d94d3691d035&=&format=webp&quality=lossless&width=350&height=350" alt="UDvengers" class="w-9 h-9 object-contain">
                 </div>
                 <h2 class="text-lg font-bold text-white tracking-tight">License Expired</h2>
                 <p class="text-xs text-neutral-400 max-w-xs mx-auto">Your old subscription license has expired. Put in your new license key below to regain access.</p>
@@ -294,7 +294,7 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                 
                 <div class="h-16 px-5 border-b border-[#1a1c24] flex items-center">
                     <div class="flex items-center gap-2.5">
-                        <img src="https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&" alt="UDvengers" class="w-7 h-7 object-contain">
+                        <img src="https://media.discordapp.net/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6aeca6f5&is=6aeb5575&hm=04f03803522d79c2a4dd94e3d3d97ba921be956b8998b94efb01d94d3691d035&=&format=webp&quality=lossless&width=350&height=350" alt="UDvengers" class="w-7 h-7 object-contain">
                         <span class="font-bold text-base tracking-tight text-white">UDvengers</span>
                     </div>
                 </div>
@@ -519,7 +519,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                     <span>Download Loader</span>
                                 </button>
-                                <a href="/download" id="linkDirectDownload" class="block text-center text-[11px] text-neutral-400 hover:text-white transition pt-0.5">Direct Download (Mirror)</a>
                                 <div id="downloadDisabledNotice" class="hidden p-2.5 rounded-xl bg-red-950/40 border border-red-500/30 text-center text-[11px] text-red-300">
                                     Loader is currently offline for maintenance.<br>Downloads are temporarily disabled.
                                 </div>
@@ -1032,7 +1031,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
 
         function updateLoaderDownloadUI(loader) {
             const btn = document.getElementById('btnDownloadLoader');
-            const directLink = document.getElementById('linkDirectDownload');
             const notice = document.getElementById('downloadDisabledNotice');
 
             const isEnabled = loader ? Boolean(loader.enabled) : true;
@@ -1042,7 +1040,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     btn.className = 'w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-neutral-800 text-neutral-400 border border-neutral-700 cursor-not-allowed opacity-80';
                     btn.innerHTML = '<svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span>Download Unavailable (Loader Offline)</span>';
                 }
-                if (directLink) directLink.classList.add('pointer-events-none', 'opacity-30');
                 if (notice) notice.classList.remove('hidden');
             } else {
                 if (btn) {
@@ -1050,7 +1047,6 @@ export const CUSTOMER_HTML = `<!DOCTYPE html>
                     btn.className = 'btn-saas w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition';
                     btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>Download Loader</span>';
                 }
-                if (directLink) directLink.classList.remove('pointer-events-none', 'opacity-30');
                 if (notice) notice.classList.add('hidden');
             }
         }

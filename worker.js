@@ -626,7 +626,7 @@ async function deleteOtpRecord(env, email) {
 }
 
 async function sendOtpEmail(env, toEmail, code, isReset = false) {
-    const iconUrl = 'https://cdn.discordapp.com/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6ae760f5&is=6ae60f75&hm=08104390c4e5a763abf9eaa0f48733b84ef7f92f0d06bf7b0d84630bb103f257&';
+    const iconUrl = 'https://media.discordapp.net/attachments/1526175746169503854/1566118441050578995/Glossy_Purple_UD_Witch_Hat_Logo.png?ex=6aeca6f5&is=6aeb5575&hm=04f03803522d79c2a4dd94e3d3d97ba921be956b8998b94efb01d94d3691d035&=&format=webp&quality=lossless&width=350&height=350';
     const title = isReset ? 'Password Reset Code' : 'Account Verification';
     const desc = isReset ? 'Use the 6-digit confirmation code below to reset your customer account password.' : 'Enter the 6-digit confirmation code below to finish setting up your account.';
     const subject = (isReset ? 'Your Password Reset Code: ' : 'Your Verification Code: ') + code;
