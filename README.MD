@@ -1,8 +1,8 @@
 ## A fully open-source site inspired by guns.lol and fakecrime.bio.
 
 ## 🎨 Customize it your way
-If you want to change the **music**, **background**, or **cursor**, just replace the corresponding files in the `assets/` folder.  
-Make sure to keep the **same file format** (e.g. `.mp3`, `.png`, `.cur`) to avoid issues.
+If you want to change the **background** or **cursor**, just replace the corresponding files in the `assets/` folder.  
+Make sure to keep the **same file format** (e.g. `.png`, `.cur`) to avoid issues.
 
 You can fully edit the script, change styles, add features, or fix bugs — go wild.  
 Have fun creating your own version!
@@ -14,7 +14,7 @@ Just open `index.html` in your browser with a live server. No setup required.
 
 ## 🎨 Add Your Own Assets
 
-To keep this repository lightweight, no music, videos, fonts, or GIFs are included.
+To keep this repository lightweight, no videos, fonts, or GIFs are included.
 
 If you want your site to work and look like the preview, you need to **add your own media files** (from YouTube, music libraries, etc.) into the `assets/` folder using the **exact same filenames and formats** listed below.
 
@@ -26,13 +26,6 @@ This is just a simplified setup — feel free to change the filenames, add more,
 ### 📥 Required Files to Add (Default Setup)
 
 Place your files into the `assets/` folder with these exact filenames:
-
-#### 🎧 Music (MP3)
-- `anime_music.mp3`
-- `background_music.mp3`
-- `car_music.mp3`
-- `hacker_music.mp3`
-- `rain_music.mp3`
 
 #### 🎥 Background Videos (MP4 / MOV)
 - `anime_background.mp4`
@@ -79,7 +72,6 @@ Place your files into the `assets/` folder with these exact filenames:
 🧠 Have fun building your own style! ![Image](https://github.com/user-attachments/assets/a0ba6f75-bcab-4560-9671-e3e87a6e2c06)
 
 ## 🌐 Community & Support
-- 💬 Join our Discord: [discord.gg/motiongoats](https://discord.gg/motiongoats)
 - ☕ Like the project? Buy me a coffee BTC: bc1qzu5sdzydwh3sulsd25rs57rpn4czyrctm4neph
 - ⭐ If you enjoy this, consider leaving a star on the repo!
 

@@ -8,13 +8,6 @@ let spotifyInterval = null;
 let userBadges = [
   "Nitro Gold.png"
 ];
-let songPlaylist = [
-  "Playboi Carti - Beno! (Official Audio) - (320 Kbps).mp3",
-  "Playboi Carti - WAKE UP F1LTHY [with Travis Scott] (Official Audio) - (320 Kbps).mp3",
-  "Purpose General - (320 Kbps).mp3",
-  "YEAT - _Tonka 2_ OFFICIAL VERSION - (320 Kbps).mp3"
-];
-
 function initMedia() {
   const backgroundVideo = document.getElementById('background');
   if (backgroundVideo) {
@@ -32,11 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const avatarDecoration = document.getElementById('avatar-decoration');
   const statusDot = document.getElementById('status-dot');
   const visitorCount = document.getElementById('visitor-count');
-  const backgroundMusic = document.getElementById('background-music');
-  const hackerMusic = document.getElementById('hacker-music');
-  const rainMusic = document.getElementById('rain-music');
-  const animeMusic = document.getElementById('anime-music');
-  const carMusic = document.getElementById('car-music');
   const homeButton = document.getElementById('home-theme');
   const hackerButton = document.getElementById('hacker-theme');
   const rainButton = document.getElementById('rain-theme');
@@ -44,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const carButton = document.getElementById('car-theme');
   const resultsButtonContainer = document.getElementById('results-button-container');
   const resultsButton = document.getElementById('results-theme');
-  const volumeIcon = document.getElementById('volume-icon');
-  const volumeSlider = document.getElementById('volume-slider');
   const transparencySlider = document.getElementById('transparency-slider');
   const backgroundVideo = document.getElementById('background');
   const hackerOverlay = document.getElementById('hacker-overlay');
@@ -275,111 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch initial live count on load (without incrementing)
   fetchLiveViewCount();
 
-  // Dynamic Random Song Selector from songs/ folder
-  let currentSong = null;
-
-  async function initSongs() {
-    try {
-      const res = await fetch('/api/songs');
-      if (res.ok) {
-        const songs = await res.json();
-        if (Array.isArray(songs) && songs.length > 0) {
-          songPlaylist = songs;
-        }
-      }
-    } catch (e) {}
-
-    selectRandomSong();
-  }
-
-  function selectRandomSong() {
-    if (!backgroundMusic) return;
-    if (songPlaylist.length > 0) {
-      const randomSong = songPlaylist[Math.floor(Math.random() * songPlaylist.length)];
-      currentSong = randomSong;
-      backgroundMusic.src = `songs/${encodeURIComponent(randomSong)}`;
-    } else {
-      backgroundMusic.src = `songs/Playboi%20Carti%20-%20Beno!%20(Official%20Audio)%20-%20(320%20Kbps).mp3`;
-    }
-    backgroundMusic.load();
-  }
-
-  // Pre-select song immediately so audio source is loaded before interaction
-  selectRandomSong();
-
-  if (backgroundMusic) {
-    backgroundMusic.volume = 1.0;
-    backgroundMusic.addEventListener('ended', () => {
-      // Pick another random song when track ends
-      selectRandomSong();
-      if (backgroundMusic) {
-        backgroundMusic.volume = savedVolume;
-        backgroundMusic.play().catch(() => {});
-      }
-    });
-  }
-
-  // Top-Left Volume Controls
-  const volumeControlWidget = document.getElementById('volume-control-widget');
-  const volumeToggleBtn = document.getElementById('volume-toggle-btn');
-  const volumeSliderBar = document.getElementById('volume-slider-bar');
-  const volumeIconHigh = document.getElementById('volume-icon-high');
-  const volumeIconMute = document.getElementById('volume-icon-mute');
-  let savedVolume = 1.0;
-
-  function setVolume(val, updateInput = true) {
-    const clamped = Math.max(0, Math.min(1, val));
-    if (backgroundMusic) {
-      backgroundMusic.volume = clamped;
-      backgroundMusic.muted = clamped === 0;
-      if (clamped > 0) savedVolume = clamped;
-      updateVolumeUI(clamped, backgroundMusic.muted);
-    }
-    if (updateInput && volumeSliderBar) {
-      volumeSliderBar.value = clamped;
-    }
-  }
-
-  function updateVolumeUI(vol, isMuted) {
-    if (isMuted || vol === 0) {
-      if (volumeIconHigh) volumeIconHigh.classList.add('hidden');
-      if (volumeIconMute) volumeIconMute.classList.remove('hidden');
-    } else {
-      if (volumeIconHigh) volumeIconHigh.classList.remove('hidden');
-      if (volumeIconMute) volumeIconMute.classList.add('hidden');
-    }
-  }
-
-  if (volumeControlWidget) {
-    volumeControlWidget.addEventListener('click', (e) => e.stopPropagation());
-    volumeControlWidget.addEventListener('mousedown', (e) => e.stopPropagation());
-    volumeControlWidget.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-  }
-
-  if (volumeSliderBar) {
-    const handleSliderChange = (e) => {
-      const val = parseFloat(e.target.value);
-      setVolume(val, false);
-    };
-    volumeSliderBar.addEventListener('input', handleSliderChange);
-    volumeSliderBar.addEventListener('change', handleSliderChange);
-  }
-
-  if (volumeToggleBtn) {
-    volumeToggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!backgroundMusic) return;
-      if (backgroundMusic.muted || backgroundMusic.volume === 0) {
-        setVolume(savedVolume || 1.0, true);
-      } else {
-        savedVolume = backgroundMusic.volume || 1.0;
-        backgroundMusic.muted = true;
-        if (volumeSliderBar) volumeSliderBar.value = 0;
-        updateVolumeUI(0, true);
-      }
-    });
-  }
-
   // Solana Address Copy & Toast Notification
   const solanaCopyBtn = document.getElementById('solana-copy-btn');
   const toastNotification = document.getElementById('toast-notification');
@@ -472,55 +353,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Mobile & Desktop Reliable Audio Starter
-  let audioStarted = false;
-  function startBackgroundAudio() {
-    if (!backgroundMusic) return;
-    try {
-      backgroundMusic.muted = false;
-      backgroundMusic.volume = savedVolume || 1.0;
-    } catch (e) {}
-
-    // Unlock Web Audio API context for iOS Safari & Android Chrome
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        if (!window._appAudioCtx) window._appAudioCtx = new AudioCtx();
-        if (window._appAudioCtx.state === 'suspended') {
-          window._appAudioCtx.resume();
-        }
-      }
-    } catch (e) {}
-
-    const playPromise = backgroundMusic.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        audioStarted = true;
-      }).catch((err) => {
-        console.warn("Mobile autoplay policy deferred audio:", err);
-        // Fallback: unlock and play on next user tap anywhere
-        const fallbackUnlock = () => {
-          if (!backgroundMusic) return;
-          backgroundMusic.muted = false;
-          backgroundMusic.play().then(() => {
-            audioStarted = true;
-          }).catch(() => {});
-          document.removeEventListener('touchend', fallbackUnlock);
-          document.removeEventListener('click', fallbackUnlock);
-        };
-        document.addEventListener('touchend', fallbackUnlock, { once: true, passive: true });
-        document.addEventListener('click', fallbackUnlock, { once: true, passive: true });
-      });
-    }
-  }
-
   // Start Screen Click / Touch
   let enterHandled = false;
   function handleEnter() {
     if (enterHandled || !startScreen || startScreen.classList.contains('hidden')) return;
     enterHandled = true;
     startScreen.classList.add('hidden');
-    startBackgroundAudio();
 
     if (profileBlock) {
       profileBlock.classList.remove('hidden');
@@ -548,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let userNameStr = "zhu";
 
 // Typewriter animation for browser tab title
-  const titleText = "discord.gg/udvengers";
+  const titleText = "zhu";
   let titleCharIndex = 0;
   let titleIsDeleting = false;
 
@@ -574,8 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Bio Description
   if (profileBio) {
-    profileBio.textContent = "CEO @ UDvengers";
-    profileBio.style.display = "block";
+    profileBio.style.display = "none";
   }
 
   // (Tilt and controls removed)
@@ -902,7 +739,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Start everything
-  initSongs();
   typeWriterStart();
   loadUserBadges();
   fetchLanyard();

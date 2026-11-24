@@ -13,7 +13,6 @@ const MIME_TYPES = {
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.mp4': 'video/mp4',
-  '.mp3': 'audio/mpeg',
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',
   '.zip': 'application/zip'
@@ -34,27 +33,6 @@ const server = http.createServer((req, res) => {
       const imageFiles = files.filter(f => !f.startsWith('.') && !f.endsWith('.tmp'));
       res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
       res.end(JSON.stringify(imageFiles));
-    });
-    return;
-  }
-
-  // API to get list of songs in songs folder
-  if (reqPath === '/api/songs') {
-    const songsDir = path.join(__dirname, 'songs');
-    if (!fs.existsSync(songsDir)) {
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify([]));
-      return;
-    }
-    fs.readdir(songsDir, (err, files) => {
-      if (err) {
-        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-        res.end(JSON.stringify([]));
-        return;
-      }
-      const audioFiles = files.filter(f => !f.startsWith('.') && /\.(mp3|wav|ogg|m4a|flac|aac)$/i.test(f));
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
-      res.end(JSON.stringify(audioFiles));
     });
     return;
   }
